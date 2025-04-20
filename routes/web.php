@@ -15,6 +15,23 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
+// Tambahkan route baru untuk history
+Route::get('/history', function () {
+    return view('history');
+});
+
+Route::post('/emissions', function (Request $request) {
+    // Handle form submission untuk create/update
+    // Ini contoh saja, nanti diimplementasikan oleh backend
+    return response()->json(['success' => true]);
+});
+
+Route::delete('/emissions/{id}', function ($id) {
+    // Handle delete
+    // Ini contoh saja, nanti diimplementasikan oleh backend
+    return response()->json(['success' => true]);
+});
+
 // Route untuk Perusahaan
 Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
 Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');

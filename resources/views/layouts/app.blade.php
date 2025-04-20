@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        .hover\:bg-gray-50:hover {
+        background-color: #f9fafb;
+        }
         body {
             background-color: #f9fafb;
         }
@@ -17,6 +20,19 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
     </style>
+    <style>
+    .period-btn.active {
+        background-color: #22C55E; /* Warna hijau Tailwind */
+        color: white;
+    }
+    .period-btn:not(.active) {
+        background-color: #f3f4f6; /* Warna gray-100 Tailwind */
+        color: #4b5563; /* Warna gray-600 Tailwind */
+    }
+    .period-btn:not(.active):hover {
+        background-color: #e5e7eb; /* Warna gray-200 Tailwind */
+    }
+</style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Navbar -->

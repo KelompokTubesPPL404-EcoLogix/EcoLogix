@@ -7,17 +7,17 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold">Emission Carbon</h2>
                 <div class="flex space-x-2 text-xs">
-                    <button class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">1M</button>
-                    <button class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">3M</button>
-                    <button class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">6M</button>
-                    <button class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">1Y</button>
+                    <button class="px-2 py-1 rounded period-btn active" data-period="1M">1M</button>
+                    <button class="px-2 py-1 rounded period-btn" data-period="3M">3M</button>
+                    <button class="px-2 py-1 rounded period-btn" data-period="6M">6M</button>
+                    <button class="px-2 py-1 rounded period-btn" data-period="1Y">1Y</button>
                 </div>
             </div>
-            <div class="relative" style="height: 300px;"> <!-- Tambahkan fixed height di sini -->
+            <div class="relative" style="height: 300px;">
                 <div class="absolute top-0 left-10 bg-green-100 text-green-800 rounded-full px-2 py-0.5 text-xs font-medium">
                     +23% vs last month
                 </div>
-                <canvas id="emissionChart"></canvas> <!-- Hapus height attribute dari canvas -->
+                <canvas id="emissionChart"></canvas>
             </div>
         </div>
 
@@ -63,7 +63,7 @@
     <div class="col-span-2 bg-white p-6 rounded-xl shadow overflow-auto">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold">Input Emision History</h2>
-            <a href="#" class="text-green-600 text-sm">See All</a>
+            <a href="{{ url('/history') }}" class="text-green-600 text-sm">See All</a>
         </div>
         <table class="w-full text-sm">
             <thead class="text-left text-gray-600 border-b">
@@ -98,10 +98,10 @@
                 <h2 class="text-lg font-semibold">Emission Type</h2>
                 <p class="text-xs text-gray-500">January 2025</p>
             </div>
-            <button class="text-sm text-green-600">View Report</button>
+            
         </div>
-        <div class="flex justify-center py-4">
-            <canvas id="donutChart" height="200"></canvas>
+        <div class="flex justify-center py-4" style="height: 200px;">
+            <canvas id="donutChart"></canvas>
         </div>
         <div class="mt-4 text-sm space-y-1">
             <p class="flex items-center"><span class="inline-block w-3 h-3 bg-green-800 mr-2 rounded-full"></span> product - 40%</p>
@@ -117,14 +117,14 @@
 <!-- ChartJS script -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Konfigurasi Emission Chart (diperbarui)
+        // Initialize chart
         const emissionChart = new Chart(document.getElementById('emissionChart'), {
             type: 'line',
             data: {
-                labels: ['Feb 1', 'Feb 8', 'Feb 8', 'Feb 8', 'Feb 15', 'Feb 8', 'Feb 22', 'Feb 28'],
+                labels: [], // Empty initially, will be populated
                 datasets: [{
                     label: 'Carbon Emission',
-                    data: [12, 10, 11, 12, 15, 13, 12, 14],
+                    data: [], // Empty initially
                     backgroundColor: 'rgba(34, 197, 94, 0.2)',
                     borderColor: '#22C55E',
                     fill: true,
@@ -134,8 +134,8 @@
                 }]
             },
             options: {
-                responsive: true, // Fitur responsive diaktifkan
-                maintainAspectRatio: false, // Memastikan aspect ratio tidak dipertahankan
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: { 
                     legend: { display: false }
                 },
@@ -159,6 +159,101 @@
             }
         });
 
+        // Period buttons functionality
+        const periodBtns = document.querySelectorAll('.period-btn');
+        let activePeriod = '1M'; // Default active period
+        
+        // Initialize with default period
+        loadChartData(activePeriod);
+        
+        // Set up button event listeners
+        periodBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const period = this.getAttribute('data-period');
+                if (period !== activePeriod) {
+                    setActivePeriod(period);
+                    loadChartData(period);
+                }
+            });
+        });
+
+        // Set active period and update UI
+        function setActivePeriod(period) {
+            activePeriod = period;
+            periodBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-period') === period);
+            });
+        }
+
+        // Load chart data for selected period
+        async function loadChartData(period) {
+            try {
+                // Show loading state (optional)
+                document.getElementById('emissionChart').style.opacity = '0.5';
+                
+                // In a real app, you would fetch from your API:
+                // const response = await fetch(`/api/emission-data?period=${period}`);
+                // const data = await response.json();
+                
+                // Simulated API response - replace with actual fetch in production
+                const data = await simulateFetchData(period);
+                
+                // Update chart
+                emissionChart.data.labels = data.labels;
+                emissionChart.data.datasets[0].data = data.values;
+                emissionChart.update();
+                
+                // Update comparison text
+                updateComparisonText(data.comparison);
+                
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                // Show error to user (optional)
+            } finally {
+                document.getElementById('emissionChart').style.opacity = '1';
+            }
+        }
+
+        // Simulate API fetch - REMOVE IN PRODUCTION
+        function simulateFetchData(period) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const data = {
+                        '1M': {
+                            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                            values: [12, 10, 11, 12],
+                            comparison: '+23% vs last month'
+                        },
+                        '3M': {
+                            labels: ['Month 1', 'Month 2', 'Month 3'],
+                            values: [10, 12, 14],
+                            comparison: '+15% vs last quarter'
+                        },
+                        '6M': {
+                            labels: ['Q1', 'Q2'],
+                            values: [8, 10],
+                            comparison: '+12% vs last half year'
+                        },
+                        '1Y': {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                            values: [5, 8, 10, 12, 15, 18],
+                            comparison: '+20% vs last year'
+                        }
+                    };
+                    resolve(data[period]);
+                }, 300); // Simulate network delay
+            });
+        }
+
+        // Update the comparison text
+        function updateComparisonText(text) {
+            const comparisonElement = document.querySelector('.absolute.top-0.left-10');
+            if (comparisonElement) {
+                comparisonElement.textContent = text;
+            }
+        }
+
+        // Initialize Donut Chart
         const donutChart = new Chart(document.getElementById('donutChart'), {
             type: 'doughnut',
             data: {
@@ -166,29 +261,25 @@
                 datasets: [{
                     label: 'Emission Type',
                     data: [40, 32, 28],
-                    backgroundColor: ['#065f46', '#22C55E', '#86efac'],
+                    backgroundColor: [
+                        '#065f46', // green-800
+                        '#22C55E', // green-500
+                        '#86efac'  // green-300
+                    ],
                     borderWidth: 0
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { 
+                        display: false 
+                    }
                 },
-                cutout: '75%',
-                maintainAspectRatio: false
+                cutout: '75%'
             }
         });
-        
-        // Connect the button to open the modal
-        const openModalBtn = document.getElementById('openEmisiModal');
-        const modal = document.getElementById('emisiModal');
-        
-        if (openModalBtn && modal) {
-            openModalBtn.addEventListener('click', function() {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            });
-        }
     });
 </script>
 @endsection

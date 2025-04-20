@@ -5,7 +5,7 @@
         <div class="fixed inset-0 bg-black opacity-40 transition-opacity" id="modalOverlay"></div>
         
         <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto z-10">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto z-10">
             <!-- Modal header -->
             <div class="flex justify-end p-4">
                 <button type="button" class="text-gray-400 hover:text-gray-500" id="closeModal">
@@ -122,23 +122,24 @@
         function handleFormSubmit(e) {
             e.preventDefault();
             
-            // Collect form data
             const formData = {
+                id: document.querySelector('.edit-btn.active')?.getAttribute('data-id'),
                 tanggal: document.getElementById('tanggal').value,
-                kategori: kategoriSelect.value,
-                sub_kategori: subKategoriSelect.value,
+                kategori: document.getElementById('kategori').value,
+                sub_kategori: document.getElementById('sub_kategori').value,
                 nilai_aktivitas: document.getElementById('nilai_aktivitas').value,
                 deskripsi: document.getElementById('deskripsi').value
             };
             
-            // Log data (in a real app, you would send this to the server)
-            console.log('Form submitted with data:', formData);
+            if (formData.id) {
+                console.log('Update data dengan ID:', formData.id, 'Data:', formData);
+                alert('Data emisi karbon berhasil diupdate!');
+            } else {
+                console.log('Buat data baru:', formData);
+                alert('Data emisi karbon berhasil disubmit!');
+            }
             
-            // Close modal
             closeModal();
-            
-            // Show success message (simple alert for demo)
-            alert('Data emisi karbon berhasil disubmit!');
         }
         
         // Event listeners
