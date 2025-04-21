@@ -5,6 +5,18 @@ use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\EmisiCarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 
+// Route untuk Perusahaan
+Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
+Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
+Route::get('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'show'])->name('perusahaan.show');
+Route::get('/perusahaan/{kode_perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+Route::put('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update');
+Route::delete('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.destroy');
+
+// Faktor Emisi Routes
+Route::resource('faktor-emisi', FaktorEmisiController::class);
+
 // Route default langsung ke dashboard
 Route::get('/', function () {
     return view('dashboard');
@@ -31,15 +43,3 @@ Route::delete('/emissions/{id}', function ($id) {
     // Ini contoh saja, nanti diimplementasikan oleh backend
     return response()->json(['success' => true]);
 });
-
-// Route untuk Perusahaan
-Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
-Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
-Route::get('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'show'])->name('perusahaan.show');
-Route::get('/perusahaan/{kode_perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
-Route::put('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update');
-Route::delete('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.destroy');
-
-// Faktor Emisi Routes
-Route::resource('faktor-emisi', FaktorEmisiController::class);
