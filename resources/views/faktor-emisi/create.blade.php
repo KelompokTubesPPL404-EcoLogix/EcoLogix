@@ -14,9 +14,9 @@
                         @csrf
                         
                         <div class="mb-3">
-                            <label for="kategori_emisi_carbon" class="form-label">Kategori Emisi Karbon</label>
-                            <input type="text" class="form-control @error('kategori_emisi_carbon') is-invalid @enderror" id="kategori_emisi_carbon" name="kategori_emisi_carbon" value="{{ old('kategori_emisi_carbon') }}" required>
-                            @error('kategori_emisi_carbon')
+                            <label for="kategori_emisi_karbon" class="form-label">Kategori Emisi Karbon</label>
+                            <input type="text" class="form-control @error('kategori_emisi_karbon') is-invalid @enderror" id="kategori_emisi_karbon" name="kategori_emisi_karbon" value="{{ old('kategori_emisi_karbon') }}" required>
+                            @error('kategori_emisi_karbon')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

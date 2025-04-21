@@ -5,7 +5,7 @@
 @section('content')
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Edit Perusahaan</h3>
+        <h3 class="card-title">Edit Perusahaan11111111</h3>
     </div>
     <div class="card-body">
         @if ($errors->any())
@@ -41,10 +41,24 @@
                 <label for="email_perusahaan" class="form-label">Email</label>
                 <input type="email" class="form-control" id="email_perusahaan" name="email_perusahaan" value="{{ $perusahaan->email_perusahaan }}" required>
             </div>
+           
             
             <div class="mb-3">
                 <label for="password_perusahaan" class="form-label">Password (Kosongkan jika tidak ingin mengubah)</label>
                 <input type="password" class="form-control" id="password_perusahaan" name="password_perusahaan" minlength="8">
+            </div>
+
+            <div class="mb-3">
+                <label for="kode_super_admin" class="form-label">Kode Super Admin</label>
+                <select class="form-select @error('kode_super_admin') is-invalid @enderror" id="kode_super_admin" name="kode_super_admin" required>
+                    <option value="">Pilih Super Admin</option>
+                    @foreach($superAdmins as $admin)
+                    <option value="{{ $admin->kode_super_admin }}" {{ old('kode_super_admin') == $admin->kode_super_admin ? 'selected' : '' }}>{{ $admin->nama_super_admin }}</option>
+                    @endforeach
+                </select>
+                @error('kode_super_admin')
+                <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
             
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
