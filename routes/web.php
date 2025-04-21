@@ -5,6 +5,10 @@ use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\EmisiCarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 
+Route::get('/', function () {
+    return view('welcome');
+});
+
 // Route untuk Perusahaan
 Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
 Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
