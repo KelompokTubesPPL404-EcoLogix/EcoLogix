@@ -1,33 +1,30 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ringkasan Pembelian Carbon Credit</title>
+@extends('layouts.manager')
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <style>
-    .card {
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .bg-gradient-success {
-      background: linear-gradient(90deg, #28a745, #218838);
-    }
-    .table-hover tbody tr:hover {
-      background-color: #f5f5f5;
-    }
-    .btn i {
-      font-size: 0.875rem;
-    }
-  </style>
-</head>
-<body>
+@section('title', 'Ringkasan Pembelian Carbon Credit')
+
+@section('styles')
+<style>
+  .card {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .bg-gradient-success {
+    background: linear-gradient(90deg, #28a745, #218838);
+  }
+  .table-hover tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+  .btn i {
+    font-size: 0.875rem;
+  }
+</style>
+@endsection
+
+@section('content')
 <div class="container py-5">
   <div class="row">
     <div class="col-md-12">
@@ -106,7 +103,9 @@
     </div>
   </div>
 </div>
+@endsection
 
+@section('scripts')
 <script>
   const data = [
     {
@@ -159,7 +158,7 @@
         </td>
         <td class="text-center">
           <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modal${i}">
-            <i class="fas fa-eye"></i>
+            <i class="bi bi-eye"></i>
           </button>
         </td>
       </tr>
@@ -189,7 +188,7 @@
               </div>
               <div class="col-12 mt-3">
                 <p><strong>Deskripsi:</strong><br>${credit.deskripsi || 'Tidak ada deskripsi'}</p>
-                ${credit.bukti_pembelian ? `<a href="${credit.bukti_pembelian}" target="_blank" class="btn btn-success"><i class="fas fa-file-download"></i> Bukti Pembelian</a>` : ''}
+                ${credit.bukti_pembelian ? `<a href="${credit.bukti_pembelian}" target="_blank" class="btn btn-success"><i class="bi bi-file-download"></i> Bukti Pembelian</a>` : ''}
               </div>
             </div>
             <div class="modal-footer">
@@ -201,12 +200,9 @@
     `;
   });
 
-  document.getElementById('totalPembelian').innerText = data.length;
-  document.getElementById('totalKompensasi').innerText = totalKompensasi.toFixed(3) + ' ton';
-  document.getElementById('completed').innerText = completed;
-  document.getElementById('pending').innerText = pending;
+  document.getElementById('totalPembelian').textContent = data.length;
+  document.getElementById('totalKompensasi').textContent = totalKompensasi.toFixed(1);
+  document.getElementById('completed').textContent = completed;
+  document.getElementById('pending').textContent = pending;
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endsection

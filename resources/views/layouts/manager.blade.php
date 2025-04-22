@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - EcoLogix</title>
+  <title>@yield('title', 'Dashboard') - EcoLogix</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
@@ -65,6 +65,7 @@
       padding: 2px 6px;
     }
   </style>
+  @yield('styles')
 </head>
 <body>
   <!-- Navbar -->
@@ -73,8 +74,8 @@
       <i id="sidebarToggleIcon" class="bi bi-list"></i>
     </button>
 
-    <a class="navbar-brand d-flex align-items-center" href="dashboard.blade.php">
-      <img src="img/ECOLOGIX.png" alt="Logo" height="30" class="me-2" />
+    <a class="navbar-brand d-flex align-items-center" href="{{ route('manager.dashboard') }}">
+      <img src="{{ asset('img/ECOLOGIX.png') }}" alt="Logo" height="30" class="me-2" />
       <span class="fw-bold text-success">EcoLogix</span>
     </a>
 
@@ -108,8 +109,7 @@
           <i class="bi bi-person-circle"></i> Refka Maulana Sidik
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="resources/views/manager/profile.blade.php">Profile</a></li>
-          <li><a class="dropdown-item" href="#">Logout</a></li>
+          <li><a class="dropdown-item" href="{{ route('manager.profile') }}">Profile</a></li>
         </ul>
       </div>
     </div>
@@ -120,27 +120,27 @@
     <div class="sidebar p-3" id="sidebar">
       <ul class="nav flex-column">
         <li class="nav-item">
-          <a href="resources/views/dashboard.blade.php" class="nav-link active">
+          <a href="{{ route('manager.dashboard') }}" class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
             <i class="bi bi-house-door me-2"></i> Dashboard
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="resources/views/manager/faktor-emisi/index.blade.php">
+          <a class="nav-link {{ request()->routeIs('manager.faktor-emisi.*') ? 'active' : '' }}" href="{{ route('manager.faktor-emisi.index') }}">
             <i class="bi bi-calculator me-2"></i> Faktor Emisi
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="resources/views/manager/kompensasi/index.blade.php">
+          <a class="nav-link {{ request()->routeIs('manager.kompensasi.*') ? 'active' : '' }}" href="{{ route('manager.kompensasi.index') }}">
             <i class="bi bi-arrow-left-right me-2"></i> Kompensasi Emisi
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="resources/views/manager/carbon_credit/index.blade.php">
+          <a class="nav-link {{ request()->routeIs('manager.carbon_credit.*') ? 'active' : '' }}" href="{{ route('manager.carbon_credit.index') }}">
             <i class="bi bi-currency-exchange me-2"></i> Lihat pembelian
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="resources/views/manager/penyedia/index.blade.php">
+          <a class="nav-link {{ request()->routeIs('manager.penyedia.*') ? 'active' : '' }}" href="{{ route('manager.penyedia.index') }}">
             <i class="bi bi-building me-2"></i> Kelola penyedia
           </a>
         </li>
@@ -149,14 +149,13 @@
 
     <!-- Main Content -->
     <div class="flex-grow-1 p-4">
-      <!-- Ganti bagian ini dengan konten dinamis -->
-      <h1>Selamat datang di EcoLogix Dashboard</h1>
-      <p>Konten utama ditampilkan di sini.</p>
+      @yield('content')
     </div>
   </div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  @yield('scripts')
   <script>
     document.getElementById('toggleSidebar').addEventListener('click', function () {
       document.body.classList.toggle('sidebar-collapsed');

@@ -118,11 +118,11 @@
     <div class="content-wrapper">
         <div class="header">
             <h1>Riwayat Kompensasi Emisi</h1>
-            <p>Tanggal Cetak: 22/04/2025</p>
+            <p>Tanggal Cetak: {{ date('d/m/Y') }}</p>
         </div>
 
         <div class="meta-info">
-            <p><strong>Nomor Dokumen:</strong> DOC-20250422-101500</p>
+            <p><strong>Nomor Dokumen:</strong> DOC-{{ date('Ymd-His') }}</p>
         </div>
 
         <table>
@@ -181,7 +181,7 @@
                 <p>Disetujui oleh:</p>
                 <div class="signature-line"></div>
                 <p><strong>Manager</strong></p>
-                <p>22 April 2025</p>
+                <p>{{ date('d F Y') }}</p>
             </div>
             <div class="clear"></div>
         </div>
@@ -190,5 +190,11 @@
     <div class="footer">
         <p>Dokumen ini dicetak secara otomatis oleh sistem Carbon Footprint</p>
     </div>
+
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
 </body>
 </html>
