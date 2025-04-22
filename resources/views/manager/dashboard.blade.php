@@ -9,10 +9,10 @@
         <div>
             <span class="text-success">Periode: </span>
             <select class="form-select form-select-sm d-inline-block w-auto">
-                <option>Januari 2023</option>
-                <option>Februari 2023</option>
-                <option>Maret 2023</option>
-                <option selected>April 2023</option>
+                <option>Januari 2025</option>
+                <option>Februari 2025</option>
+                <option>Maret 2025</option>
+                <option selected>April 2025</option>
             </select>
         </div>
     </div>
