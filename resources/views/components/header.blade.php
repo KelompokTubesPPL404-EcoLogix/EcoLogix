@@ -6,8 +6,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="logo ms-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="ECOLOGIX" height="30">
-                    <span>EC<span style="color: #28a745;">O</span>LOGIX</span>
+                    <img src="{{ asset('image/ecologix.png') }}" alt="ECOLOGIX" height="60">
                 </div>
             </div>
             <div class="header-right">

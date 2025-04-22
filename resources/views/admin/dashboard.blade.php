@@ -22,7 +22,7 @@
                             <button class="btn btn-sm">1Y</button>
                         </div>
                     </div>
-                    <div class="chart-container" style="height: 200px;">
+                    <div class="chart-container" style="height: 300px; width: 100%;">
                         <canvas id="emissionChart"></canvas>
                     </div>
                 </div>
@@ -139,6 +139,8 @@
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
@@ -147,6 +149,11 @@
                 scales: {
                     y: {
                         beginAtZero: true
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
