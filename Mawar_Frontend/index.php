@@ -1,30 +1,29 @@
 <?php
+session_start();
+
+// Define base path with correct separators
+define('BASE_PATH', str_replace('/', DIRECTORY_SEPARATOR, __DIR__));
+
 $request = $_SERVER['REQUEST_URI'];
+$request = parse_url($request, PHP_URL_PATH);
+$request = rtrim($request, '/');
 
 switch ($request) {
+    case '':
     case '/':
-        require __DIR__ . '/resources/views/index.php';
+        require BASE_PATH . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'index.php';
         break;
     case '/login':
-        require __DIR__ . '/resources/views/login.php';
+        require BASE_PATH . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'login.php';
         break;
-    case '/register':
-        require __DIR__ . '/resources/views/manager_register.php';
+    case '/contact':
+        require BASE_PATH . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'contact.php';
         break;
-    case '/admin_register':
-        require __DIR__ . '/resources/views/admin_register.php';
-        break;
-    case '/staff_register':
-        require __DIR__ . '/resources/views/staff_register.php';
-        break;
-    case '/manager_register':
-        require __DIR__ . '/resources/views/manager_register.php';
-        break;
-    case '/we':
-        require __DIR__ . '/resources/views/we.php';
+    case '/about':
+        require BASE_PATH . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'about.php';
         break;
     default:
         http_response_code(404);
-        require __DIR__ . '/resources/views/404.php';
+        require BASE_PATH . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . '404.php';
         break;
 }
