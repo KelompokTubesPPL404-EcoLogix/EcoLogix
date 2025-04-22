@@ -1,0 +1,47 @@
+<?php
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class DashboardController extends Controller
+{
+    public function userDashboard()
+    {
+        if (!Auth::guard('pengguna')->check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::guard('pengguna')->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        return view('pages.user.dashboard');
+        
+    }
+
+    public function adminDashboard()
+    {
+        return view('pages.admin.dashboard');
+        $totalUsers = DB::selectOne("SELECT COUNT(*) as total FROM penggunas")->total;
+      
+       
+    }
+
+    public function super_adminDashboard()
+    {
+        return view('pages.super_admin.dashboard');
+        $totalUsers = DB::selectOne("SELECT COUNT(*) as total FROM penggunas")->total;
+    }
+
+    public function managerDashboard()
+    {
+        return view('pages.manager.dashboard');
+        $totalPengguna = DB::selectOne("SELECT COUNT(*) as total FROM penggunas")->total;
+        
+    }
+
+
+}

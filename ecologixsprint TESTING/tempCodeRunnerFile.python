@@ -1,0 +1,36 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the Excel file
+df = pd.read_excel('C:\Users\LENOVO\Downloads\kwn (Responses).xlsx')
+
+# Define key questions and findings
+a = 'Apakah Anda merasa memiliki kesempatan kerja/magang yang sama dengan rekan kerja berbeda jenis kelamin di tempat Anda bekerja?'
+b = 'Apakah Anda pernah mengalami kesulitan mendapatkan kesempatan kerja/magang karena faktor jenis kelamin?'
+c = 'Seberapa mudah Anda mengakses pelatihan atau pengembangan keterampilan?'
+d = 'Apakah jenis divisi tertentu di tempat kerja Anda cenderung didominasi oleh satu gender?'
+e = 'Apakah tempat kerja/magang Anda memiliki sistem pelaporan untuk diskriminasi atau kekerasan berbasis gender?'
+f = 'Apakah sistem pelaporan tersebut efektif dalam melindungi korban?'
+g = 'Apakah Anda mengetahui adanya perbedaan upah antara laki-laki dan perempuan untuk pekerjaan setara di tempat kerja/magang  Anda?'
+
+# Create a list of questions
+df_questions = [a, b, c, d, e, f, g]
+
+# Plotting
+fig, axes = plt.subplots(nrows=4, ncols=2, figsize=(15, 20))
+axes = axes.flatten()
+
+for i, question in enumerate(df_questions):
+    ax = axes[i]
+    data = df[question].value_counts()
+    data.plot(kind='bar', ax=ax, color='skyblue')
+    ax.set_title(question)
+    ax.set_xlabel('Jawaban')
+    ax.set_ylabel('Jumlah Responden')
+    ax.set_xticklabels(data.index, rotation=45, ha='right')
+
+# Remove the last empty subplot
+fig.delaxes(axes[-1])
+
+plt.tight_layout()
+plt.show()
