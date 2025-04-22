@@ -168,4 +168,4 @@ class EmisiCarbonControllerTest extends TestCase
             'kode_emisi_carbon' => $emisi->kode_emisi_carbon
         ]);
     }
-}
+} 
