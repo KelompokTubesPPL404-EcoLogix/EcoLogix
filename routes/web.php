@@ -22,7 +22,6 @@ Route::delete('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'de
 // Faktor Emisi Routes
 Route::resource('faktor-emisi', FaktorEmisiController::class);
 
-<<<<<<< HEAD
 // Route untuk Kompensasi Emisi
 Route::resource('kompensasi', KompensasiEmisiController::class)
     ->except(['create'])
@@ -37,7 +36,6 @@ Route::resource('kompensasi', KompensasiEmisiController::class)
 
 // Route untuk Emisi Karbon
 Route::resource('emisicarbon', EmisiCarbonController::class);
-=======
 // Route default langsung ke dashboard
 Route::get('/', function () {
     return view('dashboard');
@@ -64,4 +62,3 @@ Route::delete('/emissions/{id}', function ($id) {
     // Ini contoh saja, nanti diimplementasikan oleh backend
     return response()->json(['success' => true]);
 });
->>>>>>> origin/main
