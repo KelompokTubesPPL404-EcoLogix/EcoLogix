@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\EmisiCarbonController;
 use App\Http\Controllers\FaktorEmisiController;
+use App\Http\Controllers\KompensasiEmisiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,6 +22,20 @@ Route::delete('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'de
 // Faktor Emisi Routes
 Route::resource('faktor-emisi', FaktorEmisiController::class);
 
+// Route untuk Kompensasi Emisi
+Route::resource('kompensasi', KompensasiEmisiController::class)
+    ->except(['create'])
+    ->names([
+    'index' => 'manager.kompensasi.index',
+    'store' => 'manager.kompensasi.store',
+    'show' => 'manager.kompensasi.show',
+    'edit' => 'manager.kompensasi.edit',
+    'update' => 'manager.kompensasi.update',
+    'destroy' => 'manager.kompensasi.destroy'
+]);
+
+// Route untuk Emisi Karbon
+Route::resource('emisicarbon', EmisiCarbonController::class);
 // Route default langsung ke dashboard
 Route::get('/', function () {
     return view('dashboard');
