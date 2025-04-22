@@ -3,8 +3,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\PembelianCarbonCreditController;
-
 
 // Redirect root URL ke halaman login
 Route::get('/', function () {
@@ -56,39 +54,6 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::prefix('admin')->group(function () {
         // Rute untuk mengelola emisi karbon
 
-
-        // CRUD Pembelian Carbon Credit
-        Route::resource('carbon_credit', PembelianCarbonCreditController::class)
-            ->except(['show'])
-            ->names([
-                'index' => 'carbon_credit.index',
-                'create' => 'carbon_credit.create', 
-                'store' => 'carbon_credit.store',
-                'edit' => 'carbon_credit.edit',
-                'update' => 'carbon_credit.update',
-                'destroy' => 'carbon_credit.destroy'
-            ]);
-
-        // Edit Status Pembelian Carbon Credit
-        Route::get('/carbon_credit/{kode_pembelian_carbon_credit}/edit-status', [PembelianCarbonCreditController::class, 'editStatus'])
-            ->name('carbon_credit.edit_status');
-        Route::put('/carbon_credit/{kode_pembelian_carbon_credit}/update-status', [PembelianCarbonCreditController::class, 'updateStatus'])
-            ->name('carbon_credit.update_status');
-
-        // Route untuk laporan emisi karbon
-        Route::get('/emisicarbon/list-report', [EmisiCarbonController::class, 'listReport'])
-            ->name('admin.emissions.list_report');
-        Route::get('/emissions/selected-report', [EmisiCarbonController::class, 'downloadSelectedReport'])
-            ->name('admin.emissions.selected.report');
-        Route::get('/emisicarbon/report', [EmisiCarbonController::class, 'downloadReport'])
-            ->name('admin.emissions.report');
-
-        // Route untuk laporan pembelian carbon credit
-        Route::get('/carbon_credit/list-report', [PembelianCarbonCreditController::class, 'listReport'])
-            ->name('carbon_credit.list_report');
-        Route::get('/carbon_credit/report', [PembelianCarbonCreditController::class, 'downloadSelectedReport'])
-            ->name('carbon_credit.report');
-
     });
 });
 // Routes untuk Manager yang sudah login
@@ -97,12 +62,6 @@ Route::middleware(['auth:manager'])->group(function () {
         // Dashboard route
         Route::get('/dashboard', [DashboardController::class, 'managerDashboard'])
              ->name('manager.dashboard');
-
-
-                    // Routes untuk Carbon Credit
-        Route::get('/carbon-credit', [PembelianCarbonCreditController::class, 'managerIndex'])
-        ->name('manager.carbon_credit.index');
-
 
     });
 });
