@@ -16,7 +16,7 @@ class ViewRenderTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('manager.dashboard');
-        $response->assertSee('Dashboard EcoLogix');
+        $response->assertSee('Dashboard - EcoLogix');
     }
 
     /**

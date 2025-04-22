@@ -23,7 +23,7 @@ class LayoutTest extends TestCase
         
         // Tes komponen card
         $response->assertSee('card', false);
-        $response->assertSee('Statistics: Total Emission Carbon', false);
+        $response->assertSee('Total Emisi', false);
     }
     
     /**
