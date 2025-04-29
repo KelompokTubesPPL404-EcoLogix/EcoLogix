@@ -5,6 +5,7 @@ use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\EmisiCarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 use App\Http\Controllers\KompensasiEmisiController;
+use App\Http\Controllers\PembelianCarbonCreditController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -62,3 +63,27 @@ Route::delete('/emissions/{id}', function ($id) {
     // Ini contoh saja, nanti diimplementasikan oleh backend
     return response()->json(['success' => true]);
 });
+
+// CRUD Pembelian Carbon Credit
+Route::resource('carbon_credit', PembelianCarbonCreditController::class)
+->except(['show'])
+->names([
+    'index' => 'carbon_credit.index',
+    'create' => 'carbon_credit.create', 
+    'store' => 'carbon_credit.store',
+    'edit' => 'carbon_credit.edit',
+    'update' => 'carbon_credit.update',
+    'destroy' => 'carbon_credit.destroy'
+]);
+
+// Edit Status Pembelian Carbon Credit
+Route::get('/carbon_credit/{kode_pembelian_carbon_credit}/edit-status', [PembelianCarbonCreditController::class, 'editStatus'])
+->name('carbon_credit.edit_status');
+Route::put('/carbon_credit/{kode_pembelian_carbon_credit}/update-status', [PembelianCarbonCreditController::class, 'updateStatus'])
+->name('carbon_credit.update_status');
+
+// Route untuk laporan pembelian carbon credit
+Route::get('/carbon_credit/list-report', [PembelianCarbonCreditController::class, 'listReport'])
+->name('carbon_credit.list_report');
+Route::get('/carbon_credit/report', [PembelianCarbonCreditController::class, 'downloadSelectedReport'])
+->name('carbon_credit.report');
