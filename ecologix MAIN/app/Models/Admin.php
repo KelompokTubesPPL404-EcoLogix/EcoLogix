@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Pengguna extends Authenticatable
+class Admin extends Authenticatable
 {
-    protected $table = 'penggunas';
+    use Notifiable;
+
+    protected $table = 'admin';
     
     protected $fillable = [
-        'kode_user',
-        'nama_user',
+        'kode_admin',
+        'nama_admin', 
         'email',
         'password',
         'no_telepon'
@@ -29,12 +32,11 @@ class Pengguna extends Authenticatable
     public static function getColumns()
     {
         return [
-            'kode_user',
-            'nama_user',
+            'kode_admin',
+            'nama_admin',
             'email',
             'password',
             'no_telepon'
         ];
     }
 }
-

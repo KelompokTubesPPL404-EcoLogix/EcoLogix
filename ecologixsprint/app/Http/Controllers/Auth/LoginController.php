@@ -23,7 +23,7 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        $tables = ['super_admins', 'admins', 'managers', 'penggunas'];
+        $tables = ['super_admins', 'admins', 'managers', 'staffs'];
         $user = null;
         $role = null;
 
@@ -37,8 +37,8 @@ class LoginController extends Controller
             if ($result) {
                 $user = $result;
                 $role = rtrim($table, 's');
-                if ($role === 'penguna') {
-                    $role = 'pengguna';
+                if ($role === 'staff') {
+                    $role = 'staff';
                 }
                 break;
             }
@@ -85,7 +85,7 @@ class LoginController extends Controller
             'user' => $user,
             'super_admin_check' => Auth::guard('super_admin')->check(),
             'admin_check' => Auth::guard('admin')->check(),
-            'pengguna_check' => Auth::guard('pengguna')->check(),
+            'staff_check' => Auth::guard('staff')->check(),
             'manager_check' => Auth::guard('manager')->check()
         ]);
         
@@ -93,8 +93,8 @@ class LoginController extends Controller
             return redirect()->route('admin.dashboard');
         } elseif (Auth::guard('super_admin')->check()) {
             return redirect()->route('super_admin.dashboard');
-        } elseif (Auth::guard('pengguna')->check()) {
-            return redirect()->route('user.dashboard');
+        } elseif (Auth::guard('staff')->check()) {
+            return redirect()->route('staff.dashboard');
         } elseif (Auth::guard('manager')->check()) {
             return redirect()->route('manager.dashboard');
         }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'User Dashboard') - GreenLedger</title>
+    <title>@yield('title', 'Staff Dashboard') - GreenLedger</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -121,14 +121,14 @@
                 <div class="dropdown">
                     <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i> 
-                        @if(Auth::guard('pengguna')->check())
-                            {{ Auth::guard('pengguna')->user()->nama_user }}
+                        @if(Auth::guard('staff')->check())
+                            {{ Auth::guard('staff')->user()->nama_user }}
                         @else
                             User
                         @endif
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                        @if(Auth::guard('pengguna')->check())
+                        @if(Auth::guard('staff')->check())
                             <li>
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf

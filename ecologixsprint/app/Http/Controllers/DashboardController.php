@@ -7,18 +7,18 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    public function userDashboard()
+    public function staffDashboard()
     {
-        if (!Auth::guard('pengguna')->check()) {
+        if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
         }
 
-        $user = Auth::guard('pengguna')->user();
+        $user = Auth::guard('staff')->user();
         if (!$user) {
             return redirect()->route('login');
         }
 
-        return view('pages.user.dashboard');
+        return view('pages.staff.dashboard');
         
     }
 

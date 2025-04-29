@@ -15,8 +15,8 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'login']);
 
     // Routes untuk register
-    Route::get('register/pengguna', [RegisterController::class, 'showPenggunaRegisterForm'])->name('register.pengguna');
-    Route::post('register/pengguna', [RegisterController::class, 'registerPengguna']);
+    Route::get('register/staff', [RegisterController::class, 'showStaffRegisterForm'])->name('register.staff');
+    Route::post('register/staff', [RegisterController::class, 'registerStaff']);
 
     Route::get('register/admin', [RegisterController::class, 'showAdminRegisterForm'])->name('register.admin');
     Route::post('register/admin', [RegisterController::class, 'registerAdmin']);
@@ -30,7 +30,7 @@ Route::middleware('guest')->group(function () {
     Route::post('register/super_admin', [RegisterController::class, 'registerSuperAdmin']);
 });
 
-// Routes untuk Pengguna yang sudah login
+// Routes untuk super admin yang sudah login
 Route::middleware(['auth:super_admin'])->group(function () {
     Route::get('/super_admin/dashboard', [DashboardController::class, 'super_adminDashboard'])->name('super_admin.dashboard');
     
@@ -40,10 +40,10 @@ Route::middleware(['auth:super_admin'])->group(function () {
     });
 });
 
-// Routes untuk Pengguna yang sudah login
-Route::middleware(['auth:pengguna'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'userDashboard'])
-             ->name('user.dashboard');
+// Routes untuk staff yang sudah login
+Route::middleware(['auth:staff'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])
+             ->name('staff.dashboard');
 });
 
 // Routes untuk Admin yang sudah login
@@ -70,5 +70,5 @@ Route::middleware(['auth:manager'])->group(function () {
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Tambahkan rute berikut
-Route::middleware(['auth:pengguna,manager,admin'])->group(function () {
+Route::middleware(['auth:staff,manager,admin'])->group(function () {
 });

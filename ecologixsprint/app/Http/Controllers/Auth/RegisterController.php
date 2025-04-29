@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
-    public function showPenggunaRegisterForm()
+    public function showStaffRegisterForm()
     {
-        return view('auth.register.pengguna');
+        return view('auth.register.staff');
     }
 
     public function showAdminRegisterForm()
@@ -30,11 +30,11 @@ class RegisterController extends Controller
         return view('auth.register.super_admin');
     }
 
-    public function registerPengguna(Request $request)
+    public function registerStaff(Request $request)
     {
         $request->validate([
-            'nama_user' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:penggunas',
+            'nama_staff' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:staffs',
             'password' => 'required|string|min:8|confirmed',
             'no_telepon' => 'required|string|max:15'
         ]);
@@ -43,13 +43,13 @@ class RegisterController extends Controller
             $kodeUser = 'USR-' . Str::random(6);
             
             DB::insert("
-                INSERT INTO penggunas (
-                    kode_user, nama_user, email, password, 
+                INSERT INTO staffs (
+                    kode_staff, nama_staff, email, password, 
                     no_telepon, created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())",
                 [
                     $kodeUser,
-                    $request->nama_user,
+                    $request->nama_staff,
                     $request->email,
                     Hash::make($request->password),
                     $request->no_telepon

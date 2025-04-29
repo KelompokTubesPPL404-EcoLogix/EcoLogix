@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Pengguna - GreenLedger</title>
+    <title>Register Staff - GreenLedger</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -100,7 +100,7 @@
 <body>
     <div class="register-container">
         <div class="register-header">
-            <h2>Register Pengguna</h2>
+            <h2>Register Staff</h2>
         </div>
 
         <div class="card">
@@ -115,13 +115,13 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('register.pengguna') }}">
+                <form method="POST" action="{{ route('register.staff') }}">
                     @csrf
 
                     <div class="mb-3">
-                        <label for="nama_user" class="form-label">Nama Lengkap</label>
-                        <input type="text" class="form-control @error('nama_user') is-invalid @enderror" 
-                               name="nama_user" value="{{ old('nama_user') }}" required autofocus>
+                        <label for="nama_staff" class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control @error('nama_staff') is-invalid @enderror" 
+                               name="nama_staff" value="{{ old('nama_staff') }}" required autofocus>
                     </div>
 
                     <div class="mb-3">
