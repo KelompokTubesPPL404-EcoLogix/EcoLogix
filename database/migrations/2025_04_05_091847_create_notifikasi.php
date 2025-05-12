@@ -18,8 +18,8 @@ return new class extends Migration
             $table->date('tanggal_notifikasi');
             $table->string('kode_admin');
             $table->string('kode_staff');
-            $table->foreign('kode_admin')->references('kode_admin')->on('admin');
-            $table->foreign('kode_staff')->references('kode_staff')->on('staff');
+            $table->foreign('kode_admin')->references('kode_user')->on('users');
+            $table->foreign('kode_staff')->references('kode_user')->on('users');
             $table->timestamps();
         });
     }

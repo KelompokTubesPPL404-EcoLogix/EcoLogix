@@ -7,15 +7,15 @@ return [
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |
-    | This option defines the default authentication "guard" and password
-    | reset "broker" for your application. You may change these values
+    | This option controls the default authentication "guard" and password
+    | reset options for your application. You may change these defaults
     | as required, but they're a perfect start for most applications.
     |
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => 'web',
+        'passwords' => 'users',
     ],
 
     /*
@@ -70,6 +70,18 @@ return [
         //     'table' => 'users',
         // ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Super Admin Authentication
+    |--------------------------------------------------------------------------
+    |
+    | This option controls special security measures for Super Admin login.
+    | This token should be set in your .env file and kept secret.
+    |
+    */
+
+    'super_admin_token' => env('SUPER_ADMIN_TOKEN', null),
 
     /*
     |--------------------------------------------------------------------------

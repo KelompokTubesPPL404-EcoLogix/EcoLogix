@@ -22,9 +22,7 @@ return new class extends Migration
             $table->date('tanggal_pembelian');
             $table->string('bukti_pembayaran');
             $table->string('deskripsi');
-            $table->foreign('kode_penyedia')->references('kode_perusahaan')->on('perusahaan');
-            $table->foreign('kode_kompensasi')->references('kode_kompensasi')->on('kompensasi_emisi_carbon');
-            $table->foreign('kode_admin')->references('kode_admin')->on('admin');
+            // Foreign keys didefinisikan di file create_foreign_keys.php
 
             $table->timestamps();
         });

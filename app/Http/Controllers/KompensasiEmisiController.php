@@ -30,7 +30,7 @@ class KompensasiEmisiController extends Controller
                 (e.kadar_emisi_karbon / 1000) as emisi_ton,
                 COALESCE(SUM(k.jumlah_kompensasi), 0) / 1000 as kompensasi_ton,
                 ((e.kadar_emisi_karbon - COALESCE(SUM(k.jumlah_kompensasi), 0)) / 1000) as sisa_emisi_ton
-            FROM emisi_carbons e
+            FROM emisi_carbon e
             LEFT JOIN kompensasi_emisi k ON e.kode_emisi_karbon = k.kode_emisi_karbon
             WHERE e.status = 'approved'
             GROUP BY 

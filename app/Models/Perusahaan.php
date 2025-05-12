@@ -77,6 +77,24 @@ class Perusahaan extends Authenticatable
      */
     public function manager()
     {
-        return $this->hasOne(Manager::class, 'kode_manager', 'kode_manager');
+        return $this->hasOne(User::class, 'kode_perusahaan', 'kode_perusahaan')
+                    ->where('role', 'manager');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'kode_perusahaan', 'kode_perusahaan');
+    }
+
+    public function admins()
+    {
+        return $this->hasMany(User::class, 'kode_perusahaan', 'kode_perusahaan')
+                    ->where('role', 'admin');
+    }
+
+    public function staffs()
+    {
+        return $this->hasMany(User::class, 'kode_perusahaan', 'kode_perusahaan')
+                    ->where('role', 'staff');
     }
 }

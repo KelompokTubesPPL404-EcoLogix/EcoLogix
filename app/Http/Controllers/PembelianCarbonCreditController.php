@@ -32,6 +32,13 @@ class PembelianCarbonCreditController extends Controller
             [$kodeAdmin]
         );
 
+        $carbon_credit = PembelianCarbonCredit::with(['penyedia'])
+            ->where('kode_admin', $kodeAdmin)
+            ->orderby('tangga;_pembelian_carbon_credit', 'desc')
+            ->get();
+
+        
+
         // Tambahkan properti penyediaCarbonCredit untuk setiap record
         foreach($carbon_credit as $credit) {
             $credit->penyediaCarbonCredit = (object)[
