@@ -63,7 +63,7 @@
     <div class="col-span-2 bg-white p-6 rounded-xl shadow overflow-auto">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold">Input Emision History</h2>
-            <a href="{{ url('/history') }}" class="text-green-600 text-sm">See All</a>
+            <a href="{{ url('/staff/history') }}" class="text-green-600 text-sm">See All</a>
         </div>
         <table class="w-full text-sm">
             <thead class="text-left text-gray-600 border-b">
