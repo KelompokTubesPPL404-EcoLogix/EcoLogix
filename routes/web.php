@@ -42,6 +42,9 @@ Route::prefix('admin')->group(function () {
 Route::prefix('staff')->group(function () {
     Route::get('/', [PerusahaanController::class, 'index'])->name('staff.dashboard');
     Route::resource('perusahaan', PerusahaanController::class);
+    Route::get('/', [PerusahaanController::class, 'index'])->name('staff.history');
+    Route::resource('perusahaan', PerusahaanController::class);
+
 });
 
 // Faktor Emisi Routes
