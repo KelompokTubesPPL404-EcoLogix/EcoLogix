@@ -1,64 +1,101 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PerusahaanController;
-use App\Http\Controllers\EmisiCarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 use App\Http\Controllers\KompensasiEmisiController;
 
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Redirect root to login
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-// Route untuk Perusahaan
-Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
-Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
-Route::get('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'show'])->name('perusahaan.show');
-Route::get('/perusahaan/{kode_perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
-Route::put('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update');
-Route::delete('/perusahaan/{kode_perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.destroy');
+// Auth Routes
+Route::prefix('auth')->group(function () {
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
+    
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
+});
+
+// Admin Routes
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/emissions', [AdminController::class, 'emissions'])->name('admin.emissions');
+    Route::get('/credits', [AdminController::class, 'credits'])->name('admin.credits');
+    Route::get('/notifications', [AdminController::class, 'notifications'])->name('admin.notifications');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
+});
+
+// Staff/Perusahaan Routes
+Route::prefix('staff')->group(function () {
+    Route::get('/', [PerusahaanController::class, 'index'])->name('staff.dashboard');
+    Route::resource('perusahaan', PerusahaanController::class);
+});
 
 // Faktor Emisi Routes
 Route::resource('faktor-emisi', FaktorEmisiController::class);
 
-// Route untuk Kompensasi Emisi
-Route::resource('kompensasi', KompensasiEmisiController::class)
-    ->except(['create'])
-    ->names([
-    'index' => 'manager.kompensasi.index',
-    'store' => 'manager.kompensasi.store',
-    'show' => 'manager.kompensasi.show',
-    'edit' => 'manager.kompensasi.edit',
-    'update' => 'manager.kompensasi.update',
-    'destroy' => 'manager.kompensasi.destroy'
-]);
-
-// Route untuk Emisi Karbon
-Route::resource('emisicarbon', EmisiCarbonController::class);
-// Route default langsung ke dashboard
-Route::get('/', function () {
-    return view('dashboard');
+// Emissions API Routes
+Route::prefix('api')->group(function () {
+    Route::post('/emissions', function (Request $request) {
+        return response()->json(['success' => true]);
+    });
+    
+    Route::delete('/emissions/{id}', function ($id) {
+        return response()->json(['success' => true]);
+    });
 });
 
-// Kalau kamu juga mau akses via /dashboard, bisa tambah ini:
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
+// Manager Routes 
+Route::prefix('manager')->group(function () {
+    // Dashboard route
+    Route::get('/dashboard', function () {
+        return view('manager.dashboard');
+    })->name('manager.dashboard');
 
-// Tambahkan route baru untuk history
-Route::get('/history', function () {
-    return view('history');
-});
+    Route::prefix('kompensasi')->group(function () {
+        Route::get('/', function () {
+            return view('manager.kompensasi.index');
+        })->name('manager.kompensasi.index');
 
-Route::post('/emissions', function (Request $request) {
-    // Handle form submission untuk create/update
-    // Ini contoh saja, nanti diimplementasikan oleh backend
-    return response()->json(['success' => true]);
-});
+        Route::get('/{id}', function ($id) {
+            return view('manager.kompensasi.show', ['id' => $id]);
+        })->name('manager.kompensasi.show');
 
-Route::delete('/emissions/{id}', function ($id) {
-    // Handle delete
-    // Ini contoh saja, nanti diimplementasikan oleh backend
-    return response()->json(['success' => true]);
+        Route::get('/{id}/edit', function ($id) {
+            return view('manager.kompensasi.edit', ['id' => $id]);
+        })->name('manager.kompensasi.edit.');
+
+        Route::get('/report/pdf', function () {
+            return view('manager.kompensasi.report');
+        })->name('manager.kompensasi.report');
+    });
+
+    Route::get('/faktor-emisi', function () {
+        return view('manager.faktor-emisi.index');
+    })->name('manager.faktor-emisi.index');
+
+    Route::get('/penyedia-carbon-credit', function () {
+        return view('manager.penyedia.index');
+    })->name('manager.penyedia.index');
+
+    Route::get('/carbon-credit', function () {
+        return view('manager.carbon_credit.index');
+    })->name('manager.carbon_credit.index');
+
+    Route::get('/profile', function () {
+        return view('manager.profile');
+    })->name('manager.profile');
 });
