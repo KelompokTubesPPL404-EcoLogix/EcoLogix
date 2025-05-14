@@ -161,7 +161,7 @@
                 </form>
 
                 <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="/register" style="color: #4CAF50; text-decoration: none;">Sign up here</a></p>
+                    <p>Don't have an account? <a href="/auth/register" style="color: #4CAF50; text-decoration: none;">Sign up here</a></p>
                 </div>
 
                 <div class="divider">
