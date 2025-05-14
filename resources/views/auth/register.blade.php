@@ -89,7 +89,6 @@
         
         <div class="signup-card">
             <div class="signup-header">
-                <img src="<?php echo htmlspecialchars(asset('images/ecologix-logo.png')); ?>" alt="Ecologix" class="logo">
                 <h2>Account Signup</h2>
                 <p>Sign up according to position</p>
             </div>

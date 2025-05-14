@@ -126,7 +126,7 @@
         </div>
         <div class="right-side">
             <a href="javascript:history.back()" class="back-link">← Back</a>
-            <img src="<?php echo htmlspecialchars(asset('images/ecologix-logo.png')); ?>" alt="Ecologix" class="logo">
+            <img src="<?php echo htmlspecialchars(asset('image/ecologix.png')); ?>" alt="Ecologix" class="logo">
             
             <div class="login-form">
                 <h2 class="mb-4">Account Login</h2>
@@ -170,13 +170,13 @@
 
                 <div class="social-login">
                     <a href="/auth/google" class="social-btn">
-                        <img src="/assets/images/google.png" alt="Google" width="24">
+                        <img src="/image/Google.png" alt="Google" width="24">
                     </a>
                     <a href="/auth/facebook" class="social-btn">
-                        <img src="/assets/images/facebook.png" alt="Facebook" width="24">
+                        <img src="/image/Facebook.png" alt="Facebook" width="24">
                     </a>
                     <a href="/auth/twitter" class="social-btn">
-                        <img src="/assets/images/twitter.png" alt="Twitter" width="24">
+                        <img src="/image/Twitter.png" alt="Twitter" width="24">
                     </a>
                 </div>
             </div>
