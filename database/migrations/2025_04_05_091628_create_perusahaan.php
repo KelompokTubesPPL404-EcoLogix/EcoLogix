@@ -20,11 +20,10 @@ return new class extends Migration
             $table->string('password_perusahaan');
             $table->string('kode_manager')->nullable();
             $table->string('kode_super_admin');
-            $table->foreign('kode_super_admin')->references('kode_super_admin')->on('super_admin');
+            $table->foreign('kode_manager')->references('kode_user')->on('users')->onDelete('set null');
+            $table->foreign('kode_super_admin')->references('kode_user')->on('users');
             $table->timestamps();
         });
-        
-
     }
 
     /**

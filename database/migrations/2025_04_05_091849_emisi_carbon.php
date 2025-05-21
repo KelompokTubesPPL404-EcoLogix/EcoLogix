@@ -22,8 +22,10 @@ return new class extends Migration
             $table->date('tanggal_emisi');
             $table->string('kode_staff');
             $table->string('kode_faktor_emisi');
-            $table->foreign('kode_staff')->references('kode_staff')->on('staff')->onDelete('cascade');
+            $table->string('kode_perusahaan');
+            $table->foreign('kode_staff')->references('kode_user')->on('users')->onDelete('cascade');
             $table->foreign('kode_faktor_emisi')->references('kode_faktor')->on('faktor_emisi')->onDelete('cascade');
+            $table->foreign('kode_perusahaan')->references('kode_perusahaan')->on('perusahaan')->onDelete('cascade');
             $table->timestamps();
         });
          // Membuat trigger untuk mengisi faktor_emisi secara otomatis

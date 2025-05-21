@@ -14,10 +14,15 @@ return new class extends Migration
         Schema::create('faktor_emisi', function (Blueprint $table) {
             $table->string('kode_faktor')->primary(); 
             $table->string('kategori_emisi_karbon');
-            $table->string('sub_kategori')->unique();
+            $table->string('sub_kategori');
             $table->decimal('nilai_faktor', 10, 2);
             $table->string('satuan');
+            $table->string('kode_perusahaan');
+            $table->foreign('kode_perusahaan')->references('kode_perusahaan')->on('perusahaan')->onDelete('cascade');
             $table->timestamps();
+            
+            // Membuat kombinasi unik dari sub_kategori dan kode_perusahaan
+            $table->unique(['sub_kategori', 'kode_perusahaan']);
         });
     }
 

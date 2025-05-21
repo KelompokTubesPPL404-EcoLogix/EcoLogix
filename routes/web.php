@@ -1,92 +1,175 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PerusahaanController;
+use App\Http\Controllers\EmisiKarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 use App\Http\Controllers\KompensasiEmisiController;
+use App\Http\Controllers\PembelianCarbonCreditController;
+use App\Http\Controllers\PenyediaCarbonCreditController;
+use App\Http\Controllers\StaffController; 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// Redirect root to login
+// Route default ke home
 Route::get('/', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        switch ($user->role) {
+            case 'super_admin':
+                return redirect()->route('superadmin.dashboard');
+            case 'manager':
+                return redirect()->route('manager.dashboard');
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'staff':
+                return redirect()->route('staff.dashboard');
+            default:
+                return view('welcome');
+        }
+    }
     return redirect()->route('login');
+})->name('home');
+
+// Dashboard redirect
+Route::get('/dashboard', function () {
+    return redirect()->route('home');
 });
 
-// Auth Routes
-Route::prefix('auth')->group(function () {
+// Rute untuk autentikasi
+Route::middleware('guest')->group(function () {
+    // Login
     Route::get('/login', function () {
         return view('auth.login');
     })->name('login');
+    Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
     
-    Route::get('/register', function () {
-        return view('auth.register');
-    })->name('register');
+    // Route untuk memeriksa apakah email adalah Super Admin
+    Route::get('/check-super-admin', [App\Http\Controllers\AuthController::class, 'checkSuperAdmin'])->name('check.super-admin');
+    
+    // Register Super Admin (hanya tersedia ketika belum ada super admin)
+    Route::get('/register/super-admin', function () {
+        if (\App\Models\User::where('role', 'super_admin')->count() > 0) {
+            return redirect()->route('login');
+        }
+        return view('auth.register-super-admin');
+    })->name('register.super-admin');
+    Route::post('/register/super-admin', [App\Http\Controllers\AuthController::class, 'registerSuperAdmin'])->name('register.super-admin.post');
 });
 
-// Admin Routes
-Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/emissions', [AdminController::class, 'emissions'])->name('admin.emissions');
-    Route::get('/credits', [AdminController::class, 'credits'])->name('admin.credits');
-    Route::get('/notifications', [AdminController::class, 'notifications'])->name('admin.notifications');
-    Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
-});
+// Rute untuk user yang sudah terotentikasi
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
-// Staff/Perusahaan Routes
-Route::prefix('staff')->group(function () {
-    Route::get('/', [PerusahaanController::class, 'index'])->name('staff.dashboard');
-    Route::resource('perusahaan', PerusahaanController::class);
+    // Rute Super Admin
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':super_admin')->prefix('super-admin')->name('superadmin.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('super-admin.dashboard');
+        })->name('dashboard');
+        
+        // Manajemen perusahaan
+        Route::resource('perusahaan', PerusahaanController::class);
+        
+        // Manajemen manager
+        // Manajemen manager menggunakan ManagerController
+        Route::resource('manager', App\Http\Controllers\ManagerController::class)->parameters(['manager' => 'manager']); // Parameter diubah ke 'manager' untuk route model binding User
+        // Rute tambahan jika diperlukan, misalnya untuk menampilkan form create dengan kode perusahaan tertentu
+        Route::get('/manager/create/for-perusahaan/{kode_perusahaan}', [App\Http\Controllers\ManagerController::class, 'create'])->name('superadmin.manager.create.for_perusahaan');
+    });
 
-    // History routes
-    Route::get('/history', function() {
-        return view('staff.history');
-    })->name('staff.history');
+    // Rute Manager
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('manager.dashboard');
+        })->name('dashboard');
+        
+        // Manajemen admin menggunakan AdminController
+        Route::resource('admin', App\Http\Controllers\AdminController::class)->parameters(['admin' => 'admin']); // Parameter diubah ke 'admin' untuk route model binding User
+        
+        // Manajemen staff
+        Route::get('/staff', function () {
+            $staffs = \App\Models\User::where('role', 'staff')
+                                     ->where('kode_perusahaan', Auth::user()->kode_perusahaan)
+                                     ->get();
+            return view('manager.staff.index', compact('staffs'));
+        })->name('staff.index');
+        Route::get('/staff/create', function () {
+            return view('manager.staff.create');
+        })->name('staff.create');
+        Route::post('/staff', [App\Http\Controllers\AuthController::class, 'registerStaff'])->name('staff.store');
+        
+        Route::prefix('kompensasi')->name('kompensasi.')->group(function () {
+            Route::get('/', [KompensasiEmisiController::class, 'index'])->name('index');
+            Route::post('/store', [KompensasiEmisiController::class, 'store'])->name('store');
+            Route::get('/report', [KompensasiEmisiController::class, 'report'])->name('report');
+            Route::get('/show/{id}', [KompensasiEmisiController::class, 'show'])->name('show');
+            Route::get('/edit/{id}', [KompensasiEmisiController::class, 'edit'])->name('edit');
+            Route::get('/destroy/{id}', [KompensasiEmisiController::class, 'destroy'])->name('destroy');
+            });
+    });
 
-});
+    // Rute Admin
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+        
+        // Manajemen staff menggunakan StaffController
+        Route::resource('staff', App\Http\Controllers\StaffController::class)->parameters(['staff' => 'staff']); // Parameter diubah ke 'staff' untuk route model binding User
+        
+        // Emisi Karbon - Admin (review dan approval)
+        Route::resource('emisicarbon', EmisiKarbonController::class)->only(['index', 'show']);
+        Route::get('/emisicarbon/{kode_emisi_karbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
+        Route::put('/emisicarbon/{kode_emisi_karbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
+        
+        // Faktor Emisi
+        Route::resource('faktor-emisi', FaktorEmisiController::class);
+    });
 
-// Faktor Emisi Routes
-Route::resource('faktor-emisi', FaktorEmisiController::class);
-
-// Emissions API Routes
-Route::prefix('api')->group(function () {
-    Route::post('/emissions', function (Request $request) {
-        return response()->json(['success' => true]);
+    // Rute Staff
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':staff')->prefix('staff')->name('staff.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('staff.dashboard');
+        })->name('dashboard');
+        
+        // Route untuk Emisi Karbon - Staff
+        Route::resource('emisicarbon', EmisiKarbonController::class);
     });
     
-    Route::delete('/emissions/{id}', function ($id) {
-        return response()->json(['success' => true]);
+    // Manager dapat juga mengakses dan memodifikasi data faktor emisi dan penyedia carbon credit
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
+        Route::resource('faktor-emisi', FaktorEmisiController::class);
+        Route::resource('penyedia-carbon-credit', PenyediaCarbonCreditController::class);
     });
-});
 
-// Manager Routes 
-Route::prefix('manager')->group(function () {
-    // Dashboard route
-    Route::get('/dashboard', function () {
-        return view('manager.dashboard');
-    })->name('manager.dashboard');
+    // CRUD Pembelian Carbon Credit
+    Route::resource('carbon_credit', PembelianCarbonCreditController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'carbon_credit.index',
+            'create' => 'carbon_credit.create', 
+            'store' => 'carbon_credit.store',
+            'edit' => 'carbon_credit.edit',
+            'update' => 'carbon_credit.update',
+            'destroy' => 'carbon_credit.destroy'
+        ]);
 
-    Route::prefix('kompensasi')->group(function () {
-        Route::get('/', function () {
-            return view('manager.kompensasi.index');
-        })->name('manager.kompensasi.index');
+    // Edit Status Pembelian Carbon Credit
+    Route::get('/carbon_credit/{kode_pembelian_carbon_credit}/edit-status', [PembelianCarbonCreditController::class, 'editStatus'])
+        ->name('carbon_credit.edit_status');
+    Route::put('/carbon_credit/{kode_pembelian_carbon_credit}/update-status', [PembelianCarbonCreditController::class, 'updateStatus'])
+        ->name('carbon_credit.update_status');
 
-        Route::get('/{id}', function ($id) {
-            return view('manager.kompensasi.show', ['id' => $id]);
-        })->name('manager.kompensasi.show');
-
-        Route::get('/{id}/edit', function ($id) {
-            return view('manager.kompensasi.edit', ['id' => $id]);
-        })->name('manager.kompensasi.edit.');
-
-        Route::get('/report/pdf', function () {
-            return view('manager.kompensasi.report');
-        })->name('manager.kompensasi.report');
+    // Route untuk laporan pembelian carbon credit
+    Route::get('/carbon_credit/list-report', [PembelianCarbonCreditController::class, 'listReport'])
+        ->name('carbon_credit.list_report');
+    Route::get('/carbon_credit/report', [PembelianCarbonCreditController::class, 'downloadSelectedReport'])
+        ->name('carbon_credit.report');
+    
+    // Tambahkan route untuk history
+    Route::get('/history', function () {
+        return view('history');
     });
 
     Route::get('/faktor-emisi', function () {

@@ -73,7 +73,7 @@ class KompensasiEmisiCarbon extends Model
      */
     public function emisiCarbon()
     {
-        return $this->belongsTo(EmisiCarbon::class, 'kode_emisi_carbon', 'kode_emisi_carbon');
+        return $this->belongsTo(EmisiKarbon::class, 'kode_emisi_carbon', 'kode_emisi_carbon');
     }
 
     /**

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('status_kompensasi', ['Belum Terkompensasi', 'Terkompensasi']);
             $table->string('kode_manager');
             $table->string('kode_perusahaan');
-            $table->foreign('kode_manager')->references('kode_manager')->on('manager');
+            $table->foreign('kode_manager')->references('kode_user')->on('users');
             $table->foreign('kode_perusahaan')->references('kode_perusahaan')->on('perusahaan');
             $table->timestamps();
         });
