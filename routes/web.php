@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/report', [KompensasiEmisiController::class, 'report'])->name('report');
             Route::get('/show/{id}', [KompensasiEmisiController::class, 'show'])->name('show');
             Route::get('/edit/{id}', [KompensasiEmisiController::class, 'edit'])->name('edit');
-            Route::get('/destroy/{id}', [KompensasiEmisiController::class, 'destroy'])->name('destroy');
+            Route::delete('/destroy/{id}', [KompensasiEmisiController::class, 'destroy'])->name('destroy');
             });
     });
 

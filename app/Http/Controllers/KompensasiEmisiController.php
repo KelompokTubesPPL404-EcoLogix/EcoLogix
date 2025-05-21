@@ -164,7 +164,7 @@ class KompensasiEmisiController extends Controller
             abort(404);
         }
 
-        return view('kompensasi.show', compact('kompensasi'));
+        return view('manager.kompensasi.show', compact('kompensasi'));
     }
 
     public function update(Request $request, $kodeKompensasi)
@@ -213,7 +213,7 @@ class KompensasiEmisiController extends Controller
             return back()->with('error', 'Gagal menghapus data kompensasi');
         }
 
-        return redirect()->route('manager.manager.kompensasi.index')
+        return redirect()->route('manager.kompensasi.index')
             ->with('success', 'Data kompensasi berhasil dihapus');
     }
 
@@ -236,7 +236,7 @@ class KompensasiEmisiController extends Controller
             abort(404);
         }
 
-        return view('kompensasi.edit', compact('kompensasi'));
+        return view('manager.kompensasi.edit', compact('kompensasi'));
     }
 
     public function report()
