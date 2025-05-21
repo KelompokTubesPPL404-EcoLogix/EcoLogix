@@ -2,124 +2,106 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use App\Models\KompensasiEmisi;
-use App\Models\EmisiCarbon;
-use App\Notifications\NewKompensasiNotification;
-use App\Models\Admin;
+use App\Models\KompensasiEmisiCarbon;
+use App\Models\EmisiKarbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class KompensasiEmisiController extends Controller
 {
     public function index(Request $request)
     {
-     
-        $emisiApproved = DB::select("
-            SELECT 
-                e.kode_emisi_karbon,
-                e.kategori_emisi_karbon,
-                e.sub_kategori,
-                e.nilai_aktivitas,
-                e.faktor_emisi,
-                e.kadar_emisi_karbon,
-                e.deskripsi,
-                e.status,
-                e.tanggal_emisi,
-                (e.kadar_emisi_karbon / 1000) as emisi_ton,
-                COALESCE(SUM(k.jumlah_kompensasi), 0) / 1000 as kompensasi_ton,
-                ((e.kadar_emisi_karbon - COALESCE(SUM(k.jumlah_kompensasi), 0)) / 1000) as sisa_emisi_ton
-            FROM emisi_carbons e
-            LEFT JOIN kompensasi_emisi k ON e.kode_emisi_karbon = k.kode_emisi_karbon
-            WHERE e.status = 'approved'
-            GROUP BY 
-                e.kode_emisi_karbon,
-                e.kategori_emisi_karbon,
-                e.sub_kategori,
-                e.nilai_aktivitas,
-                e.faktor_emisi,
-                e.kadar_emisi_karbon,
-                e.deskripsi,
-                e.status,
-                e.tanggal_emisi
-        ");
+        // Ambil data emisi approved dengan relasi kompensasi, hitung total kompensasi dan sisa emisi
+        $emisiApproved = EmisiKarbon::select([
+                'emisi_carbon.kode_emisi_carbon as kode_emisi_carbon',
+                'kategori_emisi_karbon',
+                'sub_kategori',
+                'nilai_aktivitas',
+                'faktor_emisi',
+                'kadar_emisi_karbon',
+                'deskripsi',
+                'status',
+                'tanggal_emisi',
+                DB::raw('(kadar_emisi_karbon / 1000) as emisi_ton'),
+                DB::raw('COALESCE(SUM(kompensasi_emisi_carbon.jumlah_kompensasi),0) / 1000 as kompensasi_ton'),
+                DB::raw('((kadar_emisi_karbon - COALESCE(SUM(kompensasi_emisi_carbon.jumlah_kompensasi),0)) / 1000) as sisa_emisi_ton')
+            ])
+            ->leftJoin('kompensasi_emisi_carbon', 'emisi_carbon.kode_emisi_carbon', '=', 'kompensasi_emisi_carbon.kode_emisi_carbon')
+            ->where('status', 'approved')
+            ->groupBy(
+                'kode_emisi_carbon',
+                'kategori_emisi_karbon',
+                'sub_kategori',
+                'nilai_aktivitas',
+                'faktor_emisi',
+                'kadar_emisi_karbon',
+                'deskripsi',
+                'status',
+                'tanggal_emisi'
+            )
+            ->get();
 
-     
-        $query = "
-            SELECT 
-                k.kode_kompensasi,
-                k.kode_emisi_karbon,
-                ROUND(k.jumlah_kompensasi / 1000, 2) as jumlah_ton,
-                k.tanggal_kompensasi,
-                k.status,
-                COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
-                COALESCE(e.sub_kategori, '-') as sub_kategori,
-                ROUND(e.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton
-            FROM kompensasi_emisi k
-            LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
-            WHERE 1=1
-        ";
-        
-        $params = [];
+        // Query riwayat kompensasi dengan filter
+        $riwayatQuery = KompensasiEmisiCarbon::select([
+                'kompensasi_emisi_carbon.kode_kompensasi',
+                'kompensasi_emisi_carbon.kode_emisi_carbon',
+                DB::raw('ROUND(kompensasi_emisi_carbon.jumlah_kompensasi / 1000, 2) as jumlah_ton'),
+                'kompensasi_emisi_carbon.tanggal_kompensasi',
+                'kompensasi_emisi_carbon.status_kompensasi as status',
+                DB::raw('COALESCE(emisi_carbon.kategori_emisi_karbon, "-") as kategori_emisi'),
+                DB::raw('COALESCE(emisi_carbon.sub_kategori, "-") as sub_kategori'),
+            ])
+            ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
+            ->orderByDesc('kompensasi_emisi_carbon.created_at');
 
-       
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query .= " AND (
-                k.kode_kompensasi LIKE ? OR 
-                k.kode_emisi_karbon LIKE ? OR
-                e.kategori_emisi_karbon LIKE ? OR 
-                e.sub_kategori LIKE ?
-            )";
-            $searchParam = "%{$search}%";
-            $params = array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam]);
-        }
-
-       
-        if ($request->has('start_date') && !empty($request->start_date)) {
-            $query .= " AND DATE(k.tanggal_kompensasi) >= ?";
-            $params[] = $request->start_date;
-        }
-        if ($request->has('end_date') && !empty($request->end_date)) {
-            $query .= " AND DATE(k.tanggal_kompensasi) <= ?";
-            $params[] = $request->end_date;
-        }
-
-        if ($request->has('status') && !empty($request->status)) {
-            $query .= " AND k.status = ?";
-            $params[] = $request->status;
-        }
-
-        if ($request->has('kategori') && !empty($request->kategori)) {
-            $query .= " AND e.kategori_emisi_karbon = ?";
-            $params[] = $request->kategori;
-        }
-
-        $query .= " ORDER BY k.created_at DESC";
-
-        $riwayatKompensasi = DB::select($query, $params);
-
-      
-        $kategoriEmisi = collect($emisiApproved)->groupBy('kategori_emisi_karbon')
-            ->map(function($items) {
-                return [
-                    'kategori' => $items->first()->kategori_emisi_karbon,
-                    'total' => $items->sum('emisi_ton'),
-                    'terkompensasi' => $items->sum('kompensasi_ton'),
-                    'sisa' => $items->sum('sisa_emisi_ton')
-                ];
+            $riwayatQuery->where(function($q) use ($search) {
+                $q->where('kompensasi_emisi_carbon.kode_kompensasi', 'like', "%$search%")
+                  ->orWhere('kompensasi_emisi_carbon.kode_emisi_carbon', 'like', "%$search%")
+                  ->orWhere('emisi_carbon.kategori_emisi_karbon', 'like', "%$search%")
+                  ->orWhere('emisi_carbon.sub_kategori', 'like', "%$search%");
             });
+        }
+        if ($request->filled('start_date')) {
+            $riwayatQuery->whereDate('kompensasi_emisi_carbon.tanggal_kompensasi', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $riwayatQuery->whereDate('kompensasi_emisi_carbon.tanggal_kompensasi', '<=', $request->end_date);
+        }
+        if ($request->filled('status')) {
+            $riwayatQuery->where('kompensasi_emisi_carbon.status_kompensasi', $request->status);
+        }
+        if ($request->filled('kategori')) {
+            $riwayatQuery->where('emisi_carbon.kategori_emisi_karbon', $request->kategori);
+        }
 
-        
-        $kategoris = DB::select("
-            SELECT DISTINCT kategori_emisi_karbon 
-            FROM emisi_carbons 
-            WHERE kategori_emisi_karbon IS NOT NULL
-            ORDER BY kategori_emisi_karbon
-        ");
+        $riwayatKompensasi = $riwayatQuery->get();
 
-        return view('kompensasi.index', compact(
+        // Agregasi kategori emisi
+        $kategoriEmisi = $emisiApproved->groupBy('kategori_emisi_karbon')->map(function($items) {
+            return [
+                'kategori' => $items->first()->kategori_emisi_karbon,
+                'total' => $items->sum('emisi_ton'),
+                'terkompensasi' => $items->sum('kompensasi_ton'),
+                'sisa' => $items->sum('sisa_emisi_ton')
+            ];
+        });
+
+        // Kategori distinct
+        $kategoris = EmisiKarbon::select('kategori_emisi_karbon')
+                    ->distinct()
+                    ->whereNotNull('kategori_emisi_karbon')
+                    ->orderBy('kategori_emisi_karbon')
+                    ->get();
+
+        return view('manager.kompensasi.index', compact(
             'emisiApproved',
             'riwayatKompensasi',
             'kategoriEmisi',
@@ -129,111 +111,81 @@ class KompensasiEmisiController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
-            'kode_emisi_karbon' => 'required|exists:emisi_carbons,kode_emisi_karbon',
-            'jumlah_kompensasi' => 'required|numeric|min:0.001'
+            'kode_emisi_carbon' => 'required|exists:emisi_carbon,kode_emisi_carbon',
+            'jumlah_kompensasi' => 'required|numeric|min:0.01',
+            'tanggal_kompensasi' => 'required|date',
         ]);
 
-        try {
-            DB::beginTransaction();
-
-            $jumlahKompensasiKg = $request->jumlah_kompensasi * 1000;
-
-            $emisiData = EmisiCarbon::where('kode_emisi_karbon', $request->kode_emisi_karbon)
-                ->where('status', 'approved')
-                ->first();
-
-            if (!$emisiData) {
-                DB::rollBack();
-                return back()->with('error', 'Data emisi tidak ditemukan atau belum disetujui');
-            }
-
-            $totalKompensasi = KompensasiEmisi::where('kode_emisi_karbon', $request->kode_emisi_karbon)
-                ->sum('jumlah_kompensasi');
-
-            $sisaEmisiKg = $emisiData->kadar_emisi_karbon - $totalKompensasi;
-
-            
-            $lastKode = KompensasiEmisi::orderBy('id', 'desc')->first();
-            $kodeNumber = 1;
-            if ($lastKode) {
-                $kodeNumber = (int)substr($lastKode->kode_kompensasi, 4) + 1;
-            }
-            $kodeKompensasi = 'KMP-' . str_pad($kodeNumber, 6, '0', STR_PAD_LEFT);
-
-            
-            $inserted = DB::insert("
-                INSERT INTO kompensasi_emisi (
-                    kode_kompensasi, kode_emisi_karbon, jumlah_kompensasi,
-                    tanggal_kompensasi, status, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())",
-                [
-                    $kodeKompensasi,
-                    $request->kode_emisi_karbon,
-                    $jumlahKompensasiKg,
-                    now(),
-                    'pending'
-                ]
-            );
-
-            if (!$inserted) {
-                DB::rollBack();
-                return back()->with('error', 'Gagal menyimpan data kompensasi');
-            }
-            
-
-            DB::commit();
-            return redirect()->route('manager.kompensasi.index')
-                           ->with('success', 'Kompensasi emisi berhasil dicatat dan menunggu persetujuan');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        // Ambil data emisi karbon
+        $emisi = EmisiKarbon::where('kode_emisi_carbon', $request->kode_emisi_carbon)->first();
+        
+        if (!$emisi) {
+            return redirect()->back()->with('error', 'Data emisi karbon tidak ditemukan.');
         }
+
+        // Konversi ke ton (jika input dalam kg)
+        $jumlahTon = $request->jumlah_kompensasi / 1000;
+
+        // Buat kode kompensasi (K + timestamp)
+        $kodeKompensasi = 'K' . Carbon::now()->format('YmdHis');
+
+        $manager = Auth::user();
+        // Simpan data kompensasi
+        $kompensasi = new KompensasiEmisiCarbon();
+        $kompensasi->kode_kompensasi = $kodeKompensasi;
+        $kompensasi->kode_emisi_carbon = $request->kode_emisi_carbon;
+        $kompensasi->jumlah_kompensasi = $request->jumlah_kompensasi;
+        $kompensasi->tanggal_kompensasi = $request->tanggal_kompensasi;
+        $kompensasi->status_kompensasi = 'Belum Terkompensasi'; // Default pending, menunggu approval admin
+        $kompensasi->kode_manager = $manager->kode_user;
+        $kompensasi->kode_perusahaan = $manager->kode_perusahaan;
+        $kompensasi->save();
+
+        return redirect()->back()->with('success', 'Data kompensasi berhasil disimpan dan menunggu persetujuan.');
     }
 
     public function show($kodeKompensasi)
     {
-        $kompensasi = DB::select("
-            SELECT 
-                k.*,
-                ROUND(k.jumlah_kompensasi / 1000, 2) as jumlah_ton,
-                e.*,
-                ROUND(e.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton,
-                COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
-                COALESCE(e.sub_kategori, '-') as sub_kategori
-            FROM kompensasi_emisi k
-            LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
-            WHERE k.kode_kompensasi = ?
-            LIMIT 1
-        ", [$kodeKompensasi]);
+        $kompensasi = KompensasiEmisiCarbon::select([
+                'kompensasi_emisi_carbon.*',
+                DB::raw('ROUND(kompensasi_emisi_carbon.jumlah_kompensasi / 1000, 2) as jumlah_ton'),
+                'emisi_carbon.*',
+                DB::raw('ROUND(emisi_carbon.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton'),
+                DB::raw('COALESCE(emisi_carbon.kategori_emisi_karbon, "-") as kategori_emisi'),
+                DB::raw('COALESCE(emisi_carbon.sub_kategori, "-") as sub_kategori'),
+            ])
+            ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
+            ->where('kompensasi_emisi_carbon.kode_kompensasi', $kodeKompensasi)
+            ->first();
 
-        if (empty($kompensasi)) {
+        if (!$kompensasi) {
             abort(404);
         }
 
-        return view('kompensasi.show', ['kompensasi' => $kompensasi[0]]);
+        return view('kompensasi.show', compact('kompensasi'));
     }
 
     public function update(Request $request, $kodeKompensasi)
     {
         $request->validate([
-            'jumlah_kompensasi' => 'required|numeric|min:0.001'
+            'jumlah_kompensasi' => 'required|numeric|min:0.001',
         ]);
 
-        try {
-            DB::beginTransaction();
+        $manager = Auth::user();
+        DB::beginTransaction();
 
-            
+        try {
             $jumlahKompensasiKg = $request->jumlah_kompensasi * 1000;
 
-            $updated = DB::update("
-                UPDATE kompensasi_emisi 
-                SET jumlah_kompensasi = ?,
-                    updated_at = NOW()
-                WHERE kode_kompensasi = ? 
-                AND status = 'pending'
-            ", [$jumlahKompensasiKg, $kodeKompensasi]);
+            $updated = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
+                ->where('status_kompensasi', 'Belum Terkompensasi')
+                ->update([
+                    'jumlah_kompensasi' => $jumlahKompensasiKg,
+                    'updated_at' => now(),
+                    'kode_manager' => $manager->kode_user,
+                ]);
 
             if (!$updated) {
                 DB::rollBack();
@@ -241,8 +193,9 @@ class KompensasiEmisiController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('manager.kompensasi.index')
-                            ->with('success', 'Data kompensasi berhasil diupdate');
+
+            return redirect()->route('manager.manager.kompensasi.index')
+                ->with('success', 'Data kompensasi berhasil diupdate');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -252,71 +205,56 @@ class KompensasiEmisiController extends Controller
 
     public function destroy($kodeKompensasi)
     {
-        $deleted = DB::delete("
-            DELETE FROM kompensasi_emisi 
-            WHERE kode_kompensasi = ? 
-            AND status = 'pending'
-        ", [$kodeKompensasi]);
+        $deleted = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
+            ->where('status_kompensasi', 'Belum Terkompensasi')
+            ->delete();
 
         if (!$deleted) {
             return back()->with('error', 'Gagal menghapus data kompensasi');
         }
 
-        return redirect()->route('manager.kompensasi.index')
-                        ->with('success', 'Data kompensasi berhasil dihapus');
+        return redirect()->route('manager.manager.kompensasi.index')
+            ->with('success', 'Data kompensasi berhasil dihapus');
     }
 
     public function edit($kodeKompensasi)
     {
-        $kompensasi = DB::select("
-            SELECT 
-                k.*,
-                ROUND(k.jumlah_kompensasi / 1000, 2) as jumlah_ton,
-                e.*,
-                ROUND(e.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton,
-                COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
-                COALESCE(e.sub_kategori, '-') as sub_kategori
-            FROM kompensasi_emisi k
-            LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
-            WHERE k.kode_kompensasi = ? AND k.status = 'pending'
-            LIMIT 1
-        ", [$kodeKompensasi]);
+        $kompensasi = KompensasiEmisiCarbon::select([
+                'kompensasi_emisi_carbon.*',
+                DB::raw('ROUND(kompensasi_emisi_carbon.jumlah_kompensasi / 1000, 2) as jumlah_ton'),
+                'emisi_carbon.*',
+                DB::raw('ROUND(emisi_carbon.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton'),
+                DB::raw('COALESCE(emisi_carbon.kategori_emisi_karbon, "-") as kategori_emisi'),
+                DB::raw('COALESCE(emisi_carbon.sub_kategori, "-") as sub_kategori'),
+            ])
+            ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
+            ->where('kompensasi_emisi_carbon.kode_kompensasi', $kodeKompensasi)
+            ->where('kompensasi_emisi_carbon.status_kompensasi', 'Belum Terkompensasi')
+            ->first();
 
-        if (empty($kompensasi)) {
+        if (!$kompensasi) {
             abort(404);
         }
 
-        return view('kompensasi.edit', ['kompensasi' => $kompensasi[0]]);
+        return view('kompensasi.edit', compact('kompensasi'));
     }
 
     public function report()
     {
-    
-        $kompensasi = DB::select("
-            SELECT 
-                k.kode_kompensasi,
-                k.kode_emisi_karbon,
-                ROUND(k.jumlah_kompensasi / 1000, 2) as jumlah_ton,
-                k.tanggal_kompensasi,
-                k.status,
-                COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
-                COALESCE(e.sub_kategori, '-') as sub_kategori
-            FROM kompensasi_emisi k
-            LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
-            ORDER BY k.tanggal_kompensasi DESC
-        ");
+        $kompensasi = KompensasiEmisiCarbon::select([
+                'kompensasi_emisi_carbon.kode_kompensasi',
+                'kompensasi_emisi_carbon.kode_emisi_carbon',
+                DB::raw('ROUND(kompensasi_emisi_carbon.jumlah_kompensasi / 1000, 2) as jumlah_ton'),
+                'kompensasi_emisi_carbon.tanggal_kompensasi',
+                'kompensasi_emisi_carbon.status_kompensasi as status',
+                DB::raw('COALESCE(emisi_carbon.kategori_emisi_karbon, "-") as kategori_emisi'),
+                DB::raw('COALESCE(emisi_carbon.sub_kategori, "-") as sub_kategori'),
+            ])
+            ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
+            ->orderByDesc('kompensasi_emisi_carbon.created_at')
+            ->get();
 
-        $total_kompensasi = collect($kompensasi)->sum('jumlah_ton');
-
-        $data = [
-            'title' => 'Laporan Riwayat Kompensasi Emisi',
-            'date' => now()->format('d/m/Y H:i:s'),
-            'kompensasi' => $kompensasi,
-            'total_kompensasi' => $total_kompensasi
-        ];
-
-        $pdf = PDF::loadView('kompensasi.report', $data);
-        
-        return $pdf->download('laporan-kompensasi-' . date('Y-m-d') . '.pdf');
+        $pdf = Pdf::loadView('kompensasi.report', compact('kompensasi'));
+        return $pdf->stream('laporan_kompensasi.pdf');
     }
 }

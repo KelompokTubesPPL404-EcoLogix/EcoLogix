@@ -117,11 +117,11 @@ class EmisiCarbonController extends Controller
         return response()->json(['data' => $emisi], 200);
     }
 
-    public function edit($kode_emisi_karbon)
+    public function edit($kode_emisi_carbon)
     {
         $kodeUser = 'DUMMY-STAFF'; // sementara
 
-        $emisiCarbon = EmisiCarbon::where('kode_emisi_karbon', $kode_emisi_karbon)
+        $emisiCarbon = EmisiCarbon::where('kode_emisi_carbon', $kode_emisi_carbon)
             ->where('kode_staff', $kodeUser)
             ->firstOrFail();
 
@@ -132,7 +132,7 @@ class EmisiCarbonController extends Controller
         // return view('emisicarbon.edit', compact('emisiCarbon', 'kategoriEmisi'));
     }
 
-    public function update(Request $request, $kode_emisi_karbon)
+    public function update(Request $request, $kode_emisi_carbon)
     {
         $request->validate([
             'tanggal_emisi' => 'required|date',
@@ -151,7 +151,7 @@ class EmisiCarbonController extends Controller
             return response()->json(['error' => 'Faktor emisi tidak ditemukan'], 400);
         }
 
-        $emisiCarbon = EmisiCarbon::where('kode_emisi_carbon', $kode_emisi_karbon)
+        $emisiCarbon = EmisiCarbon::where('kode_emisi_carbon', $kode_emisi_carbon)
             ->where('kode_staff', $request->kode_staff)
             ->firstOrFail();
 
@@ -170,9 +170,9 @@ class EmisiCarbonController extends Controller
         //     ->with('success', 'Data emisi karbon berhasil diperbarui.');
     }
 
-    public function destroy($kode_emisi_karbon)
+    public function destroy($kode_emisi_carbon)
     {
-        $emisiCarbon = EmisiCarbon::findOrFail($kode_emisi_karbon);
+        $emisiCarbon = EmisiCarbon::findOrFail($kode_emisi_carbon);
         $emisiCarbon->delete();
         return response()->json([
             'message' => 'Faktor Emisi berhasil dihapus!',
@@ -181,17 +181,17 @@ class EmisiCarbonController extends Controller
         //    ->with('success', 'Faktor Emisi berhasil dihapus!');
     }
 
-    public function editStatus($kode_emisi_karbon)
+    public function editStatus($kode_emisi_carbon)
     {
         $emisiCarbon = EmisiCarbon::with('faktorEmisi')
-            ->where('kode_emisi_karbon', $kode_emisi_karbon)
+            ->where('kode_emisi_carbon', $kode_emisi_carbon)
             ->firstOrFail();
 
         return response()->json(compact('emisiCarbon'));
         // return view('emisicarbon.edit_status', compact('emisiCarbon'));
     }
 
-    public function updateStatus(Request $request, $kode_emisi_karbon)
+    public function updateStatus(Request $request, $kode_emisi_carbon)
     {
         $request->validate([
             'status' => 'required|in:approved,pending,rejected',
@@ -199,7 +199,7 @@ class EmisiCarbonController extends Controller
 
         $kodeAdmin = 'DUMMY-ADMIN'; // sementara
 
-        $emisiCarbon = EmisiCarbon::where('kode_emisi_karbon', $kode_emisi_karbon)
+        $emisiCarbon = EmisiCarbon::where('kode_emisi_carbon', $kode_emisi_carbon)
             ->firstOrFail();
 
         $emisiCarbon->update([

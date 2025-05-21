@@ -138,15 +138,22 @@
                     </div>
                 <?php endif; ?>
                 
-                <form method="POST" action="/auth/login">
+                <form action="{{ route('login.post') }}" method="POST" id="loginForm">
+                    @csrf
                     <div class="mb-3">
                         <label>Email address</label>
-                        <input type="email" class="form-control" name="email" required>
+                        <input type="email" class="form-control" name="email" value="{{ old('email') }}" required autofocus>
                     </div>
 
                     <div class="mb-3">
                         <label>Password</label>
                         <input type="password" class="form-control" name="password" required>
+                    </div>
+                    
+                    <div class="mb-3" id="adminTokenGroup" style="display: none;">
+                        <label for="admin_token">Super Admin Token</label>
+                        <input type="password" class="form-control" id="admin_token" name="admin_token" value="{{ old('admin_token') }}">
+                        <div class="form-text text-danger">Login sebagai Super Admin memerlukan token keamanan khusus.</div>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -154,10 +161,12 @@
                             <input type="checkbox" class="form-check-input" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Remember me</label>
                         </div>
-                        <a href="/forgot-password" style="color: #666; text-decoration: none;">Forgot Your Password?</a>
+                        <a href="#" style="color: #666; text-decoration: none;">Forgot Your Password?</a>
                     </div>
 
                     <button type="submit" class="btn-login">Login</button>
+                </form>
+
                 </form>
 
                 <div class="text-center mt-3">
