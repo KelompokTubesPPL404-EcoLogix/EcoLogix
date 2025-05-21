@@ -14,61 +14,90 @@
           </a>
         </div>
         <div class="card-body">
-          <form id="formEditKompensasi">
-            <div class="row">
-              <!-- Informasi Emisi -->
-              <div class="col-md-6">
-                <h6 class="border-bottom pb-2">Informasi Emisi</h6>
-                <table class="table table-borderless">
-                  <tr>
-                    <td width="200">Kode Emisi</td>
-                    <td>: <span id="kodeEmisi">EM123456</span></td>
-                  </tr>
-                  <tr>
-                    <td>Kategori</td>
-                    <td>: <span id="kategori">Transportasi</span></td>
-                  </tr>
-                  <tr>
-                    <td>Sub Kategori</td>
-                    <td>: <span id="subKategori">Darat</span></td>
-                  </tr>
-                  <tr>
-                    <td>Kadar Emisi</td>
-                    <td>: <span id="kadarEmisi">5.25 ton CO₂e</span></td>
-                  </tr>
-                </table>
-              </div>
+          <div class="row">
+            <!-- Informasi Kompensasi -->
+            <div class="col-md-6">
+              <h6 class="border-bottom pb-2">Informasi Kompensasi</h6>
+              <table class="table table-borderless">
+                <tr>
+                  <td width="200">Kode Kompensasi</td>
+                  <td>: {{ $kompensasi->kode_kompensasi }}</td>
+                </tr>
+                <tr>
+                  <td>Kode Manager</td>
+                  <td>: {{ $kompensasi->kode_manager ?? '-' }}</td>
+                </tr>
+                <tr>
+                  <td>Tanggal Kompensasi</td>
+                  <td>: {{ \Carbon\Carbon::parse($kompensasi->tanggal_kompensasi)->format('d/m/Y') }}</td>
+                </tr>
+                <tr>
+                  <td>Status</td>
+                  <td>:
+                    @if($kompensasi->status_kompensasi == 'pending')
+                      <span class="badge bg-warning text-dark">Pending</span>
+                    @elseif($kompensasi->status_kompensasi == 'approved')
+                      <span class="badge bg-success">Approved</span>
+                    @elseif($kompensasi->status_kompensasi == 'rejected')
+                      <span class="badge bg-danger">Rejected</span>
+                    @else
+                      <span class="badge bg-secondary">{{ $kompensasi->status_kompensasi }}</span>
+                    @endif
+                  </td>
+                </tr>
+                <tr>
+                  <td>Created At</td>
+                  <td>: {{ $kompensasi->created_at ? \Carbon\Carbon::parse($kompensasi->created_at)->format('d/m/Y H:i:s') : '-' }}</td>
+                </tr>
+                <tr>
+                  <td>Updated At</td>
+                  <td>: {{ $kompensasi->updated_at ? \Carbon\Carbon::parse($kompensasi->updated_at)->format('d/m/Y H:i:s') : '-' }}</td>
+                </tr>
+              </table>
+            </div>
 
-              <!-- Form Edit -->
-              <div class="col-md-6">
-                <h6 class="border-bottom pb-2">Edit Kompensasi</h6>
+            <!-- Informasi Emisi & Form Edit -->
+            <div class="col-md-6">
+              <h6 class="border-bottom pb-2">Informasi Emisi</h6>
+              <table class="table table-borderless">
+                <tr>
+                  <td width="200">Kode Emisi</td>
+                  <td>: {{ $kompensasi->kode_emisi_carbon }}</td>
+                </tr>
+                <tr>
+                  <td>Kategori</td>
+                  <td>: {{ $kompensasi->kategori_emisi ?? '-' }}</td>
+                </tr>
+                <tr>
+                  <td>Sub Kategori</td>
+                  <td>: {{ $kompensasi->sub_kategori ?? '-' }}</td>
+                </tr>
+                <tr>
+                  <td>Kadar Emisi</td>
+                  <td>: {{ number_format($kompensasi->kadar_emisi_ton, 2) }} ton CO₂e</td>
+                </tr>
+              </table>
+              <hr>
+              <h6 class="border-bottom pb-2">Edit Kompensasi</h6>
+              <form action="{{ route('manager.kompensasi.edit', $kompensasi->kode_kompensasi) }}" method="POST">
+                @csrf
+                @method('PUT')
                 <div class="mb-3">
                   <label for="jumlahKompensasi" class="form-label">Jumlah Kompensasi (ton CO₂e)</label>
-                  <input type="number" class="form-control" id="jumlahKompensasi" name="jumlahKompensasi" step="0.01" min="0.01" value="2.00" required />
-                  <div class="invalid-feedback">Jumlah kompensasi tidak boleh kosong.</div>
+                  <input type="number" class="form-control @error('jumlah_kompensasi') is-invalid @enderror" 
+                         id="jumlahKompensasi" name="jumlah_kompensasi" step="0.01" min="0.01" 
+                         value="{{ old('jumlah_kompensasi', $kompensasi->jumlah_ton) }}" required />
+                  @error('jumlah_kompensasi')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
                 </div>
                 <button type="submit" class="btn btn-primary">Update Kompensasi</button>
-              </div>
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-@endsection
-
-@section('scripts')
-<script>
-  document.getElementById("formEditKompensasi").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const jumlah = document.getElementById("jumlahKompensasi").value;
-    if (!jumlah || jumlah <= 0) {
-      document.getElementById("jumlahKompensasi").classList.add("is-invalid");
-      return;
-    }
-    alert("Kompensasi berhasil diperbarui dengan nilai: " + jumlah + " ton CO₂e");
-    // Di sini kamu bisa kirim data ke backend via fetch/AJAX jika pakai API
-  });
-</script>
 @endsection

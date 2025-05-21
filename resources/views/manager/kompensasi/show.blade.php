@@ -21,27 +21,41 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <td width="200">Kode Kompensasi</td>
-                                    <td>: KMP001</td>
+                                    <td>: {{ $kompensasi->kode_kompensasi }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Kode Manager</td>
+                                    <td>: {{ $kompensasi->kode_manager ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td>Jumlah Kompensasi</td>
-                                    <td>: 5.00 ton CO₂e</td>
+                                    <td>: {{ number_format($kompensasi->jumlah_ton, 2) }} ton CO₂e</td>
                                 </tr>
                                 <tr>
                                     <td>Tanggal Kompensasi</td>
-                                    <td>: 22/04/2025</td>
+                                    <td>: {{ \Carbon\Carbon::parse($kompensasi->tanggal_kompensasi)->format('d/m/Y') }}</td>
                                 </tr>
                                 <tr>
                                     <td>Status</td>
-                                    <td>: <span class="badge bg-warning">Pending</span></td>
+                                    <td>:
+                                        @if($kompensasi->status_kompensasi == 'pending')
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        @elseif($kompensasi->status_kompensasi == 'approved')
+                                            <span class="badge bg-success">Approved</span>
+                                        @elseif($kompensasi->status_kompensasi == 'rejected')
+                                            <span class="badge bg-danger">Rejected</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ $kompensasi->status_kompensasi }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Created At</td>
-                                    <td>: 21/04/2025 10:15:30</td>
+                                    <td>: {{ $kompensasi->created_at ? \Carbon\Carbon::parse($kompensasi->created_at)->format('d/m/Y H:i:s') : '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td>Updated At</td>
-                                    <td>: 22/04/2025 08:12:45</td>
+                                    <td>: {{ $kompensasi->updated_at ? \Carbon\Carbon::parse($kompensasi->updated_at)->format('d/m/Y H:i:s') : '-' }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -52,31 +66,31 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <td width="200">Kode Emisi</td>
-                                    <td>: EM001</td>
+                                    <td>: {{ $kompensasi->kode_emisi_carbon }}</td>
                                 </tr>
                                 <tr>
                                     <td>Kategori</td>
-                                    <td>: Transportasi</td>
+                                    <td>: {{ $kompensasi->kategori_emisi ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td>Sub Kategori</td>
-                                    <td>: Mobil</td>
+                                    <td>: {{ $kompensasi->sub_kategori ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td>Kadar Emisi</td>
-                                    <td>: 8.75 ton CO₂e</td>
+                                    <td>: {{ number_format($kompensasi->kadar_emisi_ton, 2) }} ton CO₂e</td>
                                 </tr>
                                 <tr>
                                     <td>Nilai Aktivitas</td>
-                                    <td>: 120</td>
+                                    <td>: {{ $kompensasi->nilai_aktivitas ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td>Faktor Emisi</td>
-                                    <td>: 0.073</td>
+                                    <td>: {{ $kompensasi->faktor_emisi ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td>Deskripsi</td>
-                                    <td>: Perjalanan dinas menggunakan kendaraan pribadi selama bulan April</td>
+                                    <td>: {{ $kompensasi->deskripsi ?? '-' }}</td>
                                 </tr>
                             </table>
                         </div>
