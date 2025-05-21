@@ -7,7 +7,7 @@ use App\Http\Controllers\FaktorEmisiController;
 use App\Http\Controllers\KompensasiEmisiController;
 use App\Http\Controllers\PembelianCarbonCreditController;
 use App\Http\Controllers\PenyediaCarbonCreditController;
-use App\Http\Controllers\StaffController; 
+use App\Http\Controllers\StaffController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -99,14 +99,9 @@ Route::middleware('auth')->group(function () {
         })->name('staff.create');
         Route::post('/staff', [App\Http\Controllers\AuthController::class, 'registerStaff'])->name('staff.store');
         
-        Route::prefix('kompensasi')->name('kompensasi.')->group(function () {
-            Route::get('/', [KompensasiEmisiController::class, 'index'])->name('index');
-            Route::post('/store', [KompensasiEmisiController::class, 'store'])->name('store');
-            Route::get('/report', [KompensasiEmisiController::class, 'report'])->name('report');
-            Route::get('/show/{id}', [KompensasiEmisiController::class, 'show'])->name('show');
-            Route::get('/edit/{id}', [KompensasiEmisiController::class, 'edit'])->name('edit');
-            Route::delete('/destroy/{id}', [KompensasiEmisiController::class, 'destroy'])->name('destroy');
-            });
+        // Route untuk Kompensasi Emisi
+        Route::resource('kompensasi', KompensasiEmisiController::class);
+        Route::get('/kompensasi-report', [KompensasiEmisiController::class, 'report'])->name('kompensasi.report');
     });
 
     // Rute Admin
@@ -116,12 +111,13 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
         
         // Manajemen staff menggunakan StaffController
-        Route::resource('staff', App\Http\Controllers\StaffController::class)->parameters(['staff' => 'staff']); // Parameter diubah ke 'staff' untuk route model binding User
+        Route::resource('staff', App\Http\Controllers\StaffController::class)->parameters(['staff' => 'staff']); 
         
         // Emisi Karbon - Admin (review dan approval)
-        Route::resource('emisicarbon', EmisiKarbonController::class)->only(['index', 'show']);
-        Route::get('/emisicarbon/{kode_emisi_karbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
-        Route::put('/emisicarbon/{kode_emisi_karbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
+Route::get('/emisicarbon', [EmisiKarbonController::class, 'adminIndex'])->name('emisicarbon.index');
+Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])->name('emisicarbon.show');
+        Route::get('/emisicarbon/{emisicarbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
+        Route::put('/emisicarbon/{emisicarbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
         
         // Faktor Emisi
         Route::resource('faktor-emisi', FaktorEmisiController::class);
@@ -171,20 +167,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', function () {
         return view('history');
     });
-
-    Route::get('/faktor-emisi', function () {
-        return view('manager.faktor-emisi.index');
-    })->name('manager.faktor-emisi.index');
-
-    Route::get('/penyedia-carbon-credit', function () {
-        return view('manager.penyedia.index');
-    })->name('manager.penyedia.index');
-
-    Route::get('/carbon-credit', function () {
-        return view('manager.carbon_credit.index');
-    })->name('manager.carbon_credit.index');
-
-    Route::get('/profile', function () {
-        return view('manager.profile');
-    })->name('manager.profile');
 });

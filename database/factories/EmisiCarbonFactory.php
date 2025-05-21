@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\EmisiCarbon;
+use App\Models\EmisiKarbon;
 use App\Models\Staff;
 use App\Models\FaktorEmisi;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -10,11 +10,11 @@ use Illuminate\Support\Str;
 
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EmisiCarbon>
+ * @extends
  */
 class EmisiCarbonFactory extends Factory
 {
-    protected $model = EmisiCarbon::class;
+    protected $model = EmisiKarbon::class;
 
     public function definition(): array
     {

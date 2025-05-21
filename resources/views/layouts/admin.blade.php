@@ -1,38 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - ECOLOGIX Admin Dashboard</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-    @yield('styles')
-</head>
-<body>
-    <div class="dashboard-container">
-        @include('components.sidebar')
-        
-        <div class="content-container">
-            @include('components.header')
-            
-            <main class="main-content p-4">
-                @yield('content')
-            </main>
-        </div>
-    </div>
+@extends('layouts.app')
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom JS -->
-    <script src="{{ asset('js/admin.js') }}"></script>
-    @yield('scripts')
-</body>
-</html>
+@section('title', 'Admin Dashboard')
+
+@section('sidebar')
+<ul class="nav flex-column">
+  <li class="nav-item">
+    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+      <i class="bi bi-house-door me-2"></i> Dashboard
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}" href="#">
+      <i class="bi bi-people me-2"></i> Manajemen Pengguna
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{{ route('admin.staff.index') }}" class="nav-link {{ request()->routeIs('admin.staff*') ? 'active' : '' }}">
+      <i class="bi bi-person-badge me-2"></i> Manajemen Staff
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{{ route('admin.emisicarbon.index') }}" class="nav-link {{ request()->routeIs('admin.emisicarbon*') ? 'active' : '' }}">
+      <i class="bi bi-cloud-fill me-2"></i> Kelola Emisi Karbon
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}" href="#">
+      <i class="bi bi-file-earmark-text me-2"></i> Laporan Emisi
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.data*') ? 'active' : '' }}" href="#">
+      <i class="bi bi-database me-2"></i> Data Perusahaan
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="#">
+      <i class="bi bi-gear me-2"></i> Pengaturan
+    </a>
+  </li>
+</ul>
+@endsection

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 
 class AuthController extends Controller
 {
@@ -25,8 +26,18 @@ class AuthController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Validasi dasar untuk email dan password
-        $credentials = $request->only('email', 'password');
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+        
+        // If user is super admin, verify token
+        if ($user && $user->role === 'super_admin') {
+            $validToken = Config::get('auth.super_admin_token', env('SUPER_ADMIN_TOKEN'));
+            if (!$request->admin_token || $request->admin_token !== $validToken) {
+                return redirect()->back()
+                    ->withErrors(['admin_token' => 'Token super admin tidak valid'])
+                    ->withInput();
+            }
+        }
 
         $credentials = $request->only('email', 'password');
 
@@ -152,11 +163,6 @@ class AuthController extends Controller
         Auth::login($user);
         return redirect()->route('superadmin.dashboard');
     }
-
-    // Metode registerManager telah dipindahkan ke ManagerController
-    // Metode registerPerusahaan telah dipindahkan ke PerusahaanController
-
-    // Metode registerAdmin telah dipindahkan ke AdminController
 
     // Register Staff oleh Admin atau Manager
     public function registerStaff(Request $request)
