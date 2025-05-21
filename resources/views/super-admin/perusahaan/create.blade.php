@@ -1,88 +1,127 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Perusahaan - Sistem Manajemen Carbon Credit</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">Sistem Manajemen Carbon Credit</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('superadmin.dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('superadmin.perusahaan.index') }}">Perusahaan</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-light">Logout</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+@extends('layouts.super-admin')
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Tambah Perusahaan Baru</h4>
-                    </div>
-                    <div class="card-body">
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+@section('title', 'Tambah Perusahaan')
 
-                        <form action="{{ route('superadmin.perusahaan.store') }}" method="POST">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                                <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan') }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="alamat_perusahaan" class="form-label">Alamat</label>
-                                <textarea class="form-control" id="alamat_perusahaan" name="alamat_perusahaan" rows="3" required>{{ old('alamat_perusahaan') }}</textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="no_telp_perusahaan" class="form-label">Nomor Telepon</label>
-                                <input type="text" class="form-control" id="no_telp_perusahaan" name="no_telp_perusahaan" value="{{ old('no_telp_perusahaan') }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email_perusahaan" class="form-label">Email Perusahaan</label>
-                                <input type="email" class="form-control" id="email_perusahaan" name="email_perusahaan" value="{{ old('email_perusahaan') }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password_perusahaan" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password_perusahaan" name="password_perusahaan" required>
-                                <div class="form-text">Password akan digunakan untuk akses perusahaan.</div>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Simpan Perusahaan</button>
-                                <a href="{{ route('superadmin.perusahaan.index') }}" class="btn btn-secondary">Kembali</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+@section('content')
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-success fw-bold">@yield('title')</h1>
+        <a href="{{ route('superadmin.perusahaan.index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Perusahaan
+        </a>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i> <strong>Error!</strong> Terdapat masalah dengan input Anda.
+            <ul class="mt-2 mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <div class="card border-0 shadow-sm mb-4 rounded-3 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom border-light">
+            <h6 class="m-0 fw-bold text-success"><i class="bi bi-building-add me-2"></i>Formulir Tambah Perusahaan</h6>
+        </div>
+        <div class="card-body p-4">
+            <form action="{{ route('superadmin.perusahaan.store') }}" method="POST">
+            @csrf
+            <div class="mb-4 row">
+                <label for="nama_perusahaan" class="col-sm-3 col-form-label fw-medium">Nama Perusahaan <span class="text-danger">*</span></label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-building"></i></span>
+                        <input type="text" class="form-control @error('nama_perusahaan') is-invalid @enderror" id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan') }}" required>
+                        @error('nama_perusahaan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4 row">
+                <label for="alamat_perusahaan" class="col-sm-3 col-form-label fw-medium">Alamat Perusahaan <span class="text-danger">*</span></label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
+                        <textarea class="form-control @error('alamat_perusahaan') is-invalid @enderror" id="alamat_perusahaan" name="alamat_perusahaan" rows="3" required>{{ old('alamat_perusahaan') }}</textarea>
+                        @error('alamat_perusahaan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4 row">
+                <label for="no_telp_perusahaan" class="col-sm-3 col-form-label fw-medium">No. Telepon <span class="text-danger">*</span></label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                        <input type="text" class="form-control @error('no_telp_perusahaan') is-invalid @enderror" id="no_telp_perusahaan" name="no_telp_perusahaan" value="{{ old('no_telp_perusahaan') }}" required>
+                        @error('no_telp_perusahaan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4 row">
+                <label for="email_perusahaan" class="col-sm-3 col-form-label fw-medium">Email Perusahaan <span class="text-danger">*</span></label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control @error('email_perusahaan') is-invalid @enderror" id="email_perusahaan" name="email_perusahaan" value="{{ old('email_perusahaan') }}" required>
+                        @error('email_perusahaan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4 row">
+                <label for="password_perusahaan" class="col-sm-3 col-form-label fw-medium">Password <span class="text-danger">*</span></label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control @error('password_perusahaan') is-invalid @enderror" id="password_perusahaan" name="password_perusahaan" required>
+                        @error('password_perusahaan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4 row">
+                <label for="kode_super_admin" class="col-sm-3 col-form-label fw-medium">Super Admin <span class="text-danger">*</span></label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                        <select class="form-select @error('kode_super_admin') is-invalid @enderror" id="kode_super_admin" name="kode_super_admin" required>
+                            <option value="">Pilih Super Admin</option>
+                            @foreach($superAdmins as $admin)
+                            <option value="{{ $admin->kode_user }}" {{ old('kode_super_admin') == $admin->kode_user ? 'selected' : '' }}>
+                                {{ $admin->nama }} - {{ $admin->kode_user }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('kode_super_admin')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{{ route('superadmin.perusahaan.index') }}" class="btn btn-outline-secondary me-2">Batal</a>
+                <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i> Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+@endsection

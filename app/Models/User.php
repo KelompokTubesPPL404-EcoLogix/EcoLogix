@@ -49,6 +49,16 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'kode_user';
+    }
+
+    /**
      * Cek apakah user adalah super admin
      *
      * @return bool
@@ -94,5 +104,13 @@ class User extends Authenticatable
     public function perusahaan()
     {
         return $this->belongsTo(Perusahaan::class, 'kode_perusahaan', 'kode_perusahaan');
+    }
+
+    /**
+     * Scope untuk mendapatkan super admin
+     */
+    public function scopeSuperAdmin($query)
+    {
+        return $query->where('role', 'super_admin');
     }
 }

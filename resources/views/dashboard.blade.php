@@ -1,114 +1,155 @@
 @extends('layouts.app')
 
+@section('title', 'Dashboard EcoLogix')
+
+@section('sidebar')
+<ul class="nav flex-column">
+  <li class="nav-item">
+    <a href="#" class="nav-link active">
+      <i class="bi bi-house-door me-2"></i> Dashboard
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">
+      <i class="bi bi-calculator me-2"></i> Emisi Carbon
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">
+      <i class="bi bi-bar-chart me-2"></i> Laporan
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">
+      <i class="bi bi-gear me-2"></i> Pengaturan
+    </a>
+  </li>
+</ul>
+@endsection
+
 @section('content')
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
-    <!-- Emission Carbon Chart -->
-        <div class="col-span-3 bg-white p-6 rounded-xl shadow">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold">Emission Carbon</h2>
-                <div class="flex space-x-2 text-xs">
-                    <button class="px-2 py-1 rounded period-btn active" data-period="1M">1M</button>
-                    <button class="px-2 py-1 rounded period-btn" data-period="3M">3M</button>
-                    <button class="px-2 py-1 rounded period-btn" data-period="6M">6M</button>
-                    <button class="px-2 py-1 rounded period-btn" data-period="1Y">1Y</button>
-                </div>
-            </div>
-            <div class="relative" style="height: 300px;">
-                <div class="absolute top-0 left-10 bg-green-100 text-green-800 rounded-full px-2 py-0.5 text-xs font-medium">
-                    +23% vs last month
-                </div>
-                <canvas id="emissionChart"></canvas>
-            </div>
-        </div>
-
-    <!-- Input Emisi Karbon Card -->
-    <div class="flex flex-col gap-4">
-        <!-- Input Button Card -->
-        <div class="bg-white p-6 rounded-xl shadow h-auto">
-            <button id="openEmisiModal" class="bg-green-600 hover:bg-green-700 text-white font-semibold w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                Input Emisi Karbon
-            </button>
-        </div>
-        
-        <!-- Total Carbon Emission Card -->
-        <div class="bg-white p-6 rounded-xl shadow h-auto">
-            <div>
-                <p class="text-3xl font-bold">49.65 <span class="text-sm">ton Co₂e</span></p>
-                <p class="text-gray-600 text-sm">Total Carbon Emision</p>
-                <p class="text-green-600 text-xs mt-1 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
-                    </svg>
-                    1.20% since last month
-                </p>
-            </div>
-        </div>
-        
-        <!-- Input Total Card -->
-        <div class="bg-white p-6 rounded-xl shadow h-auto">
-            <div>
-                <p class="text-xl font-semibold">6</p>
-                <p class="text-sm text-gray-500">Input Total</p>
-            </div>
-        </div>
+<div class="row">
+  <div class="col-md-12 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title fw-bold text-success">Dashboard EcoLogix</h4>
+        <p class="text-muted">Sistem Manajemen Emisi Karbon</p>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Tabel dan Chart Donut -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 w-full">
-    <!-- Input Emission History Table -->
-    <div class="col-span-2 bg-white p-6 rounded-xl shadow overflow-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">Input Emision History</h2>
-            <a href="{{ url('/history') }}" class="text-green-600 text-sm">See All</a>
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title fw-bold">Emisi Carbon</h5>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-success active" data-period="1M">1M</button>
+            <button class="btn btn-sm btn-outline-success" data-period="3M">3M</button>
+            <button class="btn btn-sm btn-outline-success" data-period="6M">6M</button>
+            <button class="btn btn-sm btn-outline-success" data-period="1Y">1Y</button>
+          </div>
         </div>
-        <table class="w-full text-sm">
-            <thead class="text-left text-gray-600 border-b">
-                <tr>
-                    <th class="pb-3">no</th>
-                    <th class="pb-3">date</th>
-                    <th class="pb-3">emision category</th>
-                    <th class="pb-3">sub category</th>
-                    <th class="pb-3">activity score</th>
-                    <th class="pb-3">emission levels</th>
-                </tr>
+        <div class="position-relative" style="height: 300px;">
+          <div class="position-absolute top-0 start-0 badge bg-success">
+            +23% vs bulan lalu
+          </div>
+          <canvas id="emissionChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title fw-bold">Riwayat Input Emisi</h5>
+          <a href="{{ url('/history') }}" class="text-success">Lihat Semua</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Kategori Emisi</th>
+                <th>Sub Kategori</th>
+                <th>Skor Aktivitas</th>
+                <th>Level Emisi</th>
+              </tr>
             </thead>
             <tbody>
-                @for($i = 1; $i <= 6; $i++)
-                <tr class="border-b last:border-none">
-                    <td class="py-3">{{ $i }}</td>
-                    <td class="py-3">01/01/25</td>
-                    <td class="py-3">sampah</td>
-                    <td class="py-3">limbah</td>
-                    <td class="py-3">0.05 kg</td>
-                    <td class="py-3">0.05 kg Co₂e</td>
-                </tr>
-                @endfor
+              @for($i = 1; $i <= 6; $i++)
+              <tr>
+                <td>{{ $i }}</td>
+                <td>01/01/25</td>
+                <td>Sampah</td>
+                <td>Limbah</td>
+                <td>0.05 kg</td>
+                <td>0.05 kg Co₂e</td>
+              </tr>
+              @endfor
             </tbody>
-        </table>
+          </table>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Emission Type Chart -->
-    <div class="bg-white p-6 rounded-xl shadow">
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <h2 class="text-lg font-semibold">Emission Type</h2>
-                <p class="text-xs text-gray-500">January 2025</p>
-            </div>
-            
-        </div>
-        <div class="flex justify-center py-4" style="height: 200px;">
-            <canvas id="donutChart"></canvas>
-        </div>
-        <div class="mt-4 text-sm space-y-1">
-            <p class="flex items-center"><span class="inline-block w-3 h-3 bg-green-800 mr-2 rounded-full"></span> product - 40%</p>
-            <p class="flex items-center"><span class="inline-block w-3 h-3 bg-green-600 mr-2 rounded-full"></span> degrowth - 32%</p>
-            <p class="flex items-center"><span class="inline-block w-3 h-3 bg-green-400 mr-2 rounded-full"></span> growth - 28%</p>
-        </div>
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-body">
+        <button id="openEmisiModal" class="btn btn-success w-100">
+          <i class="bi bi-plus-circle me-2"></i> Input Emisi Carbon
+        </button>
+      </div>
     </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold">Total Emisi Carbon</h5>
+        <p class="fs-2 fw-bold mt-3">49.65 <span class="fs-6">ton Co₂e</span></p>
+        <p class="text-muted small">Total Emisi Carbon</p>
+        <p class="text-success small d-flex align-items-center">
+          <i class="bi bi-graph-up me-1"></i>
+          1.20% sejak bulan lalu
+        </p>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold">Jumlah Input</h5>
+        <p class="fs-3 fw-bold mt-3">6</p>
+        <p class="text-muted small">Total input data</p>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="card-title fw-bold">Tipe Emisi</h5>
+          <small class="text-muted">Januari 2025</small>
+        </div>
+        <div class="d-flex justify-content-center py-3" style="height: 200px;">
+          <canvas id="donutChart"></canvas>
+        </div>
+        <div class="mt-3 small">
+          <div class="d-flex align-items-center mb-2">
+            <span class="d-inline-block rounded-circle me-2" style="width:10px; height:10px; background-color:#14532d;"></span> 
+            <span>Produk - 40%</span>
+          </div>
+          <div class="d-flex align-items-center mb-2">
+            <span class="d-inline-block rounded-circle me-2" style="width:10px; height:10px; background-color:#16a34a;"></span> 
+            <span>Degrowth - 32%</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="d-inline-block rounded-circle me-2" style="width:10px; height:10px; background-color:#4ade80;"></span> 
+            <span>Growth - 28%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Include Modal -->

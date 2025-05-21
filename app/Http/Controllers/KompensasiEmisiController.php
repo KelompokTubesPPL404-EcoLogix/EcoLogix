@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Models\KompensasiEmisi;
-use App\Models\EmisiCarbon;
+use App\Models\KompensasiEmisiCarbon;
+use App\Models\EmisiKarbon;
 use App\Notifications\NewKompensasiNotification;
 use App\Models\Admin;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -31,7 +31,7 @@ class KompensasiEmisiController extends Controller
                 COALESCE(SUM(k.jumlah_kompensasi), 0) / 1000 as kompensasi_ton,
                 ((e.kadar_emisi_karbon - COALESCE(SUM(k.jumlah_kompensasi), 0)) / 1000) as sisa_emisi_ton
             FROM emisi_carbon e
-            LEFT JOIN kompensasi_emisi k ON e.kode_emisi_karbon = k.kode_emisi_karbon
+            LEFT JOIN kompensasi_emisi_carbon k ON e.kode_emisi_karbon = k.kode_emisi_karbon
             WHERE e.status = 'approved'
             GROUP BY 
                 e.kode_emisi_karbon,
@@ -56,7 +56,7 @@ class KompensasiEmisiController extends Controller
                 COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
                 COALESCE(e.sub_kategori, '-') as sub_kategori,
                 ROUND(e.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton
-            FROM kompensasi_emisi k
+            FROM kompensasi_emisi_carbon k
             LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
             WHERE 1=1
         ";
@@ -119,7 +119,7 @@ class KompensasiEmisiController extends Controller
             ORDER BY kategori_emisi_karbon
         ");
 
-        return view('kompensasi.index', compact(
+        return view('manager.kompensasi.index', compact(
             'emisiApproved',
             'riwayatKompensasi',
             'kategoriEmisi',
@@ -139,7 +139,7 @@ class KompensasiEmisiController extends Controller
 
             $jumlahKompensasiKg = $request->jumlah_kompensasi * 1000;
 
-            $emisiData = EmisiCarbon::where('kode_emisi_karbon', $request->kode_emisi_karbon)
+            $emisiData = EmisiKarbon::where('kode_emisi_karbon', $request->kode_emisi_karbon)
                 ->where('status', 'approved')
                 ->first();
 
@@ -148,13 +148,13 @@ class KompensasiEmisiController extends Controller
                 return back()->with('error', 'Data emisi tidak ditemukan atau belum disetujui');
             }
 
-            $totalKompensasi = KompensasiEmisi::where('kode_emisi_karbon', $request->kode_emisi_karbon)
+            $totalKompensasi = KompensasiEmisiCarbon::where('kode_emisi_karbon', $request->kode_emisi_karbon)
                 ->sum('jumlah_kompensasi');
 
             $sisaEmisiKg = $emisiData->kadar_emisi_karbon - $totalKompensasi;
 
             
-            $lastKode = KompensasiEmisi::orderBy('id', 'desc')->first();
+            $lastKode = KompensasiEmisiCarbon::orderBy('id', 'desc')->first();
             $kodeNumber = 1;
             if ($lastKode) {
                 $kodeNumber = (int)substr($lastKode->kode_kompensasi, 4) + 1;
@@ -163,7 +163,7 @@ class KompensasiEmisiController extends Controller
 
             
             $inserted = DB::insert("
-                INSERT INTO kompensasi_emisi (
+                INSERT INTO kompensasi_emisi_carbon (
                     kode_kompensasi, kode_emisi_karbon, jumlah_kompensasi,
                     tanggal_kompensasi, status, created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())",
@@ -202,7 +202,7 @@ class KompensasiEmisiController extends Controller
                 ROUND(e.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton,
                 COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
                 COALESCE(e.sub_kategori, '-') as sub_kategori
-            FROM kompensasi_emisi k
+            FROM kompensasi_emisi_carbon k
             LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
             WHERE k.kode_kompensasi = ?
             LIMIT 1
@@ -212,7 +212,7 @@ class KompensasiEmisiController extends Controller
             abort(404);
         }
 
-        return view('kompensasi.show', ['kompensasi' => $kompensasi[0]]);
+        return view('manager.kompensasi.show', ['kompensasi' => $kompensasi[0]]);
     }
 
     public function update(Request $request, $kodeKompensasi)
@@ -228,7 +228,7 @@ class KompensasiEmisiController extends Controller
             $jumlahKompensasiKg = $request->jumlah_kompensasi * 1000;
 
             $updated = DB::update("
-                UPDATE kompensasi_emisi 
+                UPDATE kompensasi_emisi_carbon 
                 SET jumlah_kompensasi = ?,
                     updated_at = NOW()
                 WHERE kode_kompensasi = ? 
@@ -253,7 +253,7 @@ class KompensasiEmisiController extends Controller
     public function destroy($kodeKompensasi)
     {
         $deleted = DB::delete("
-            DELETE FROM kompensasi_emisi 
+            DELETE FROM kompensasi_emisi_carbon 
             WHERE kode_kompensasi = ? 
             AND status = 'pending'
         ", [$kodeKompensasi]);
@@ -276,7 +276,7 @@ class KompensasiEmisiController extends Controller
                 ROUND(e.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton,
                 COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
                 COALESCE(e.sub_kategori, '-') as sub_kategori
-            FROM kompensasi_emisi k
+            FROM kompensasi_emisi_carbon k
             LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
             WHERE k.kode_kompensasi = ? AND k.status = 'pending'
             LIMIT 1
@@ -286,7 +286,7 @@ class KompensasiEmisiController extends Controller
             abort(404);
         }
 
-        return view('kompensasi.edit', ['kompensasi' => $kompensasi[0]]);
+        return view('manager.kompensasi.edit', ['kompensasi' => $kompensasi[0]]);
     }
 
     public function report()
@@ -301,7 +301,7 @@ class KompensasiEmisiController extends Controller
                 k.status,
                 COALESCE(e.kategori_emisi_karbon, '-') as kategori_emisi,
                 COALESCE(e.sub_kategori, '-') as sub_kategori
-            FROM kompensasi_emisi k
+            FROM kompensasi_emisi_carbon k
             LEFT JOIN emisi_carbons e ON k.kode_emisi_karbon = e.kode_emisi_karbon
             ORDER BY k.tanggal_kompensasi DESC
         ");

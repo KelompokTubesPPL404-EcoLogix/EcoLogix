@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 
 class AuthController extends Controller
 {
@@ -25,36 +26,16 @@ class AuthController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Cek apakah user mencoba login sebagai Super Admin
+        // Check if user exists
         $user = User::where('email', $request->email)->first();
         
-        // Jika user ditemukan dan role-nya super_admin, cek token
+        // If user is super admin, verify token
         if ($user && $user->role === 'super_admin') {
-            // Jika user mencoba login sebagai super admin tapi tidak memberikan token
-            if (empty($request->admin_token)) {
-                // Catat percobaan login yang gagal
-                $this->recordFailedLoginAttempt($request->ip(), $request->email);
-                
-                // Periksa apakah IP ini sudah terlalu banyak percobaan gagal
-                if ($this->checkTooManyFailedAttempts($request->ip())) {
-                    return redirect()->back()->withErrors(['email' => 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'])->withInput();
-                }
-                
-                return redirect()->back()->withErrors(['admin_token' => 'Login sebagai Super Admin memerlukan token keamanan'])->withInput();
-            }
-            
-            // Verifikasi token Super Admin dari lingkungan konfigurasi
-            $validToken = config('auth.super_admin_token');
-            if (!$validToken || $request->admin_token !== $validToken) {
-                // Catat percobaan login yang gagal
-                $this->recordFailedLoginAttempt($request->ip(), $request->email);
-                
-                // Periksa apakah IP ini sudah terlalu banyak percobaan gagal
-                if ($this->checkTooManyFailedAttempts($request->ip())) {
-                    return redirect()->back()->withErrors(['email' => 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'])->withInput();
-                }
-                
-                return redirect()->back()->withErrors(['admin_token' => 'Token Super Admin tidak valid'])->withInput();
+            $validToken = Config::get('auth.super_admin_token', env('SUPER_ADMIN_TOKEN'));
+            if (!$request->admin_token || $request->admin_token !== $validToken) {
+                return redirect()->back()
+                    ->withErrors(['admin_token' => 'Token super admin tidak valid'])
+                    ->withInput();
             }
         }
 
@@ -181,145 +162,6 @@ class AuthController extends Controller
 
         Auth::login($user);
         return redirect()->route('superadmin.dashboard');
-    }
-
-    // Register perusahaan oleh Super Admin
-    public function registerPerusahaan(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'nama_perusahaan' => 'required|string|max:255',
-            'alamat_perusahaan' => 'required|string',
-            'no_telp_perusahaan' => 'required|string',
-            'email_perusahaan' => 'required|string|email|max:255|unique:perusahaan,email_perusahaan',
-            'password_perusahaan' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Pastikan user yang melakukan ini adalah super admin
-        if (!Auth::user() || !Auth::user()->isSuperAdmin()) {
-            return redirect()->back()->with('error', 'Hanya Super Admin yang dapat mendaftarkan perusahaan');
-        }
-
-        // Generate kode perusahaan
-        $lastPerusahaan = Perusahaan::orderBy('kode_perusahaan', 'desc')->first();
-        $newCode = 'PRS001';
-        
-        if ($lastPerusahaan) {
-            $lastCode = substr($lastPerusahaan->kode_perusahaan, 3);
-            $newCode = 'PRS' . str_pad((int)$lastCode + 1, 3, '0', STR_PAD_LEFT);
-        }
-
-        // Buat perusahaan baru
-        $perusahaan = new Perusahaan();
-        $perusahaan->kode_perusahaan = $newCode;
-        $perusahaan->nama_perusahaan = $request->nama_perusahaan;
-        $perusahaan->alamat_perusahaan = $request->alamat_perusahaan;
-        $perusahaan->no_telp_perusahaan = $request->no_telp_perusahaan;
-        $perusahaan->email_perusahaan = $request->email_perusahaan;
-        $perusahaan->password_perusahaan = Hash::make($request->password_perusahaan);
-        $perusahaan->kode_super_admin = Auth::user()->kode_user;
-        $perusahaan->save();
-
-        return redirect()->route('superadmin.perusahaan.index')->with('success', 'Perusahaan berhasil ditambahkan');
-    }
-
-    // Register Manager oleh perusahaan atau Super Admin
-    public function registerManager(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'no_hp' => 'required|string',
-            'kode_perusahaan' => 'required|exists:perusahaan,kode_perusahaan',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Hanya Super Admin yang boleh mendaftarkan Manager
-        if (!Auth::user() || !Auth::user()->isSuperAdmin()) {
-            return redirect()->back()->with('error', 'Hanya Super Admin yang dapat mendaftarkan Manager');
-        }
-
-        // Generate kode manager
-        $lastManager = User::where('role', 'manager')
-                         ->orderBy('kode_user', 'desc')
-                         ->first();
-        $newCode = 'MGR001';
-        
-        if ($lastManager) {
-            $lastCode = substr($lastManager->kode_user, 3);
-            $newCode = 'MGR' . str_pad((int)$lastCode + 1, 3, '0', STR_PAD_LEFT);
-        }
-
-        // Buat manager baru dalam tabel users
-        $user = new User();
-        $user->kode_user = $newCode;
-        $user->nama = $request->nama;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->role = 'manager';
-        $user->no_hp = $request->no_hp;
-        $user->kode_perusahaan = $request->kode_perusahaan;
-        $user->save();
-
-        // Update perusahaan dengan kode manager
-        $perusahaan = Perusahaan::where('kode_perusahaan', $request->kode_perusahaan)->first();
-        if ($perusahaan) {
-            $perusahaan->kode_manager = $newCode;
-            $perusahaan->save();
-        }
-
-        return redirect()->route('superadmin.perusahaan.index')->with('success', 'Manager berhasil ditambahkan');
-    }
-
-    // Register Admin oleh Manager
-    public function registerAdmin(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'no_hp' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Pastikan user yang melakukan ini adalah manager
-        if (!Auth::user() || !Auth::user()->isManager()) {
-            return redirect()->back()->with('error', 'Hanya Manager yang dapat mendaftarkan Admin');
-        }
-
-        // Generate kode admin
-        $lastAdmin = User::where('role', 'admin')
-                       ->orderBy('kode_user', 'desc')
-                       ->first();
-        $newCode = 'ADM001';
-        
-        if ($lastAdmin) {
-            $lastCode = substr($lastAdmin->kode_user, 3);
-            $newCode = 'ADM' . str_pad((int)$lastCode + 1, 3, '0', STR_PAD_LEFT);
-        }
-
-        // Buat admin baru dalam tabel users
-        $user = new User();
-        $user->kode_user = $newCode;
-        $user->nama = $request->nama;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->role = 'admin';
-        $user->no_hp = $request->no_hp;
-        $user->kode_perusahaan = Auth::user()->kode_perusahaan;
-        $user->save();
-
-        return redirect()->route('manager.admin.index')->with('success', 'Admin berhasil ditambahkan');
     }
 
     // Register Staff oleh Admin atau Manager

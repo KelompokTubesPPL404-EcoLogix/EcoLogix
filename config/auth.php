@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
@@ -73,15 +72,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Super Admin Authentication
+    | Super Admin Token
     |--------------------------------------------------------------------------
     |
-    | This option controls special security measures for Super Admin login.
-    | This token should be set in your .env file and kept secret.
+    | This value is the token required for super admin authentication.
     |
     */
-
-    'super_admin_token' => env('SUPER_ADMIN_TOKEN', null),
+    'super_admin_token' => env('SUPER_ADMIN_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------
@@ -123,5 +120,4 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
-
 ];

@@ -48,6 +48,7 @@ class FaktorEmisi extends Model
         'sub_kategori',
         'nilai_faktor',
         'satuan',
+        'kode_perusahaan',
     ];
 
     /**
@@ -55,6 +56,14 @@ class FaktorEmisi extends Model
      */
     public function emisiCarbon()
     {
-        return $this->hasMany(EmisiCarbon::class, 'kode_faktor_emisi', 'kode_faktor');
+        return $this->hasMany(EmisiKarbon::class, 'kode_faktor_emisi', 'kode_faktor');
+    }
+    
+    /**
+     * Relasi dengan Perusahaan.
+     */
+    public function perusahaan()
+    {
+        return $this->belongsTo(Perusahaan::class, 'kode_perusahaan', 'kode_perusahaan');
     }
 }

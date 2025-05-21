@@ -2,10 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PerusahaanController;
-use App\Http\Controllers\EmisiCarbonController;
+use App\Http\Controllers\EmisiKarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 use App\Http\Controllers\KompensasiEmisiController;
 use App\Http\Controllers\PembelianCarbonCreditController;
+use App\Http\Controllers\PenyediaCarbonCreditController;
+use App\Http\Controllers\StaffController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,21 +69,13 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
         
         // Manajemen perusahaan
-        Route::get('/perusahaan', function () {
-            $perusahaan = \App\Models\Perusahaan::all();
-            return view('super-admin.perusahaan.index', compact('perusahaan'));
-        })->name('perusahaan.index');
-        Route::get('/perusahaan/create', function () {
-            return view('super-admin.perusahaan.create');
-        })->name('perusahaan.create');
-        Route::post('/perusahaan', [App\Http\Controllers\AuthController::class, 'registerPerusahaan'])->name('perusahaan.store');
+        Route::resource('perusahaan', PerusahaanController::class);
         
         // Manajemen manager
-        Route::get('/manager/create/{kode_perusahaan}', function ($kode_perusahaan) {
-            $perusahaan = \App\Models\Perusahaan::where('kode_perusahaan', $kode_perusahaan)->firstOrFail();
-            return view('super-admin.manager.create', compact('perusahaan'));
-        })->name('manager.create');
-        Route::post('/manager', [App\Http\Controllers\AuthController::class, 'registerManager'])->name('manager.store');
+        // Manajemen manager menggunakan ManagerController
+        Route::resource('manager', App\Http\Controllers\ManagerController::class)->parameters(['manager' => 'manager']); // Parameter diubah ke 'manager' untuk route model binding User
+        // Rute tambahan jika diperlukan, misalnya untuk menampilkan form create dengan kode perusahaan tertentu
+        Route::get('/manager/create/for-perusahaan/{kode_perusahaan}', [App\Http\Controllers\ManagerController::class, 'create'])->name('superadmin.manager.create.for_perusahaan');
     });
 
     // Rute Manager
@@ -90,17 +84,8 @@ Route::middleware('auth')->group(function () {
             return view('manager.dashboard');
         })->name('dashboard');
         
-        // Manajemen admin
-        Route::get('/admin', function () {
-            $admins = \App\Models\User::where('role', 'admin')
-                                     ->where('kode_perusahaan', Auth::user()->kode_perusahaan)
-                                     ->get();
-            return view('manager.admin.index', compact('admins'));
-        })->name('admin.index');
-        Route::get('/admin/create', function () {
-            return view('manager.admin.create');
-        })->name('admin.create');
-        Route::post('/admin', [App\Http\Controllers\AuthController::class, 'registerAdmin'])->name('admin.store');
+        // Manajemen admin menggunakan AdminController
+        Route::resource('admin', App\Http\Controllers\AdminController::class)->parameters(['admin' => 'admin']); // Parameter diubah ke 'admin' untuk route model binding User
         
         // Manajemen staff
         Route::get('/staff', function () {
@@ -115,8 +100,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/staff', [App\Http\Controllers\AuthController::class, 'registerStaff'])->name('staff.store');
         
         // Route untuk Kompensasi Emisi
-        Route::resource('kompensasi', KompensasiEmisiController::class)
-            ->except(['create']);
+        Route::resource('kompensasi', KompensasiEmisiController::class);
+        Route::get('/kompensasi-report', [KompensasiEmisiController::class, 'report'])->name('kompensasi.report');
     });
 
     // Rute Admin
@@ -125,17 +110,17 @@ Route::middleware('auth')->group(function () {
             return view('admin.dashboard');
         })->name('dashboard');
         
-        // Manajemen staff
-        Route::get('/staff', function () {
-            $staffs = \App\Models\User::where('role', 'staff')
-                                     ->where('kode_perusahaan', Auth::user()->kode_perusahaan)
-                                     ->get();
-            return view('admin.staff.index', compact('staffs'));
-        })->name('staff.index');
-        Route::get('/staff/create', function () {
-            return view('admin.staff.create');
-        })->name('staff.create');
-        Route::post('/staff', [App\Http\Controllers\AuthController::class, 'registerStaff'])->name('staff.store');
+        // Manajemen staff menggunakan StaffController
+        Route::resource('staff', App\Http\Controllers\StaffController::class)->parameters(['staff' => 'staff']); 
+        
+        // Emisi Karbon - Admin (review dan approval)
+Route::get('/emisicarbon', [EmisiKarbonController::class, 'adminIndex'])->name('emisicarbon.index');
+Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])->name('emisicarbon.show');
+        Route::get('/emisicarbon/{emisicarbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
+        Route::put('/emisicarbon/{emisicarbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
+        
+        // Faktor Emisi
+        Route::resource('faktor-emisi', FaktorEmisiController::class);
     });
 
     // Rute Staff
@@ -143,16 +128,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('staff.dashboard');
         })->name('dashboard');
+        
+        // Route untuk Emisi Karbon - Staff
+        Route::resource('emisicarbon', EmisiKarbonController::class);
     });
     
-    // Route untuk Perusahaan
-    Route::resource('perusahaan', PerusahaanController::class);
-
-    // Faktor Emisi Routes
-    Route::resource('faktor-emisi', FaktorEmisiController::class);
-
-    // Route untuk Emisi Karbon
-    Route::resource('emisicarbon', EmisiCarbonController::class);
+    // Manager dapat juga mengakses dan memodifikasi data faktor emisi dan penyedia carbon credit
+    Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
+        Route::resource('faktor-emisi', FaktorEmisiController::class);
+        Route::resource('penyedia-carbon-credit', PenyediaCarbonCreditController::class);
+    });
 
     // CRUD Pembelian Carbon Credit
     Route::resource('carbon_credit', PembelianCarbonCreditController::class)
