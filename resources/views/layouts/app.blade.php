@@ -113,7 +113,7 @@
 
     <a class="navbar-brand d-flex align-items-center" href="#">
       <img src="{{ asset('ECOLOGIX.png') }}" alt="Logo" height="30" class="me-2" />
-      <span class="fw-bold text-success">EcoLogix</span>
+      <span class="fw-bold text-success"></span>
     </a>
 
     <div class="ms-auto d-flex align-items-center gap-3">

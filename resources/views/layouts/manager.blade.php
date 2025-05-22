@@ -27,11 +27,11 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.admin*') || request()->routeIs('manager.staff*') ? 'active' : '' }}" href="#">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.admin') ? 'active' : '' }}" href="{{ route('manager.admin.index') }}">
           <div class="icon-container me-3">
             <i class="bi bi-people"></i>
           </div>
-          <span>Manajemen Tim</span>
+          <span>Manajemen Admin</span>
         </a>
       </li>
     </ul>
