@@ -415,12 +415,12 @@ class DashboardController extends Controller
     {
         // Dapatkan total emisi per perusahaan
         $companies = DB::table('perusahaan')
-            ->leftJoin('emisi_karbon', 'perusahaan.kode_perusahaan', '=', 'emisi_karbon.kode_perusahaan')
-            ->where('emisi_karbon.status', 'approved')
+            ->leftJoin('emisi_carbon', 'perusahaan.kode_perusahaan', '=', 'emisi_carbon.kode_perusahaan')
+            ->where('emisi_carbon.status', 'approved')
             ->select(
                 'perusahaan.kode_perusahaan',
                 'perusahaan.nama_perusahaan',
-                DB::raw('SUM(emisi_karbon.kadar_emisi_karbon) as total_emisi')
+                DB::raw('SUM(emisi_carbon.kadar_emisi_karbon) as total_emisi')
             )
             ->groupBy('perusahaan.kode_perusahaan', 'perusahaan.nama_perusahaan')
             ->orderBy('total_emisi', 'desc')
