@@ -12,7 +12,7 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('emisi-carbon', EmisiKarbonController::class);
 
 // Dashboard API Routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:web')->group(function () {
     Route::get('/dashboard/emisi-chart', [DashboardController::class, 'getEmisiChart']);
     Route::get('/dashboard/emisi-by-category', [DashboardController::class, 'getEmisiByCategory']);
     Route::get('/dashboard/stats', [DashboardController::class, 'getDashboardStats']);

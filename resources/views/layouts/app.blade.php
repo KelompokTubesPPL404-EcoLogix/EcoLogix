@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'Dashboard') - EcoLogix</title>
+  
+  <!-- Ensure charts render properly -->
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
@@ -18,23 +21,53 @@
       background-color: #f8f9fa;
     }
 
+    /* Carbon Theme Gradients */
+    .bg-gradient-success-light {
+      background: linear-gradient(120deg, rgba(40, 167, 69, 0.1) 0%, rgba(32, 201, 151, 0.2) 100%);
+    }
+    
+    .bg-carbon-theme {
+      background: linear-gradient(135deg, #104117 0%, #007f2d 100%);
+    }
+    
     .sidebar {
-      background-color: #007f2d;
+      background: linear-gradient(180deg, #104117 0%, #007f2d 100%);
       min-height: 100vh;
       color: white;
       transition: all 0.3s ease;
       width: 250px;
+      box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow-y: auto;
+    }
+    
+    /* Carbon theme overlay pattern */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.15;
+      z-index: 0;
     }
 
     .sidebar .nav-link {
       color: white;
       font-weight: 500;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+      margin-bottom: 5px;
     }
 
     .sidebar .nav-link:hover,
     .sidebar .nav-link.active {
-      background-color: #006622;
+      background-color: rgba(255, 255, 255, 0.15);
       border-radius: 8px;
+      transform: translateX(5px);
     }
 
     .card {

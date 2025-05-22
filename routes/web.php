@@ -64,9 +64,8 @@ Route::middleware('auth')->group(function () {
 
     // Rute Super Admin
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':super_admin')->prefix('super-admin')->name('superadmin.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('super-admin.dashboard');
-        })->name('dashboard');
+        // Super Admin dashboard
+        Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'superAdmin'])->name('dashboard');
         
         // Manajemen perusahaan
         Route::resource('perusahaan', PerusahaanController::class);
@@ -80,9 +79,8 @@ Route::middleware('auth')->group(function () {
 
     // Rute Manager
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('manager.dashboard');
-        })->name('dashboard');
+        // Manager dashboard
+        Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'manager'])->name('dashboard');
         
         // Manajemen admin menggunakan AdminController
         Route::resource('admin', App\Http\Controllers\AdminController::class)->parameters(['admin' => 'admin']); // Parameter diubah ke 'admin' untuk route model binding User
@@ -106,16 +104,15 @@ Route::middleware('auth')->group(function () {
 
     // Rute Admin
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
+        // Admin dashboard
+        Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'admin'])->name('dashboard');
         
         // Manajemen staff menggunakan StaffController
         Route::resource('staff', App\Http\Controllers\StaffController::class)->parameters(['staff' => 'staff']); 
         
         // Emisi Karbon - Admin (review dan approval)
-Route::get('/emisicarbon', [EmisiKarbonController::class, 'adminIndex'])->name('emisicarbon.index');
-Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])->name('emisicarbon.show');
+        Route::get('/emisicarbon', [EmisiKarbonController::class, 'adminIndex'])->name('emisicarbon.index');
+        Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])->name('emisicarbon.show');
         Route::get('/emisicarbon/{emisicarbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
         Route::put('/emisicarbon/{emisicarbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
         
@@ -125,9 +122,8 @@ Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])
 
     // Rute Staff
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':staff')->prefix('staff')->name('staff.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('staff.dashboard');
-        })->name('dashboard');
+        // Staff dashboard
+        Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'staff'])->name('dashboard');
         
         // Route untuk Emisi Karbon - Staff
         Route::resource('emisicarbon', EmisiKarbonController::class);
@@ -167,4 +163,6 @@ Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])
     Route::get('/history', function () {
         return view('history');
     });
+    
+    // Tidak menggunakan API lagi untuk dashboard data
 });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EmisiKarbon;
 use App\Models\User;
+use App\Models\Perusahaan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,19 +13,580 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Mendapatkan data untuk chart emisi karbon berdasarkan periode
+     * Menampilkan dashboard admin
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\View\View
      */
-    public function getEmisiChart(Request $request)
+    public function index(Request $request)
+    {
+        // Redirect berdasarkan role user
+        $role = Auth::user()->role;
+        
+        if ($role === 'super_admin') {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($role === 'manager') {
+            return redirect()->route('manager.dashboard');
+        } elseif ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($role === 'staff') {
+            return redirect()->route('staff.dashboard');
+        }
+        
+        return abort(403, 'Unauthorized role');
+    }
+    
+    /**
+     * Dashboard admin
+     *
+     * @return \Illuminate\View\View
+     */
+    public function admin(Request $request)
     {
         $period = $request->input('period', '1M');
         $kodePerusahaan = Auth::user()->kode_perusahaan;
-        $role = Auth::user()->role;
+        
+        // Dapatkan data emisi untuk chart
+        $emisiChartData = $this->prepareEmisiChartData($period, 'admin');
+        
+        // Dapatkan data kategori emisi
+        $categoryChartData = $this->prepareCategoryChartData('admin');
+        
+        // Dapatkan statistik dashboard
+        $dashboardStats = $this->prepareDashboardStats('admin');
+        
+        // Dapatkan data perusahaan
+        $perusahaan = Perusahaan::where('kode_perusahaan', $kodePerusahaan)->first();
+        
+        // Dapatkan staff terbaru
+        $latestStaff = User::where('kode_perusahaan', $kodePerusahaan)
+            ->where('role', 'staff')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        // Dapatkan data emisi terbaru
+        $latestEmissions = EmisiKarbon::where('kode_perusahaan', $kodePerusahaan)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        return view('admin.dashboard', compact(
+            'emisiChartData', 
+            'categoryChartData', 
+            'dashboardStats', 
+            'perusahaan', 
+            'latestStaff', 
+            'latestEmissions'
+        ));
+    }
+    
+    /**
+     * Dashboard manager
+     *
+     * @return \Illuminate\View\View
+     */
+    public function manager(Request $request)
+    {
+        $period = $request->input('period', '1M');
+        $kodePerusahaan = Auth::user()->kode_perusahaan;
+        
+        // Dapatkan data emisi untuk chart
+        $emisiChartData = $this->prepareEmisiChartData($period, 'manager');
+        
+        // Dapatkan data kategori emisi
+        $categoryChartData = $this->prepareCategoryChartData('manager');
+        
+        // Dapatkan statistik dashboard
+        $dashboardStats = $this->prepareDashboardStats('manager');
+        
+        // Dapatkan data staff untuk perusahaan
+        $staffData = $this->prepareStaffData();
+        
+        // Dapatkan data emisi terbaru
+        $latestEmissions = EmisiKarbon::where('kode_perusahaan', $kodePerusahaan)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        return view('manager.dashboard', compact(
+            'emisiChartData', 
+            'categoryChartData', 
+            'dashboardStats', 
+            'staffData',
+            'latestEmissions'
+        ));
+    }
+    
+    /**
+     * Dashboard staff
+     *
+     * @return \Illuminate\View\View
+     */
+    public function staff(Request $request)
+    {
+        $period = $request->input('period', '1M');
         $kodeUser = Auth::user()->kode_user;
         
-        // Filter berdasarkan role
+        // Dapatkan data emisi untuk chart
+        $emisiChartData = $this->prepareEmisiChartData($period, 'staff');
+        
+        // Dapatkan data kategori emisi
+        $categoryChartData = $this->prepareCategoryChartData('staff');
+        
+        // Dapatkan statistik dashboard
+        $dashboardStats = $this->prepareDashboardStats('staff');
+        
+        // Dapatkan data emisi terbaru
+        $latestEmissions = EmisiKarbon::where('kode_staff', $kodeUser)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        return view('staff.dashboard', compact(
+            'emisiChartData', 
+            'categoryChartData', 
+            'dashboardStats', 
+            'latestEmissions'
+        ));
+    }
+    
+    /**
+     * Dashboard super admin
+     *
+     * @return \Illuminate\View\View
+     */
+    public function superAdmin(Request $request)
+    {
+        $period = $request->input('period', '1M');
+        
+        // Dapatkan data emisi untuk chart
+        $emisiChartData = $this->prepareEmisiChartData($period, 'super_admin');
+        
+        // Dapatkan data perusahaan untuk chart
+        $companyChartData = $this->prepareCompanyChartData();
+        
+        // Dapatkan perusahaan terbaru
+        $latestCompanies = Perusahaan::orderBy('created_at', 'desc')->take(5)->get();
+        
+        return view('super-admin.dashboard', compact(
+            'emisiChartData', 
+            'companyChartData', 
+            'latestCompanies'
+        ));
+    }
+    
+    /**
+     * Prepare emisi chart data berdasarkan periode dan role
+     *
+     * @param string $period
+     * @param string $role
+     * @return array
+     */
+    private function prepareEmisiChartData($period, $role)
+    {
+        // Tentukan rentang waktu berdasarkan periode
+        $today = Carbon::now();
+        $startDate = null;
+        $format = '';
+        $groupByFormat = '';
+        
+        switch ($period) {
+            case '1M':
+                $startDate = $today->copy()->subMonth();
+                $format = 'd M';
+                $groupByFormat = 'Y-m-d';
+                break;
+            case '3M':
+                $startDate = $today->copy()->subMonths(3);
+                $format = 'd M';
+                $groupByFormat = 'Y-m-d';
+                break;
+            case '6M':
+                $startDate = $today->copy()->subMonths(6);
+                $format = 'M Y';
+                $groupByFormat = 'Y-m';
+                break;
+            case '1Y':
+                $startDate = $today->copy()->subYear();
+                $format = 'M Y';
+                $groupByFormat = 'Y-m';
+                break;
+            case 'ALL':
+                $startDate = Carbon::createFromDate(2020, 1, 1);
+                $format = 'Y';
+                $groupByFormat = 'Y';
+                break;
+            default:
+                $startDate = $today->copy()->subMonth();
+                $format = 'd M';
+                $groupByFormat = 'Y-m-d';
+        }
+        
+        // Dapatkan emisi berdasarkan role
+        $query = EmisiKarbon::query();
+        $query->where('status', 'approved');
+        
+        if ($role === 'staff') {
+            $query->where('kode_staff', Auth::user()->kode_user);
+        } elseif ($role === 'admin' || $role === 'manager') {
+            $query->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+        }
+        
+        // Filter berdasarkan tanggal
+        $query->whereBetween('tanggal_emisi', [$startDate->format('Y-m-d'), $today->format('Y-m-d')]);
+        
+        // Group by tanggal
+        $emissions = $query->select(
+            DB::raw("DATE_FORMAT(tanggal_emisi, '{$groupByFormat}') as date"),
+            DB::raw('SUM(kadar_emisi_karbon) as total_emisi')
+        )
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get();
+        
+        // Buat array untuk labels dan data
+        $dates = [];
+        $emisiValues = [];
+        
+        // Buat array tanggal lengkap dari start_date hingga today
+        $current = $startDate->copy();
+        while ($current <= $today) {
+            $dateKey = $current->format($groupByFormat);
+            $dates[$dateKey] = $current->format($format);
+            $emisiValues[$dateKey] = 0;
+            
+            // Increment sesuai dengan format
+            if ($groupByFormat === 'Y-m-d') {
+                $current->addDay();
+            } elseif ($groupByFormat === 'Y-m') {
+                $current->addMonth();
+            } else {
+                $current->addYear();
+            }
+        }
+        
+        // Isi data dari database
+        foreach ($emissions as $emission) {
+            $emisiValues[$emission->date] = (float) $emission->total_emisi;
+        }
+        
+        // Dapatkan nilai perbandingan dengan periode sebelumnya
+        $comparison = $this->calculateComparison($period, $role);
+        
+        return [
+            'labels' => array_values($dates),
+            'data' => array_values($emisiValues),
+            'comparison' => $comparison
+        ];
+    }
+    
+    /**
+     * Hitung perbandingan emisi dengan periode sebelumnya
+     *
+     * @param string $period
+     * @param string $role
+     * @return float
+     */
+    private function calculateComparison($period, $role)
+    {
+        $today = Carbon::now();
+        $endDate = $today->copy();
+        $startDate = null;
+        $previousStartDate = null;
+        $previousEndDate = null;
+        
+        switch ($period) {
+            case '1M':
+                $startDate = $today->copy()->subMonth();
+                $previousStartDate = $startDate->copy()->subMonth();
+                $previousEndDate = $startDate->copy()->subDay();
+                break;
+            case '3M':
+                $startDate = $today->copy()->subMonths(3);
+                $previousStartDate = $startDate->copy()->subMonths(3);
+                $previousEndDate = $startDate->copy()->subDay();
+                break;
+            case '6M':
+                $startDate = $today->copy()->subMonths(6);
+                $previousStartDate = $startDate->copy()->subMonths(6);
+                $previousEndDate = $startDate->copy()->subDay();
+                break;
+            case '1Y':
+                $startDate = $today->copy()->subYear();
+                $previousStartDate = $startDate->copy()->subYear();
+                $previousEndDate = $startDate->copy()->subDay();
+                break;
+            default:
+                $startDate = $today->copy()->subMonth();
+                $previousStartDate = $startDate->copy()->subMonth();
+                $previousEndDate = $startDate->copy()->subDay();
+        }
+        
+        // Dapatkan emisi untuk periode saat ini
+        $query = EmisiKarbon::query();
+        $query->where('status', 'approved');
+        
+        if ($role === 'staff') {
+            $query->where('kode_staff', Auth::user()->kode_user);
+        } elseif ($role === 'admin' || $role === 'manager') {
+            $query->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+        }
+        
+        // Filter periode saat ini
+        $currentEmission = (clone $query)
+            ->whereBetween('tanggal_emisi', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->sum('kadar_emisi_karbon');
+        
+        // Filter periode sebelumnya
+        $previousEmission = (clone $query)
+            ->whereBetween('tanggal_emisi', [$previousStartDate->format('Y-m-d'), $previousEndDate->format('Y-m-d')])
+            ->sum('kadar_emisi_karbon');
+        
+        // Hitung persentase perubahan
+        if ($previousEmission > 0) {
+            $comparison = (($currentEmission - $previousEmission) / $previousEmission) * 100;
+            return round($comparison, 2);
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Prepare category chart data berdasarkan role
+     *
+     * @param string $role
+     * @return array
+     */
+    private function prepareCategoryChartData($role)
+    {
+        // Dapatkan emisi berdasarkan kategori
+        $query = EmisiKarbon::query();
+        $query->where('status', 'approved');
+        
+        if ($role === 'staff') {
+            $query->where('kode_staff', Auth::user()->kode_user);
+        } elseif ($role === 'admin' || $role === 'manager') {
+            $query->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+        }
+        
+        $emissions = $query->select('kategori_emisi_karbon', DB::raw('SUM(kadar_emisi_karbon) as total_emisi'))
+            ->groupBy('kategori_emisi_karbon')
+            ->orderBy('total_emisi', 'desc')
+            ->get();
+        
+        // Warna untuk chart
+        $colors = [
+            '#28a745', '#20c997', '#17a2b8', '#0dcaf0', '#0d6efd',
+            '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14',
+            '#ffc107', '#198754', '#0dcaf0', '#0d6efd', '#6610f2'
+        ];
+        
+        $labels = [];
+        $data = [];
+        $colorSet = [];
+        $percentages = [];
+        
+        $totalEmisi = $emissions->sum('total_emisi');
+        
+        foreach ($emissions as $index => $emission) {
+            $labels[] = $emission->kategori_emisi_karbon;
+            $data[] = (float) $emission->total_emisi;
+            $colorSet[] = $colors[$index % count($colors)];
+            
+            // Hitung persentase
+            $percentage = $totalEmisi > 0 ? round(($emission->total_emisi / $totalEmisi) * 100, 2) : 0;
+            $percentages[] = $percentage;
+        }
+        
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'colors' => $colorSet,
+            'percentages' => $percentages
+        ];
+    }
+    
+    /**
+     * Prepare company chart data untuk super admin
+     *
+     * @return array
+     */
+    private function prepareCompanyChartData()
+    {
+        // Dapatkan total emisi per perusahaan
+        $companies = DB::table('perusahaan')
+            ->leftJoin('emisi_karbon', 'perusahaan.kode_perusahaan', '=', 'emisi_karbon.kode_perusahaan')
+            ->where('emisi_karbon.status', 'approved')
+            ->select(
+                'perusahaan.kode_perusahaan',
+                'perusahaan.nama_perusahaan',
+                DB::raw('SUM(emisi_karbon.kadar_emisi_karbon) as total_emisi')
+            )
+            ->groupBy('perusahaan.kode_perusahaan', 'perusahaan.nama_perusahaan')
+            ->orderBy('total_emisi', 'desc')
+            ->get();
+        
+        // Warna untuk chart
+        $colors = [
+            '#28a745', '#20c997', '#17a2b8', '#0dcaf0', '#0d6efd',
+            '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14',
+            '#ffc107', '#198754', '#0dcaf0', '#0d6efd', '#6610f2'
+        ];
+        
+        $labels = [];
+        $data = [];
+        $colorSet = [];
+        $percentages = [];
+        
+        $totalEmisi = $companies->sum('total_emisi');
+        
+        foreach ($companies as $index => $company) {
+            $labels[] = $company->nama_perusahaan;
+            $data[] = (float) $company->total_emisi;
+            $colorSet[] = $colors[$index % count($colors)];
+            
+            // Hitung persentase
+            $percentage = $totalEmisi > 0 ? round(($company->total_emisi / $totalEmisi) * 100, 2) : 0;
+            $percentages[] = $percentage;
+        }
+        
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'colors' => $colorSet,
+            'percentages' => $percentages
+        ];
+    }
+    
+    /**
+     * Prepare staff data untuk manager
+     *
+     * @return array
+     */
+    private function prepareStaffData()
+    {
+        $kodePerusahaan = Auth::user()->kode_perusahaan;
+        
+        // Dapatkan semua staff di perusahaan
+        $staffs = User::where('kode_perusahaan', $kodePerusahaan)
+            ->where('role', 'staff')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        $staffData = [];
+        
+        foreach ($staffs as $staff) {
+            // Hitung total emisi staff
+            $totalEmisi = EmisiKarbon::where('kode_staff', $staff->kode_user)
+                ->where('status', 'approved')
+                ->sum('kadar_emisi_karbon');
+                
+            // Hitung total input data staff
+            $totalInput = EmisiKarbon::where('kode_staff', $staff->kode_user)->count();
+            
+            // Hitung berdasarkan status
+            $totalPending = EmisiKarbon::where('kode_staff', $staff->kode_user)
+                ->where('status', 'pending')
+                ->count();
+                
+            $totalApproved = EmisiKarbon::where('kode_staff', $staff->kode_user)
+                ->where('status', 'approved')
+                ->count();
+                
+            $totalRejected = EmisiKarbon::where('kode_staff', $staff->kode_user)
+                ->where('status', 'rejected')
+                ->count();
+            
+            $staffData[] = [
+                'kode_user' => $staff->kode_user,
+                'nama' => $staff->nama,
+                'email' => $staff->email,
+                'total_emisi' => $totalEmisi,
+                'total_input' => $totalInput,
+                'total_pending' => $totalPending,
+                'total_approved' => $totalApproved,
+                'total_rejected' => $totalRejected
+            ];
+        }
+        
+        return $staffData;
+    }
+    
+    /**
+     * Prepare dashboard statistics berdasarkan role
+     *
+     * @param string $role
+     * @return array
+     */
+    private function prepareDashboardStats($role)
+    {
+        // Dapatkan emisi berdasarkan role
+        $query = EmisiKarbon::query();
+        $query->where('status', 'approved');
+        
+        if ($role === 'staff') {
+            $query->where('kode_staff', Auth::user()->kode_user);
+        } elseif ($role === 'admin' || $role === 'manager') {
+            $query->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+        }
+        
+        // Total emisi
+        $totalEmisi = $query->sum('kadar_emisi_karbon');
+        
+        // Total input data
+        $totalInputQuery = EmisiKarbon::query();
+        
+        if ($role === 'staff') {
+            $totalInputQuery->where('kode_staff', Auth::user()->kode_user);
+        } elseif ($role === 'admin' || $role === 'manager') {
+            $totalInputQuery->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+        }
+        
+        $totalInput = $totalInputQuery->count();
+        
+        // Hitung status emisi
+        $statusQuery = EmisiKarbon::query();
+        
+        if ($role === 'staff') {
+            $statusQuery->where('kode_staff', Auth::user()->kode_user);
+        } elseif ($role === 'admin' || $role === 'manager') {
+            $statusQuery->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+        }
+        
+        $pendingCount = (clone $statusQuery)->where('status', 'pending')->count();
+        $approvedCount = (clone $statusQuery)->where('status', 'approved')->count();
+        $rejectedCount = (clone $statusQuery)->where('status', 'rejected')->count();
+        
+        // Total user berdasarkan role
+        $totalUserQuery = User::query();
+        
+        if ($role === 'admin' || $role === 'manager') {
+            $totalUserQuery->where('kode_perusahaan', Auth::user()->kode_perusahaan);
+            
+            // Jika admin, hitung total staff
+            if ($role === 'admin') {
+                $totalUserQuery->where('role', 'staff');
+            }
+        }
+        
+        $totalUser = $role === 'staff' ? 0 : $totalUserQuery->count();
+        
+        return [
+            'total_emisi' => $totalEmisi,
+            'total_input' => $totalInput,
+            'total_user' => $totalUser,
+            'pending_count' => $pendingCount,
+            'approved_count' => $approvedCount,
+            'rejected_count' => $rejectedCount
+        ];
+    }
+    
+    private function getEmisiData(Request $request)
+    {
+        $period = $request->input('period', '1M');
+        $role = Auth::user()->role;
+        $kodeUser = Auth::user()->kode_user;
+        $kodePerusahaan = Auth::user()->kode_perusahaan;
         $query = EmisiKarbon::query();
         
         if ($role === 'staff') {
@@ -33,8 +595,8 @@ class DashboardController extends Controller
             $query->where('kode_staff', 'like', $kodePerusahaan . '%');
             // Admin dan manager hanya melihat data yang sudah disetujui
             $query->where('status', 'approved');
-        } elseif ($role === 'super-admin') {
-            // Super Admin dapat melihat semua data yang sudah disetujui
+        } elseif ($role === 'super_admin') {
+            // Super Admin dapat melihat semua data yang sudah disetujui dari semua perusahaan
             $query->where('status', 'approved');
         }
         
@@ -223,6 +785,9 @@ class DashboardController extends Controller
             $query->where('kode_staff', 'like', $kodePerusahaan . '%');
             // Admin dan manager hanya melihat data yang sudah disetujui
             $query->where('status', 'approved');
+        } elseif ($role === 'super_admin') {
+            // Super Admin melihat semua data yang sudah disetujui dari semua perusahaan
+            $query->where('status', 'approved');
         }
         
         // Ambil data 1 bulan terakhir
@@ -285,17 +850,6 @@ class DashboardController extends Controller
         $kodePerusahaan = Auth::user()->kode_perusahaan;
         $role = Auth::user()->role;
         $kodeUser = Auth::user()->kode_user;
-        
-        // Filter berdasarkan role
-        $query = EmisiKarbon::query();
-        
-        if ($role === 'staff') {
-            $query->where('kode_staff', $kodeUser);
-        } elseif ($role === 'admin' || $role === 'manager') {
-            $query->where('kode_staff', 'like', $kodePerusahaan . '%');
-        }
-        
-        // Total emisi (hanya yang approved untuk admin dan manager)
         $totalEmisiQuery = clone $query;
         if ($role === 'admin' || $role === 'manager') {
             $totalEmisiQuery->where('status', 'approved');
@@ -359,5 +913,68 @@ class DashboardController extends Controller
             'rejected_count' => $rejectedCount,
             'team_stats' => $teamStats,
             'compensated_emission' => $compensatedEmission
-        ]);}
+        ]);
+    }
+    
+    /**
+     * Mendapatkan data emisi berdasarkan perusahaan untuk Super Admin
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getEmisiByCompany()
+    {
+        // Verifikasi user adalah super admin
+        $role = Auth::user()->role;
+        if ($role !== 'super_admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        
+        // Ambil data emisi karbon dikelompokkan berdasarkan perusahaan
+        $companyData = DB::table('emisi_carbon')
+            ->join('perusahaan', 'emisi_carbon.kode_perusahaan', '=', 'perusahaan.kode_perusahaan')
+            ->where('emisi_carbon.status', 'approved')
+            ->select('perusahaan.nama_perusahaan', DB::raw('SUM(emisi_carbon.kadar_emisi_karbon) as total'))
+            ->groupBy('perusahaan.nama_perusahaan')
+            ->orderBy('total', 'desc')
+            ->get();
+        
+        $labels = [];
+        $data = [];
+        $percentages = [];
+        $colors = [
+            '#28a745', // success - hijau
+            '#17a2b8', // info - biru muda
+            '#007bff', // primary - biru
+            '#6f42c1', // purple
+            '#fd7e14', // orange
+            '#e83e8c', // pink
+            '#6c757d', // secondary - abu-abu
+            '#20c997', // teal
+            '#ffc107', // warning - kuning
+            '#dc3545', // danger - merah
+        ];
+        
+        $totalEmisi = $companyData->sum('total');
+        
+        foreach ($companyData as $index => $company) {
+            $labels[] = $company->nama_perusahaan;
+            $data[] = round($company->total, 2);
+            $percentages[] = $totalEmisi > 0 ? round(($company->total / $totalEmisi) * 100) : 0;
+        }
+        
+        // Jika tidak ada data, tampilkan placeholder
+        if (empty($labels)) {
+            $labels = ['Belum Ada Data'];
+            $data = [0];
+            $percentages = [0];
+            $colors = ['#e9ecef'];
+        }
+        
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data,
+            'percentages' => $percentages,
+            'colors' => array_slice($colors, 0, count($labels))
+        ]);
+    }
     }

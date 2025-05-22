@@ -9,7 +9,7 @@
             <div class="card-body p-4">
                 <div class="d-flex align-items-center">
                     <div class="rounded-circle bg-success p-3 me-3">
-                        <i class="bi bi-shield-check text-white fs-4"></i>
+                        <i class="bi bi-person-check-fill text-white fs-4"></i>
                     </div>
                     <div>
                         <h4 class="card-title fw-bold text-success mb-1">Selamat Datang, {{ Auth::user()->nama }}!</h4>
@@ -108,12 +108,12 @@
             </div>
             <div class="card-body">
                 <div class="chart-container" style="height: 250px;">
-                    <canvas id="emisiChart"></canvas>
+                    <canvas id="emisiChart" width="400" height="250"></canvas>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div>
                         <h6 class="mb-0">Total Emisi Karbon</h6>
-                        <h4 class="text-success mb-0" id="totalEmisi">{{ number_format($emisiChartData['data'] ? array_sum($emisiChartData['data']) : 0, 2) }} kg CO₂e</h4>
+                        <h4 class="text-success mb-0" id="totalEmisi">Loading...</h4>
                     </div>
                     <div class="text-end">
                         <span class="badge bg-success" id="total-approved">{{ \App\Models\EmisiKarbon::where('status', 'approved')->count() }}</span>
@@ -129,26 +129,17 @@
             <div class="card-header bg-white border-0 pt-4 d-flex justify-content-between align-items-center">
                 <h5 class="card-title fw-bold"><i class="bi bi-pie-chart-fill text-success me-2"></i>Distribusi Emisi Karbon</h5>
                 <select class="form-select form-select-sm w-auto" id="chart-type-selector">
+                    <option value="category">Berdasarkan Kategori</option>
                     <option value="company">Berdasarkan Perusahaan</option>
                 </select>
             </div>
             <div class="card-body">
                 <div class="chart-container" style="height: 250px;">
-                    <canvas id="distributionChart"></canvas>
+                    <canvas id="distributionChart" width="400" height="250"></canvas>
                 </div>
                 <div class="chart-legend mt-3">
                     <div class="d-flex flex-column" id="chart-legend-container">
-                        @foreach($companyChartData['labels'] as $index => $company)
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center">
-                                <div class="color-dot me-2" style="background-color: {{ $companyChartData['colors'][$index] }};"></div>
-                                <span>{{ $company }}</span>
-                            </div>
-                            <div>
-                                <span class="badge bg-light text-dark">{{ $companyChartData['percentages'][$index] }}%</span>
-                            </div>
-                        </div>
-                        @endforeach
+                        <!-- Dynamic legend items will be inserted here by JavaScript -->
                     </div>
                 </div>
             </div>
@@ -213,7 +204,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($latestCompanies as $perusahaan)
+                            @forelse(\App\Models\Perusahaan::latest()->take(5)->get() as $perusahaan)
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -254,6 +245,7 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Card animations
@@ -266,143 +258,272 @@
             }, 100 * index);
         });
         
-        // Chart data
-        const emisiChartData = @json($emisiChartData);
-        const companyChartData = @json($companyChartData);
+        // Chart instances
+        let emissionChart = null;
+        let distributionChart = null;
         
-        // Emisi Chart
-        const emisiCtx = document.getElementById('emisiChart').getContext('2d');
-        const emisiChart = new Chart(emisiCtx, {
-            type: 'line',
-            data: {
-                labels: emisiChartData.labels,
-                datasets: [{
-                    label: 'Emisi Karbon (kg CO₂e)',
-                    data: emisiChartData.data,
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                    borderColor: '#28a745',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#28a745',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${parseFloat(context.parsed.y).toLocaleString('id-ID')} kg CO₂e`;
-                            }
-                        }
-                    }
+        // Default period and chart type
+        let currentPeriod = '1M';
+        let chartType = 'category';
+        
+        // Fetch emission data for time series chart
+        function fetchEmissionData(period) {
+            fetch(`{{ route('api.emisi.chart') }}?period=${period}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateEmissionChart(data);
+                
+                // Update total emission text
+                const totalEmisi = data.data.reduce((total, value) => total + value, 0);
+                document.getElementById('totalEmisi').textContent = `${totalEmisi.toLocaleString('id-ID')} kg CO₂e`;
+            })
+            .catch(error => {
+                console.error('Error fetching emission data:', error);
+                document.getElementById('totalEmisi').textContent = 'Error loading data';
+            });
+        }
+        
+        // Update emission time series chart
+        function updateEmissionChart(data) {
+            if (emissionChart) {
+                emissionChart.destroy();
+            }
+            
+            const ctx = document.getElementById('emisiChart').getContext('2d');
+            emissionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Emisi Karbon (kg CO₂e)',
+                        data: data.data,
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderColor: '#28a745',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#28a745',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString('id-ID');
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${parseFloat(context.parsed.y).toLocaleString('id-ID')} kg CO₂e`;
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        });
-        
-        // Distribution Chart (Donut)
-        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
-        const distributionChart = new Chart(distributionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: companyChartData.labels,
-                datasets: [{
-                    data: companyChartData.data,
-                    backgroundColor: companyChartData.colors,
-                    borderColor: 'white',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '65%',
-                plugins: {
-                    legend: {
-                        display: false
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${context.label}: ${value.toLocaleString('id-ID')} kg CO₂e (${percentage}%)`;
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('id-ID');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
         
-        // Update approval statistics progress bars
-        function updateApprovalProgress() {
-            const pendingCount = parseInt(document.getElementById('pending-count').textContent);
-            const approvedCount = parseInt(document.getElementById('approved-count').textContent);
-            const rejectedCount = parseInt(document.getElementById('rejected-count').textContent);
+        // Fetch distribution data (by category or company)
+        function fetchDistributionData(type) {
+            const endpoint = type === 'category' ? '{{ route("api.emisi.category") }}' : '/api/emisi/by-company';
             
-            const totalCount = pendingCount + approvedCount + rejectedCount;
+            fetch(endpoint, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateDistributionChart(data, type);
+                updateDistributionLegend(data);
+            })
+            .catch(error => {
+                console.error(`Error fetching ${type} distribution data:`, error);
+            });
+        }
+        
+        // Update distribution chart (donut chart)
+        function updateDistributionChart(data, type) {
+            if (distributionChart) {
+                distributionChart.destroy();
+            }
             
-            if (totalCount > 0) {
-                document.getElementById('pending-progress').style.width = `${(pendingCount / totalCount) * 100}%`;
-                document.getElementById('approved-progress').style.width = `${(approvedCount / totalCount) * 100}%`;
-                document.getElementById('rejected-progress').style.width = `${(rejectedCount / totalCount) * 100}%`;
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            distributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.colors,
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${context.label}: ${value.toLocaleString('id-ID')} kg CO₂e (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update distribution legend
+        function updateDistributionLegend(data) {
+            const legendContainer = document.getElementById('chart-legend-container');
+            if (!legendContainer) return;
+            
+            legendContainer.innerHTML = '';
+            
+            data.labels.forEach((label, index) => {
+                const percentage = data.percentages ? data.percentages[index] : Math.round((data.data[index] / data.data.reduce((a, b) => a + b, 0)) * 100);
+                const color = data.colors[index];
+                
+                const legendItem = document.createElement('div');
+                legendItem.className = 'd-flex align-items-center mb-2';
+                legendItem.innerHTML = `
+                    <span class="legend-dot" style="background-color: ${color}"></span> ${label}
+                    <div class="ms-auto">${percentage}%</div>
+                `;
+                
+                legendContainer.appendChild(legendItem);
+            });
+        }
+        
+        // Fetch and display approval statistics
+        function fetchApprovalStats() {
+            fetch('{{ route("api.dashboard.stats") }}', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateApprovalStats(data);
+            })
+            .catch(error => {
+                console.error('Error fetching approval stats:', error);
+            });
+        }
+        
+        // Update approval statistics
+        function updateApprovalStats(data) {
+            // Get elements
+            const pendingCount = document.getElementById('pending-count');
+            const approvedCount = document.getElementById('approved-count');
+            const rejectedCount = document.getElementById('rejected-count');
+            
+            const pendingProgress = document.getElementById('pending-progress');
+            const approvedProgress = document.getElementById('approved-progress');
+            const rejectedProgress = document.getElementById('rejected-progress');
+            
+            // Update counts
+            pendingCount.textContent = data.pending_count;
+            approvedCount.textContent = data.approved_count;
+            rejectedCount.textContent = data.rejected_count;
+            
+            // Calculate total
+            const total = data.pending_count + data.approved_count + data.rejected_count;
+            
+            // Update progress bars
+            if (total > 0) {
+                const pendingPercentage = (data.pending_count / total) * 100;
+                const approvedPercentage = (data.approved_count / total) * 100;
+                const rejectedPercentage = (data.rejected_count / total) * 100;
+                
+                pendingProgress.style.width = `${pendingPercentage}%`;
+                approvedProgress.style.width = `${approvedPercentage}%`;
+                rejectedProgress.style.width = `${rejectedPercentage}%`;
             }
         }
         
-        updateApprovalProgress();
+        // Initialize dashboard with data
+        fetchEmissionData(currentPeriod);
+        fetchDistributionData(chartType);
+        fetchApprovalStats();
         
         // Add event listeners for period buttons
         const periodButtons = document.querySelectorAll('.period-btn');
         periodButtons.forEach(button => {
             button.addEventListener('click', function() {
-                periodButtons.forEach(btn => btn.classList.remove('btn-success', 'active'));
-                periodButtons.forEach(btn => btn.classList.add('btn-outline-success'));
+                // Update UI
+                periodButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-success');
+                });
+                this.classList.add('active');
                 this.classList.remove('btn-outline-success');
-                this.classList.add('btn-success', 'active');
+                this.classList.add('btn-success');
                 
-                const period = this.getAttribute('data-period');
-                window.location.href = `{{ route('superadmin.dashboard') }}?period=${period}`;
+                // Get new period and fetch data
+                currentPeriod = this.dataset.period;
+                fetchEmissionData(currentPeriod);
             });
+        });
+        
+        // Add event listener for chart type selector
+        document.getElementById('chart-type-selector').addEventListener('change', function() {
+            chartType = this.value;
+            fetchDistributionData(chartType);
         });
     });
 </script>
-@endsection
 
-@section('styles')
 <style>
     /* Dashboard styles */
     .card {
+        border-radius: 10px;
+        overflow: hidden;
         transition: all 0.3s ease;
         transform: translateY(20px);
         opacity: 0;
     }
     
-    .color-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        display: inline-block;
+    .card-header {
+        border-bottom: none;
+    }
+    
+    .bg-gradient-success-light {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
     }
     
     .bg-success-subtle {
@@ -410,19 +531,36 @@
     }
     
     .bg-primary-subtle {
-        background-color: rgba(0, 123, 255, 0.1);
+        background-color: rgba(13, 110, 253, 0.1);
     }
     
     .bg-info-subtle {
-        background-color: rgba(23, 162, 184, 0.1);
+        background-color: rgba(13, 202, 240, 0.1);
     }
     
     .bg-secondary-subtle {
         background-color: rgba(108, 117, 125, 0.1);
     }
     
-    .bg-gradient-success-light {
-        background: linear-gradient(45deg, rgba(40, 167, 69, 0.1) 0%, rgba(32, 201, 151, 0.2) 100%);
+    .rounded-4 {
+        border-radius: 0.75rem;
+    }
+    
+    .legend-dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .btn-group .btn {
+        border-radius: 20px;
+        margin: 0 2px;
+    }
+    
+    .chart-container {
+        position: relative;
     }
 </style>
 @endsection

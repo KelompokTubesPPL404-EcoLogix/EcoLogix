@@ -1,6 +1,6 @@
-@extends('layouts.staff')
+@extends('layouts.manager')
 
-@section('title', 'Dashboard Staff')
+@section('title', 'Dashboard Manager')
 
 @section('content')
 <div class="container-fluid">
@@ -10,11 +10,11 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center">
                         <div class="rounded-circle bg-success p-3 me-3">
-                            <i class="bi bi-person-fill text-white fs-4"></i>
+                            <i class="bi bi-briefcase-fill text-white fs-4"></i>
                         </div>
                         <div>
                             <h4 class="card-title fw-bold text-success mb-1">Selamat Datang, {{ Auth::user()->nama }}!</h4>
-                            <p class="text-muted mb-0">Anda login sebagai Staff untuk perusahaan {{ Auth::user()->perusahaan->nama_perusahaan ?? 'Unknown' }}</p>
+                            <p class="text-muted mb-0">Anda login sebagai Manager untuk perusahaan {{ Auth::user()->perusahaan->nama_perusahaan ?? 'Unknown' }}</p>
                         </div>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                     <h5 class="card-title fw-bold">
-                        <i class="bi bi-bar-chart-fill text-success me-2"></i>Emisi Karbon Saya
+                        <i class="bi bi-bar-chart-fill text-success me-2"></i>Total Emisi Karbon
                     </h5>
                     <div class="btn-group btn-group-sm" role="group">
                         <button type="button" class="btn btn-success active period-btn" data-period="1M">1M</button>
@@ -51,9 +51,9 @@
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                     <h5 class="card-title fw-bold">
-                        <i class="bi bi-list-check text-success me-2"></i>Riwayat Input Data
+                        <i class="bi bi-list-check text-success me-2"></i>Data Emisi Terbaru
                     </h5>
-                    <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-sm btn-outline-success rounded-pill">
+                    <a href="#" class="btn btn-sm btn-outline-success rounded-pill">
                         <i class="bi bi-eye me-1"></i>Lihat Semua
                     </a>
                 </div>
@@ -64,10 +64,10 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Tanggal</th>
+                                    <th>Staff</th>
                                     <th>Kategori</th>
                                     <th>Nilai Aktivitas</th>
                                     <th>Kadar Emisi</th>
-                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -75,17 +75,11 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ \Carbon\Carbon::parse($emisi->tanggal_emisi)->format('d/m/y') }}</td>
+                                    <td>{{ $emisi->staff->nama ?? 'Unknown' }}</td>
                                     <td>{{ $emisi->kategori_emisi_karbon }}</td>
                                     <td>{{ $emisi->nilai_aktivitas }} kg</td>
-                                    <td>{{ $emisi->kadar_emisi_karbon }} kg CO₂e</td>
                                     <td>
-                                        @if($emisi->status == 'pending')
-                                            <span class="badge bg-warning">Pending</span>
-                                        @elseif($emisi->status == 'approved')
-                                            <span class="badge bg-success">Approved</span>
-                                        @elseif($emisi->status == 'rejected')
-                                            <span class="badge bg-danger">Rejected</span>
-                                        @endif
+                                        <span class="badge bg-success">{{ $emisi->kadar_emisi_karbon }} kg CO₂e</span>
                                     </td>
                                 </tr>
                                 @empty
@@ -106,7 +100,7 @@
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-white border-0">
                     <h5 class="card-title fw-bold">
-                        <i class="bi bi-grid-1x2-fill text-success me-2"></i>Statistik Saya
+                        <i class="bi bi-grid-1x2-fill text-success me-2"></i>Statistik Dashboard
                     </h5>
                 </div>
                 <div class="card-body">
@@ -123,41 +117,34 @@
                     
                     <div class="stats-item mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted">Total Input Data</span>
-                            <i class="bi bi-input-cursor-text text-primary"></i>
+                            <span class="text-muted">Emisi Terkompensasi</span>
+                            <i class="bi bi-arrow-left-right text-info"></i>
                         </div>
-                        <h3 class="fw-bold text-primary">{{ $dashboardStats['total_input'] }}</h3>
+                        <h3 class="fw-bold text-info">{{ number_format($dashboardStats['compensated_emission'], 2) }} kg CO₂e</h3>
                         <div class="progress" style="height: 5px;">
-                            <div class="progress-bar bg-primary" style="width: 100%"></div>
+                            <div class="progress-bar bg-info" style="width: {{ $dashboardStats['total_emisi'] > 0 ? ($dashboardStats['compensated_emission'] / $dashboardStats['total_emisi']) * 100 : 0 }}%"></div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="text-center mb-3">
-                                <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-warning bg-opacity-10 p-3" style="width: 64px; height: 64px;">
-                                    <i class="bi bi-hourglass-split text-warning fs-4"></i>
-                                </div>
-                                <h4 class="mt-2 mb-0">{{ $latestEmissions->where('status', 'pending')->count() }}</h4>
-                                <span class="text-muted small">Pending</span>
-                            </div>
+                    <div class="stats-item mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Tim Saya</span>
+                            <i class="bi bi-people text-primary"></i>
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-center mb-3">
-                                <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-success bg-opacity-10 p-3" style="width: 64px; height: 64px;">
-                                    <i class="bi bi-check-circle text-success fs-4"></i>
+                        <div class="row text-center mt-3">
+                            <div class="col-6">
+                                <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-primary bg-opacity-10 p-3" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-person-badge text-primary fs-5"></i>
                                 </div>
-                                <h4 class="mt-2 mb-0">{{ $latestEmissions->where('status', 'approved')->count() }}</h4>
-                                <span class="text-muted small">Approved</span>
+                                <h5 class="mt-2 mb-0">{{ $dashboardStats['team_stats']['admin_count'] ?? 0 }}</h5>
+                                <span class="text-muted small">Admin</span>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-center mb-3">
-                                <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-danger bg-opacity-10 p-3" style="width: 64px; height: 64px;">
-                                    <i class="bi bi-x-circle text-danger fs-4"></i>
+                            <div class="col-6">
+                                <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-success bg-opacity-10 p-3" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-person text-success fs-5"></i>
                                 </div>
-                                <h4 class="mt-2 mb-0">{{ $latestEmissions->where('status', 'rejected')->count() }}</h4>
-                                <span class="text-muted small">Rejected</span>
+                                <h5 class="mt-2 mb-0">{{ $dashboardStats['team_stats']['staff_count'] ?? 0 }}</h5>
+                                <span class="text-muted small">Staff</span>
                             </div>
                         </div>
                     </div>
@@ -187,22 +174,6 @@
                         </div>
                         @endforeach
                     </div>
-                </div>
-            </div>
-
-            <div class="card mb-4 border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title fw-bold">
-                        <i class="bi bi-plus-circle-fill text-success me-2"></i>Aksi Cepat
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success w-100 mb-3">
-                        <i class="bi bi-plus-lg me-2"></i> Input Data Emisi Baru
-                    </a>
-                    <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-success w-100">
-                        <i class="bi bi-list-check me-2"></i> Lihat Semua Data Emisi
-                    </a>
                 </div>
             </div>
         </div>
@@ -319,7 +290,7 @@
                 this.classList.add('btn-success', 'active');
                 
                 const period = this.getAttribute('data-period');
-                window.location.href = `{{ route('staff.dashboard') }}?period=${period}`;
+                window.location.href = `{{ route('manager.dashboard') }}?period=${period}`;
             });
         });
     });
