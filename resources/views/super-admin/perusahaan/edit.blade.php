@@ -192,17 +192,28 @@
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label for="kode_super_admin" class="form-label">Kode Super Admin</label>
-                <select class="form-select @error('kode_super_admin') is-invalid @enderror" id="kode_super_admin" name="kode_super_admin" required>
-                    <option value="">Pilih Super Admin</option>
-                    @foreach($superAdmins as $admin)
-                    <option value="{{ $admin->kode_super_admin }}" {{ old('kode_super_admin') == $admin->kode_super_admin ? 'selected' : '' }}>{{ $admin->nama_super_admin }}</option>
-                    @endforeach
-                </select>
-                @error('kode_super_admin')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <div class="mb-4 row">
+                <label for="kode_super_admin" class="col-sm-3 col-form-label fw-medium text-success">
+                    <i class="bi bi-person-badge me-1"></i>Super Admin <span class="text-danger">*</span>
+                </label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
+                        <select class="form-select @error('kode_super_admin') is-invalid @enderror" 
+                                id="kode_super_admin" name="kode_super_admin" required>
+                            <option value="">Pilih Super Admin</option>
+                            @foreach($superAdmins as $admin)
+                                <option value="{{ $admin->kode_user }}" 
+                                    {{ (old('kode_super_admin', $perusahaan->kode_super_admin) == $admin->kode_user) ? 'selected' : '' }}>
+                                    {{ $admin->nama }} ({{ $admin->kode_user }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('kode_super_admin')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
             </div>
             
             <div class="d-flex justify-content-end mt-5 pt-3 border-top">

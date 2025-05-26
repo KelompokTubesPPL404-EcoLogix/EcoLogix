@@ -93,23 +93,6 @@
         <div class="card-body p-4 bg-light">
             <form action="{{ route('superadmin.perusahaan.store') }}" method="POST">
             @csrf
-            <div class="mb-4 row">
-                {{-- <label for="kode_perusahaan" class="col-sm-3 col-form-label fw-medium text-success">
-                    <i class="bi bi-code-square me-1"></i>Kode Perusahaan <span class="text-danger">*</span>
-                </label>
-                <div class="col-sm-9">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                        <input type="text" class="form-control @error('kode_perusahaan') is-invalid @enderror" id="kode_perusahaan" name="kode_perusahaan" value="{{ old('kode_perusahaan') }}" placeholder="Contoh: COMP001" required>
-                        @error('kode_perusahaan')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <small class="form-text text-muted mt-1">
-                        <i class="bi bi-info-circle me-1"></i>Kode unik untuk identifikasi perusahaan di sistem Ecologix
-                    </small>
-                </div> --}}
-            </div>
 
             <div class="mb-4 row">
                 <label for="nama_perusahaan" class="col-sm-3 col-form-label fw-medium text-success">
@@ -118,7 +101,9 @@
                 <div class="col-sm-9">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-building-fill"></i></span>
-                        <input type="text" class="form-control @error('nama_perusahaan') is-invalid @enderror" id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan') }}" placeholder="Masukkan nama lengkap perusahaan" required>
+                        <input type="text" class="form-control @error('nama_perusahaan') is-invalid @enderror" 
+                               id="nama_perusahaan" name="nama_perusahaan" value="{{ old('nama_perusahaan') }}" 
+                               placeholder="Masukkan nama lengkap perusahaan" required>
                         @error('nama_perusahaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -127,14 +112,16 @@
             </div>
 
             <div class="mb-4 row">
-                <label for="alamat" class="col-sm-3 col-form-label fw-medium text-success">
-                    <i class="bi bi-geo-alt me-1"></i>Alamat Perusahaan
+                <label for="alamat_perusahaan" class="col-sm-3 col-form-label fw-medium text-success">
+                    <i class="bi bi-geo-alt me-1"></i>Alamat Perusahaan <span class="text-danger">*</span>
                 </label>
                 <div class="col-sm-9">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-geo-alt-fill"></i></span>
-                        <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" rows="3" placeholder="Alamat lengkap perusahaan untuk keperluan monitoring emisi">{{ old('alamat') }}</textarea>
-                        @error('alamat')
+                        <textarea class="form-control @error('alamat_perusahaan') is-invalid @enderror" 
+                                  id="alamat_perusahaan" name="alamat_perusahaan" rows="3" 
+                                  placeholder="Alamat lengkap perusahaan" required>{{ old('alamat_perusahaan') }}</textarea>
+                        @error('alamat_perusahaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -142,14 +129,16 @@
             </div>
 
             <div class="mb-4 row">
-                <label for="telepon" class="col-sm-3 col-form-label fw-medium text-success">
-                    <i class="bi bi-telephone me-1"></i>Telepon Perusahaan
+                <label for="no_telp_perusahaan" class="col-sm-3 col-form-label fw-medium text-success">
+                    <i class="bi bi-telephone me-1"></i>No. Telepon <span class="text-danger">*</span>
                 </label>
                 <div class="col-sm-9">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
-                        <input type="text" class="form-control @error('telepon') is-invalid @enderror" id="telepon" name="telepon" value="{{ old('telepon') }}" placeholder="Nomor telepon kantor pusat">
-                        @error('telepon')
+                        <input type="text" class="form-control @error('no_telp_perusahaan') is-invalid @enderror" 
+                               id="no_telp_perusahaan" name="no_telp_perusahaan" value="{{ old('no_telp_perusahaan') }}" 
+                               placeholder="Nomor telepon perusahaan" required>
+                        @error('no_telp_perusahaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -157,14 +146,16 @@
             </div>
 
             <div class="mb-4 row">
-                <label for="email" class="col-sm-3 col-form-label fw-medium text-success">
-                    <i class="bi bi-envelope me-1"></i>Email Perusahaan
+                <label for="email_perusahaan" class="col-sm-3 col-form-label fw-medium text-success">
+                    <i class="bi bi-envelope me-1"></i>Email Perusahaan <span class="text-danger">*</span>
                 </label>
                 <div class="col-sm-9">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="info@perusahaan.com">
-                        @error('email')
+                        <input type="email" class="form-control @error('email_perusahaan') is-invalid @enderror" 
+                               id="email_perusahaan" name="email_perusahaan" value="{{ old('email_perusahaan') }}" 
+                               placeholder="email@perusahaan.com" required>
+                        @error('email_perusahaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
