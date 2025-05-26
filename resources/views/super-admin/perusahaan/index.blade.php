@@ -249,7 +249,7 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <div class="btn-group" role="group">
+                                
                                     <a href="{{ route('superadmin.perusahaan.show', $p->kode_perusahaan) }}" class="btn btn-outline-info btn-action" title="Lihat Detail Perusahaan">
                                         <i class="bi bi-eye-fill"></i>
                                     </a>
@@ -263,7 +263,7 @@
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
                                     </form>
-                                </div>
+                                
                             </td>
                         </tr>
                         @empty

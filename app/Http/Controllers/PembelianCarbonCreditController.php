@@ -59,10 +59,13 @@ class PembelianCarbonCreditController extends Controller
             ORDER BY created_at DESC"
         );
 
+        $user = Auth::user();
         $penyediaList = DB::select("
             SELECT * FROM penyedia_carbon_credits 
             WHERE is_active = true 
-            ORDER BY nama_penyedia ASC"
+            AND kode_perusahaan = ?
+            ORDER BY nama_penyedia ASC",
+            [$user->kode_perusahaan]
         );
 
         return view('carbon_credit.create', compact('kompensasiPending', 'penyediaList'));
@@ -201,10 +204,13 @@ class PembelianCarbonCreditController extends Controller
         ];
 
        
+        $user = Auth::user();
         $penyediaList = DB::select("
             SELECT * FROM penyedia_carbon_credits 
             WHERE is_active = true 
-            ORDER BY nama_penyedia ASC"
+            AND kode_perusahaan = ?
+            ORDER BY nama_penyedia ASC",
+            [$user->kode_perusahaan]
         );
 
         return view('carbon_credit.edit', compact('carbon_credit', 'penyediaList'));
