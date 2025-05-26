@@ -200,23 +200,49 @@
             }, 100 * index);
         });
         
-        // Chart data
+        // Chart data with error handling
         const emisiChartData = @json($emisiChartData);
         const categoryChartData = @json($categoryChartData);
         
+        // Debug chart data
+        console.log('Emisi Chart Data:', emisiChartData);
+        console.log('Category Chart Data:', categoryChartData);
+        
+        // Validate chart data
+        if (!emisiChartData || !emisiChartData.labels || !emisiChartData.data) {
+            console.error('Invalid emisi chart data:', emisiChartData);
+            return;
+        }
+        
+        if (!categoryChartData || !categoryChartData.labels || !categoryChartData.data) {
+            console.error('Invalid category chart data:', categoryChartData);
+            return;
+        }
+        
+        // Format data to ensure consistent type
+        const formattedData = emisiChartData.data.map(value => parseFloat(value) || 0);
+        
         // Emisi Chart
-        const emisiCtx = document.getElementById('emisiChart').getContext('2d');
+        const emisiCanvas = document.getElementById('emisiChart');
+        if (!emisiCanvas) {
+            console.error('Emisi chart canvas not found');
+            return;
+        }
+        
+        const emisiCtx = emisiCanvas.getContext('2d');
         const emisiChart = new Chart(emisiCtx, {
             type: 'line',
             data: {
                 labels: emisiChartData.labels,
                 datasets: [{
                     label: 'Emisi Karbon (kg CO₂e)',
-                    data: emisiChartData.data,
+                    data: formattedData,
                     backgroundColor: 'rgba(40, 167, 69, 0.2)',
                     borderColor: '#28a745',
                     borderWidth: 2,
                     pointBackgroundColor: '#28a745',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     tension: 0.3,
                     fill: true
                 }]
@@ -229,11 +255,26 @@
                         beginAtZero: true,
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(1) + ' kg';
+                            },
+                            font: {
+                                size: 11
+                            }
                         }
                     },
                     x: {
                         grid: {
                             display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
                         }
                     }
                 },
@@ -242,12 +283,29 @@
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 13
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        padding: 10,
+                        cornerRadius: 4,
                         callbacks: {
                             label: function(context) {
-                                return `${context.parsed.y.toFixed(2)} kg CO₂e`;
+                                return `${parseFloat(context.parsed.y).toFixed(2)} kg CO₂e`;
                             }
                         }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
                     }
                 }
             }

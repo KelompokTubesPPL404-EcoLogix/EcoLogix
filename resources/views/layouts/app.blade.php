@@ -37,8 +37,12 @@
       transition: all 0.3s ease;
       width: 250px;
       box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
-      position: relative;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
       overflow-y: auto;
+      padding-top: 70px; /* Space for navbar */
     }
     
     /* Carbon theme overlay pattern */
@@ -87,8 +91,27 @@
       margin-left: -250px;
     }
 
-    .sidebar-collapsed .flex-grow-1 {
-      width: 100%;
+    .sidebar-collapsed .main-content {
+      margin-left: 0 !important;
+    }
+    
+    .main-content {
+      margin-left: 250px;
+      transition: margin-left 0.3s ease;
+    }
+    
+    /* Navbar adjustments */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1001;
+      background-color: white !important;
+    }
+    
+    body {
+      padding-top: 70px; /* Space for fixed navbar */
     }
 
     .notification-badge {
@@ -105,36 +128,76 @@
   @yield('styles')
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
-    <button class="btn btn-outline-success me-2 d-none d-md-block" id="toggleSidebar">
+  <!-- Enhanced Navbar with EcoLogix Theme -->
+  <nav class="navbar navbar-expand-lg navbar-dark px-3" style="background: linear-gradient(135deg, #104117 0%, #007f2d 100%); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+    <button class="btn btn-outline-light me-2 d-none d-md-block" id="toggleSidebar">
       <i id="sidebarToggleIcon" class="bi bi-list"></i>
     </button>
 
     <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="{{ asset('ECOLOGIX.png') }}" alt="Logo" height="30" class="me-2" />
-      <span class="fw-bold text-success"></span>
+      <img src="{{ asset('ECOLOGIX.png') }}" alt="EcoLogix" height="36" class="me-2" />
+      <span class="fw-bold text-white d-none d-md-inline-block"></span>
     </a>
+    
+    <div class="navbar-text text-white ms-4 d-none d-lg-flex align-items-center">
+      <div class="vr bg-light opacity-25 me-3" style="height: 24px;"></div>
+      <span class="fs-6">{{ Auth::user()->perusahaan->nama_perusahaan ?? 'EcoLogix Platform' }}</span>
+    </div>
 
     <div class="ms-auto d-flex align-items-center gap-3">
+      <!-- Status Badge -->
+      <div class="d-none d-md-block">
+        <span class="badge bg-light text-success d-flex align-items-center gap-1">
+          <i class="bi bi-check-circle-fill"></i>
+          <span class="small">Online</span>
+        </span>
+      </div>
+      
       <!-- Notifikasi -->
       <div class="dropdown position-relative">
-        <button class="btn btn-light position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-bell-fill"></i>
+        <button class="btn btn-dark position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(0,0,0,0.2); border: none;">
+          <i class="bi bi-bell-fill text-white"></i>
           <span class="notification-badge">2</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 300px;">
-          <li class="dropdown-header fw-bold">Notifikasi</li>
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="width: 320px; border-radius: 8px; border: none; margin-top: 10px;">
+          <li class="dropdown-header fw-bold d-flex justify-content-between align-items-center p-3">
+            <span>Notifikasi</span>
+            <span class="badge bg-success rounded-pill">2 Baru</span>
+          </li>
+          <li><hr class="dropdown-divider my-0"></li>
           <li>
-            <a class="dropdown-item d-flex justify-content-between small text-wrap">
-              <span>Pengajuan kompensasi baru masuk.</span>
-              <span class="text-muted">5 menit lalu</span>
+            <a class="dropdown-item p-3 d-flex align-items-start gap-2" href="#">
+              <div class="flex-shrink-0">
+                <div class="rounded-circle bg-success bg-opacity-10 p-2">
+                  <i class="bi bi-file-earmark-plus text-success"></i>
+                </div>
+              </div>
+              <div>
+                <p class="mb-0 fw-medium">Pengajuan emisi baru</p>
+                <p class="text-muted small mb-0">Data emisi dari Departemen Produksi telah diajukan</p>
+                <p class="text-muted small mb-0">5 menit lalu</p>
+              </div>
             </a>
           </li>
+          <li><hr class="dropdown-divider my-0"></li>
           <li>
-            <a class="dropdown-item d-flex justify-content-between small text-wrap">
-              <span>Data faktor emisi diperbarui.</span>
-              <span class="text-muted">1 jam lalu</span>
+            <a class="dropdown-item p-3 d-flex align-items-start gap-2" href="#">
+              <div class="flex-shrink-0">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+                  <i class="bi bi-arrow-repeat text-primary"></i>
+                </div>
+              </div>
+              <div>
+                <p class="mb-0 fw-medium">Faktor emisi diperbarui</p>
+                <p class="text-muted small mb-0">Data faktor emisi transportasi telah diperbarui</p>
+                <p class="text-muted small mb-0">1 jam lalu</p>
+              </div>
+            </a>
+          </li>
+          <li><hr class="dropdown-divider my-0"></li>
+          <li>
+            <a class="dropdown-item text-center p-2" href="#">
+              <span class="text-success fw-medium small">Lihat Semua Notifikasi</span>
             </a>
           </li>
         </ul>
@@ -142,15 +205,31 @@
 
       <!-- Profile Dropdown -->
       <div class="dropdown">
-        <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle"></i> {{ Auth::user()->nama ?? 'User Name' }}
+        <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(0,0,0,0.2); border: none;">
+          <div class="rounded-circle bg-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+            <i class="bi bi-person-fill text-success"></i>
+          </div>
+          <span class="text-white d-none d-md-inline">{{ Auth::user()->nama ?? 'User' }}</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#">Profile</a></li>
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownMenuButton" style="border-radius: 8px; border: none; margin-top: 10px;">
+          <li class="dropdown-header fw-bold text-center pb-0">
+            <div class="d-flex flex-column align-items-center">
+              <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px;">
+                <i class="bi bi-person-fill fs-4 text-success"></i>
+              </div>
+              <p class="mb-0 fw-bold">{{ Auth::user()->nama ?? 'User' }}</p>
+              <p class="text-muted small mb-2">{{ Auth::user()->email ?? 'user@example.com' }}</p>
+              <span class="badge bg-success mb-2">{{ ucfirst(str_replace('_', ' ', Auth::user()->role ?? 'user')) }}</span>
+            </div>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-person-gear me-2 text-success"></i> Profil Saya</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-success"></i> Pengaturan</a></li>
+          <li><hr class="dropdown-divider"></li>
           <li>
-            <form action="{{ route('logout') }}" method="POST" class="dropdown-item p-0">
+            <form action="{{ route('logout') }}" method="POST">
               @csrf
-              <button type="submit" class="dropdown-item text-danger">Logout</button>
+              <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Keluar</button>
             </form>
           </li>
         </ul>
@@ -158,14 +237,13 @@
     </div>
   </nav>
 
-  <div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar p-3" id="sidebar">
-      @yield('sidebar')
-    </div>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    @yield('sidebar')
+  </div>
 
-    <!-- Main Content -->
-    <div class="flex-grow-1 p-4">
+  <!-- Main Content -->
+  <div class="main-content p-4">
       @if(session('success'))
       <div class="alert alert-success">
           {{ session('success') }}
