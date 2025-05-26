@@ -222,25 +222,63 @@
             }, 100 * index);
         });
         
-        // Chart data
+        // Chart data with validation
         const emisiChartData = @json($emisiChartData);
         const categoryChartData = @json($categoryChartData);
         
+        // Debug chart data
+        console.log('Emisi Chart Data:', emisiChartData);
+        console.log('Category Chart Data:', categoryChartData);
+        
+        // Validate chart data
+        if (!emisiChartData || !emisiChartData.labels || !emisiChartData.data) {
+            console.error('Invalid emisi chart data:', emisiChartData);
+            return;
+        }
+        
+        // Check if we have valid data first
+        if (!emisiChartData.data || emisiChartData.data.length === 0) {
+            console.log('No chart data available');
+            // Create empty message in chart area
+            const emisiChartContainer = document.querySelector('.chart-container');
+            if (emisiChartContainer) {
+                const noDataMessage = document.createElement('div');
+                noDataMessage.className = 'text-center py-5';
+                noDataMessage.innerHTML = '<i class="bi bi-exclamation-circle text-muted fs-1"></i><p class="mt-3 text-muted">Belum ada data emisi karbon. Silahkan input data untuk melihat visualisasi.</p>';
+                emisiChartContainer.appendChild(noDataMessage);
+            }
+            return;
+        }
+        
+        // Format data to ensure consistent type
+        const formattedData = emisiChartData.data.map(value => parseFloat(value) || 0);
+        
+        // Enhanced formatted data - check if we have any non-zero values
+        const hasData = formattedData.some(value => value > 0);
+        if (!hasData) {
+            console.log('All zero data values');
+        }
+        
         // Emisi Chart
-        const emisiCtx = document.getElementById('emisiChart').getContext('2d');
+        const emisiCanvas = document.getElementById('emisiChart');
+        if (!emisiCanvas) {
+            console.error('Emisi chart canvas not found');
+            return;
+        }
+        
+        const emisiCtx = emisiCanvas.getContext('2d');
         const emisiChart = new Chart(emisiCtx, {
-            type: 'line',
+            type: 'bar', // Changed to bar for better monthly visualization
             data: {
                 labels: emisiChartData.labels,
                 datasets: [{
-                    label: 'Emisi Karbon (kg CO₂e)',
-                    data: emisiChartData.data,
-                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    label: 'Emisi Karbon Bulanan (kg CO₂e)',
+                    data: formattedData,
+                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
                     borderColor: '#28a745',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#28a745',
-                    tension: 0.3,
-                    fill: true
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    hoverBackgroundColor: 'rgba(40, 167, 69, 0.8)',
                 }]
             },
             options: {
@@ -251,11 +289,45 @@
                         beginAtZero: true,
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('id-ID') + ' kg';
+                            },
+                            font: {
+                                size: 11
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Total Emisi (kg CO₂e)',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            padding: {top: 10, bottom: 10}
                         }
                     },
                     x: {
                         grid: {
                             display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10,
+                                weight: 'bold'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Bulan',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            padding: {top: 10, bottom: 0}
                         }
                     }
                 },
@@ -264,13 +336,35 @@
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 13
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        padding: 10,
+                        cornerRadius: 4,
                         callbacks: {
                             label: function(context) {
-                                return `${context.parsed.y.toFixed(2)} kg CO₂e`;
+                                return `${parseFloat(context.parsed.y).toLocaleString('id-ID')} kg CO₂e`;
                             }
                         }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Visualisasi Emisi Karbon Bulanan',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: {top: 10, bottom: 30},
+                        color: '#28a745'
                     }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 }
             }
         });

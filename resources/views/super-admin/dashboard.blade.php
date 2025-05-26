@@ -266,62 +266,125 @@
             }, 100 * index);
         });
         
-        // Chart data
+        // Chart data with error handling
         const emisiChartData = @json($emisiChartData);
         const companyChartData = @json($companyChartData);
         
+        // Debug chart data
+        console.log('Emisi Chart Data:', emisiChartData);
+        console.log('Company Chart Data:', companyChartData);
+        
+        // Validate chart data
+        if (!emisiChartData || !emisiChartData.labels || !emisiChartData.data) {
+            console.error('Invalid emisi chart data:', emisiChartData);
+            return;
+        }
+        
+        if (!companyChartData || !companyChartData.labels || !companyChartData.data) {
+            console.error('Invalid company chart data:', companyChartData);
+            return;
+        }
+        
+        // Format data to ensure consistent type
+        const formattedData = emisiChartData.data.map(value => parseFloat(value) || 0);
+        
         // Emisi Chart
-        const emisiCtx = document.getElementById('emisiChart').getContext('2d');
+        const emisiCanvas = document.getElementById('emisiChart');
+        if (!emisiCanvas) {
+            console.error('Emisi chart canvas not found');
+            return;
+        }
+        
+        const emisiCtx = emisiCanvas.getContext('2d');
         const emisiChart = new Chart(emisiCtx, {
             type: 'line',
             data: {
                 labels: emisiChartData.labels,
                 datasets: [{
                     label: 'Emisi Karbon (kg CO₂e)',
-                    data: emisiChartData.data,
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    data: formattedData,
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
                     borderColor: '#28a745',
                     borderWidth: 2,
                     pointBackgroundColor: '#28a745',
-                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.3,
                     fill: true
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${parseFloat(context.parsed.y).toLocaleString('id-ID')} kg CO₂e`;
-                            }
-                        }
-                    }
-                },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString('id-ID');
+                                return value.toFixed(1) + ' kg';
+                            },
+                            font: {
+                                size: 11
                             }
                         }
                     },
                     x: {
                         grid: {
                             display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
                         }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 13
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        padding: 10,
+                        cornerRadius: 4,
+                        callbacks: {
+                            label: function(context) {
+                                return `${parseFloat(context.parsed.y).toFixed(2)} kg CO₂e`;
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
                     }
                 }
             }
         });
         
         // Distribution Chart (Donut)
-        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+        const distributionCanvas = document.getElementById('distributionChart');
+        if (!distributionCanvas) {
+            console.error('Distribution chart canvas not found');
+            return;
+        }
+        
+        const distributionCtx = distributionCanvas.getContext('2d');
         const distributionChart = new Chart(distributionCtx, {
             type: 'doughnut',
             data: {
