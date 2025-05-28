@@ -166,7 +166,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-cash-coin text-success me-2"></i>
-                                    <span class="fw-bold">{{ number_format($penyedia->harga_per_ton, 2) }}</span>
+                                    <span class="fw-bold">{{ $penyedia->mata_uang }} {{ number_format($penyedia->harga_per_ton, 2) }}</span>
                                 </div>
                             </td>
                             <td>

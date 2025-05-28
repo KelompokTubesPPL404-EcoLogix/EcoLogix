@@ -133,31 +133,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
         Route::resource('faktor-emisi', FaktorEmisiController::class);
         Route::resource('penyedia-carbon-credit', PenyediaCarbonCreditController::class);
+        Route::resource('pembelian-carbon-credit', PembelianCarbonCreditController::class);
+        
+        // Route for auto-populating form fields
+        Route::get('pembelian-carbon-credit-get-form-data', [PembelianCarbonCreditController::class, 'getFormData'])
+            ->name('pembelian-carbon-credit.get-form-data');
     });
-
-    // CRUD Pembelian Carbon Credit
-    Route::resource('carbon_credit', PembelianCarbonCreditController::class)
-        ->except(['show'])
-        ->names([
-            'index' => 'carbon_credit.index',
-            'create' => 'carbon_credit.create', 
-            'store' => 'carbon_credit.store',
-            'edit' => 'carbon_credit.edit',
-            'update' => 'carbon_credit.update',
-            'destroy' => 'carbon_credit.destroy'
-        ]);
-
-    // Edit Status Pembelian Carbon Credit
-    Route::get('/carbon_credit/{kode_pembelian_carbon_credit}/edit-status', [PembelianCarbonCreditController::class, 'editStatus'])
-        ->name('carbon_credit.edit_status');
-    Route::put('/carbon_credit/{kode_pembelian_carbon_credit}/update-status', [PembelianCarbonCreditController::class, 'updateStatus'])
-        ->name('carbon_credit.update_status');
-
-    // Route untuk laporan pembelian carbon credit
-    Route::get('/carbon_credit/list-report', [PembelianCarbonCreditController::class, 'listReport'])
-        ->name('carbon_credit.list_report');
-    Route::get('/carbon_credit/report', [PembelianCarbonCreditController::class, 'downloadSelectedReport'])
-        ->name('carbon_credit.report');
     
     // Tambahkan route untuk history
     Route::get('/history', function () {

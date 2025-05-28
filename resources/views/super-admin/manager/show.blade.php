@@ -92,9 +92,9 @@
 
     <!-- Action Buttons -->
     <div class="d-flex justify-content-end mb-4">
-        <a href="{{ route('superadmin.manager.edit', $manager->kode_user) }}" class="btn btn-warning shadow-sm me-2 px-4">
+        <!-- <a href="{{ route('superadmin.manager.edit', $manager->kode_user) }}" class="btn btn-warning shadow-sm me-2 px-4">
             <i class="bi bi-pencil me-1"></i> Edit Manager
-        </a>
+        </a> -->
         <a href="{{ route('superadmin.manager.index') }}" class="btn btn-outline-success shadow-sm px-4">
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Manager
         </a>
@@ -120,7 +120,7 @@
                 </div>
                 <p class="text-muted mb-0">
                     <i class="bi bi-calendar-check me-1"></i>
-                    Bergabung {{ $manager->created_at->format('d F Y') }}
+                    Bergabung {{ $manager->created_at->timezone('Asia/Jakarta')->format('d F Y') }} WIB
                 </p>
             </div>
         </div>
@@ -218,7 +218,7 @@
                                     <i class="bi bi-calendar-plus me-1"></i>Tanggal Dibuat
                                 </div>
                                 <div class="info-value">
-                                    {{ $manager->created_at->format('d F Y H:i:s') }}
+                                    {{ $manager->created_at->timezone('Asia/Jakarta')->format('d F Y H:i:s') }} WIB
                                 </div>
                             </div>
                             
@@ -227,7 +227,7 @@
                                     <i class="bi bi-clock-history me-1"></i>Terakhir Diperbarui
                                 </div>
                                 <div class="info-value">
-                                    {{ $manager->updated_at->format('d F Y H:i:s') }}
+                                    {{ $manager->updated_at->timezone('Asia/Jakarta')->format('d F Y H:i:s') }} WIB
                                 </div>
                             </div>
                         </div>

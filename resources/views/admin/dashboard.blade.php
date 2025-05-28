@@ -74,7 +74,7 @@
                                 @forelse($latestEmissions as $index => $emisi)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($emisi->tanggal_emisi)->format('d/m/y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($emisi->tanggal_emisi)->timezone('Asia/Jakarta')->format('d/m/y') }} WIB</td>
                                     <td>{{ $emisi->kategori_emisi_karbon }}</td>
                                     <td>{{ $emisi->sub_kategori }}</td>
                                     <td>{{ $emisi->nilai_aktivitas }} kg</td>

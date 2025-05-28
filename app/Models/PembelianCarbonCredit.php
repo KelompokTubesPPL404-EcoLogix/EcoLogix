@@ -56,11 +56,11 @@ class PembelianCarbonCredit extends Model
     ];
 
     /**
-     * Relasi dengan Perusahaan (sebagai penyedia).
+     * Relasi dengan PenyediaCarbonCredit.
      */
     public function penyedia()
     {
-        return $this->belongsTo(Perusahaan::class, 'kode_penyedia', 'kode_perusahaan');
+        return $this->belongsTo(PenyediaCarbonCredit::class, 'kode_penyedia', 'kode_penyedia');
     }
 
     /**

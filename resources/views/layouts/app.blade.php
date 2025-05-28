@@ -135,7 +135,7 @@
     </button>
 
     <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="{{ asset('ECOLOGIX.png') }}" alt="EcoLogix" height="36" class="me-2" />
+      <img src="{{ asset('ECOLOGIXputihround.png') }}" alt="EcoLogix" height="36" class="me-2" />
       <span class="fw-bold text-white d-none d-md-inline-block"></span>
     </a>
     

@@ -153,7 +153,7 @@
                                     </th>
                                     <td>
                                         <i class="bi bi-clock-history me-1 text-muted"></i>
-                                        {{ $penyedia->created_at->setTimezone('Asia/Jakarta')->format('d-m-Y H:i') }} WIB
+                                        {{ $penyedia->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i') }} WIB
                                     </td>
                                 </tr>
                                 <tr>
@@ -162,7 +162,7 @@
                                     </th>
                                     <td>
                                         <i class="bi bi-clock me-1 text-muted"></i>
-                                        {{ $penyedia->updated_at->setTimezone('Asia/Jakarta')->format('d-m-Y H:i') }} WIB
+                                        {{ $penyedia->updated_at->timezone('Asia/Jakarta')->format('d-m-Y H:i') }} WIB
                                     </td>
                                 </tr>
                             </tbody>

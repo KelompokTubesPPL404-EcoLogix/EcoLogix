@@ -41,7 +41,7 @@
                             </tr>
                             <tr>
                                 <th>Tanggal Emisi</th>
-                                <td>{{ $emisicarbon->tanggal_emisi->format('d-m-Y') }}</td>
+                                <td>{{ $emisicarbon->tanggal_emisi->timezone('Asia/Jakarta')->format('d-m-Y') }} WIB</td>
                             </tr>
                             <tr>
                                 <th>Staff</th>

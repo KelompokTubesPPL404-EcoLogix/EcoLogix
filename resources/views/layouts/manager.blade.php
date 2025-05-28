@@ -48,7 +48,7 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.kompensasi*') ? 'active' : '' }}" href="#">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.kompensasi*') ? 'active' : '' }}" href="{{ route('manager.kompensasi.index') }}">
           <div class="icon-container me-3">
             <i class="bi bi-arrow-left-right"></i>
           </div>
@@ -56,7 +56,7 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.carbon_credit*') ? 'active' : '' }}" href="#">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.carbon_credit*') ? 'active' : '' }}" href="{{ route('manager.pembelian-carbon-credit.index') }}">
           <div class="icon-container me-3">
             <i class="bi bi-currency-exchange"></i>
           </div>

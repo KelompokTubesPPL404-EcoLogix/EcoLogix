@@ -219,7 +219,7 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="btn-group" role="group">
+                               
                                     <a href="{{ route('superadmin.manager.show', $manager->kode_user) }}" class="btn btn-outline-info btn-sm" title="Lihat Detail">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -233,7 +233,7 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
-                                </div>
+                                
                             </td>
                         </tr>
                         @empty
