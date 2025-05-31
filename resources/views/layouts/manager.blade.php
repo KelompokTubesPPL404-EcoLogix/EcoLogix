@@ -40,6 +40,14 @@
     
     <ul class="nav flex-column gap-1">
       <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.leaderboard') ? 'active' : '' }}" href="{{ route('manager.leaderboard') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-trophy"></i>
+          </div>
+          <span>Leaderboard Perusahaan</span>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.reports*') ? 'active' : '' }}" href="#">
           <div class="icon-container me-3">
             <i class="bi bi-bar-chart"></i>
@@ -48,21 +56,21 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.kompensasi*') ? 'active' : '' }}" href="#">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.kompensasi*') ? 'active' : '' }}" href="{{ route('manager.kompensasi.index') }}">
           <div class="icon-container me-3">
             <i class="bi bi-arrow-left-right"></i>
           </div>
           <span>Kompensasi Emisi</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.carbon_credit*') ? 'active' : '' }}" href="#">
+      {{-- <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.carbon_credit*') ? 'active' : '' }}" href="{{ route('manager.pembelian-carbon-credit.index') }}">
           <div class="icon-container me-3">
             <i class="bi bi-currency-exchange"></i>
           </div>
           <span>Carbon Credit</span>
         </a>
-      </li>
+      </li> --}}
     </ul>
     
     <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Konfigurasi</div>

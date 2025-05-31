@@ -47,11 +47,11 @@
                 </tr>
                 <tr>
                     <th>Terdaftar Pada</th>
-                    <td>{{ $staff->created_at ? $staff->created_at->format('d M Y, H:i') : '-' }}</td>
+                    <td>{{ $staff->created_at ? $staff->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB' : '-' }}</td>
                 </tr>
                 <tr>
                     <th>Diperbarui Pada</th>
-                    <td>{{ $staff->updated_at ? $staff->updated_at->format('d M Y, H:i') : '-' }}</td>
+                    <td>{{ $staff->updated_at ? $staff->updated_at->timezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB' : '-' }}</td>
                 </tr>
             </table>
             <a href="{{ route('admin.staff.edit', $staff->kode_user) }}" class="btn btn-warning">Edit Data</a>

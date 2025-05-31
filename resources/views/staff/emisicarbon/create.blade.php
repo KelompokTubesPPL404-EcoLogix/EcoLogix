@@ -2,13 +2,78 @@
 
 @section('title', 'Tambah Data Emisi Karbon')
 
+@push('css')
+    <style>
+        .eco-gradient {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
+        }
+        .eco-card {
+            border-left: 4px solid #28a745;
+            transition: all 0.3s ease;
+        }
+        .eco-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.15);
+        }
+        .eco-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 3px solid #28a745;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        }
+        .input-icon-group {
+            position: relative;
+        }
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: #28a745;
+        }
+        .input-with-icon {
+            padding-left: 35px;
+        }
+        .btn-eco-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-eco-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+    </style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Tambah Data Emisi Karbon</h1>
-        <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Kembali
-        </a>
+    <!-- Enhanced Eco Header Section -->
+    <div class="eco-header p-4 rounded-3 mb-4">
+        <div class="d-sm-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="h3 mb-2 text-success fw-bold">
+                    <i class="bi bi-plus-circle me-2"></i>Tambah Data Emisi Karbon
+                </h1>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-info-circle me-1"></i>Masukkan data emisi karbon baru untuk perusahaan Anda
+                </p>
+            </div>
+            <div class="d-flex align-items-center">
+                <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-secondary shadow-sm px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+        </div>
     </div>
 
     @if(session('error'))
@@ -17,84 +82,129 @@
     </div>
     @endif
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-success">Form Input Emisi Karbon</h6>
+    <div class="eco-card card border-0 shadow-lg mb-4 rounded-3 overflow-hidden">
+        <div class="card-header eco-gradient text-white py-3">
+            <h6 class="m-0 fw-bold">
+                <i class="bi bi-clipboard-data me-2"></i>Form Input Emisi Karbon
+            </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <form action="{{ route('staff.emisicarbon.store') }}" method="POST">
                 @csrf
-                <div class="row mb-3">
+                <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="tanggal_emisi">Tanggal Emisi</label>
-                            <input type="date" class="form-control @error('tanggal_emisi') is-invalid @enderror" id="tanggal_emisi" name="tanggal_emisi" value="{{ old('tanggal_emisi', date('Y-m-d')) }}" required>
+                            <label for="tanggal_emisi">
+                                <i class="bi bi-calendar-date text-success me-1"></i>Tanggal Emisi
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-calendar3 text-success"></i>
+                                </span>
+                                <input type="date" class="form-control @error('tanggal_emisi') is-invalid @enderror" id="tanggal_emisi" name="tanggal_emisi" value="{{ old('tanggal_emisi', date('Y-m-d')) }}" required>
+                            </div>
                             @error('tanggal_emisi')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted">Masukkan tanggal kejadian emisi karbon</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="kategori_emisi_karbon">Kategori Emisi</label>
-                            <select class="form-select @error('kategori_emisi_karbon') is-invalid @enderror" id="kategori_emisi_karbon" name="kategori_emisi_karbon" required>
-                                <option value="">-- Pilih Kategori --</option>
-                                @foreach($kategoriEmisi as $kategori => $faktorList)
-                                <option value="{{ $kategori }}" {{ old('kategori_emisi_karbon') == $kategori ? 'selected' : '' }}>{{ $kategori }}</option>
-                                @endforeach
-                            </select>
+                            <label for="kategori_emisi_karbon">
+                                <i class="bi bi-tags text-success me-1"></i>Kategori Emisi
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-tag text-success"></i>
+                                </span>
+                                <select class="form-select @error('kategori_emisi_karbon') is-invalid @enderror" id="kategori_emisi_karbon" name="kategori_emisi_karbon" required>
+                                    <option value="">-- Pilih Kategori --</option>
+                                    @foreach($kategoriEmisi as $kategori => $faktorList)
+                                    <option value="{{ $kategori }}" {{ old('kategori_emisi_karbon') == $kategori ? 'selected' : '' }}>{{ $kategori }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @error('kategori_emisi_karbon')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted">Pilih kategori utama emisi karbon</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="sub_kategori">Sub Kategori</label>
-                            <select class="form-select @error('sub_kategori') is-invalid @enderror" id="sub_kategori" name="sub_kategori" required disabled>
-                                <option value="">-- Pilih Sub Kategori --</option>
-                            </select>
+                            <label for="sub_kategori">
+                                <i class="bi bi-tag text-success me-1"></i>Sub Kategori
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-tags text-success"></i>
+                                </span>
+                                <select class="form-select @error('sub_kategori') is-invalid @enderror" id="sub_kategori" name="sub_kategori" required disabled>
+                                    <option value="">-- Pilih Sub Kategori --</option>
+                                </select>
+                            </div>
                             @error('sub_kategori')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted">Pilih sub kategori untuk detil lebih spesifik</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="nilai_aktivitas">Nilai Aktivitas</label>
+                            <label for="nilai_aktivitas">
+                                <i class="bi bi-activity text-success me-1"></i>Nilai Aktivitas
+                            </label>
                             <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-calculator text-success"></i>
+                                </span>
                                 <input type="number" step="0.01" min="0" class="form-control @error('nilai_aktivitas') is-invalid @enderror" id="nilai_aktivitas" name="nilai_aktivitas" value="{{ old('nilai_aktivitas') }}" placeholder="0.00" required>
-                                <span class="input-group-text" id="satuan_aktivitas">Satuan</span>
+                                <span class="input-group-text bg-success text-white" id="satuan_aktivitas">Satuan</span>
                             </div>
                             @error('nilai_aktivitas')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted">Masukkan jumlah atau volume aktivitas yang menyebabkan emisi</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="estimasi_emisi">Estimasi Emisi Karbon</label>
+                            <label for="estimasi_emisi">
+                                <i class="bi bi-graph-up-arrow text-success me-1"></i>Estimasi Emisi Karbon
+                            </label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="estimasi_emisi" readonly placeholder="0.00">
-                                <span class="input-group-text">kg CO₂e</span>
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-cloud text-success"></i>
+                                </span>
+                                <input type="text" class="form-control bg-light" id="estimasi_emisi" readonly placeholder="0.00">
+                                <span class="input-group-text bg-success text-white">kg CO₂e</span>
                             </div>
                             <small class="text-muted">Estimasi berdasarkan faktor emisi yang dipilih</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label for="deskripsi">Deskripsi / Keterangan</label>
-                    <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsi" name="deskripsi" rows="3" required>{{ old('deskripsi') }}</textarea>
+                <div class="form-group mb-4">
+                    <label for="deskripsi">
+                        <i class="bi bi-card-text text-success me-1"></i>Deskripsi / Keterangan
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-chat-square-text text-success"></i>
+                        </span>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsi" name="deskripsi" rows="3" required>{{ old('deskripsi') }}</textarea>
+                    </div>
                     @error('deskripsi')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <small class="text-muted">Berikan keterangan tambahan tentang aktivitas emisi ini</small>
                 </div>
 
                 <!-- Hidden input untuk kode_faktor_emisi -->
@@ -103,9 +213,15 @@
                 <div class="text-danger small">{{ $message }}</div>
                 @enderror
 
+                <hr class="my-4">
+                
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="reset" class="btn btn-light me-md-2">Reset</button>
-                    <button type="submit" class="btn btn-success">Simpan Data</button>
+                    <button type="reset" class="btn btn-outline-secondary px-4 me-md-2">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                    </button>
+                    <button type="submit" class="btn btn-eco-primary px-4">
+                        <i class="bi bi-save me-1"></i>Simpan Data
+                    </button>
                 </div>
             </form>
         </div>

@@ -78,13 +78,11 @@
                 <h1 class="h3 mb-2 text-success fw-bold">
                     <i class="bi bi-people-fill me-2"></i>@yield('title')
                 </h1>
-                <p class="text-muted mb-0">
+                {{-- <p class="text-muted mb-0">
                     <i class="bi bi-leaf me-1"></i>Kelola manager untuk monitoring emisi karbon perusahaan di Ecologix
-                </p>
+                </p> --}}
             </div>
-            <div class="carbon-icon">
-                <i class="bi bi-person-workspace"></i>
-            </div>
+           
         </div>
     </div>
 
@@ -164,8 +162,8 @@
 
     <div class="eco-card card border-0 shadow-lg mb-4">
         <div class="card-header eco-gradient text-white py-3">
-            <h6 class="m-0 fw-bold">
-                <i class="bi bi-table me-2"></i>Daftar Manager Ecologix
+            <h6 class="m-0 fw-bold text-success">
+                <i class="bi bi-table me-2 text-success"></i>Daftar Manager Ecologix
             </h6>
         </div>
         <div class="card-body p-0">
@@ -219,7 +217,7 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="btn-group" role="group">
+                               
                                     <a href="{{ route('superadmin.manager.show', $manager->kode_user) }}" class="btn btn-outline-info btn-sm" title="Lihat Detail">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -233,7 +231,7 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
-                                </div>
+                                
                             </td>
                         </tr>
                         @empty

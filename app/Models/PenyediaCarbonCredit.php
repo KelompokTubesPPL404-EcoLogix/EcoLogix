@@ -44,6 +44,7 @@ class PenyediaCarbonCredit extends Model
      */
     protected $fillable = [
         'kode_penyedia',
+        'kode_perusahaan',
         'nama_penyedia',
         'deskripsi',
         'harga_per_ton',
@@ -52,10 +53,28 @@ class PenyediaCarbonCredit extends Model
     ];
 
     /**
+     * Cast attributes to appropriate types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'harga_per_ton' => 'decimal:2',
+        'is_active' => 'boolean',
+    ];
+
+    /**
      * Relasi dengan PembelianCarbonCredit.
      */
     public function pembelianCarbonCredit()
     {
         return $this->hasMany(PembelianCarbonCredit::class, 'kode_penyedia', 'kode_penyedia');
+    }
+    
+    /**
+     * Relasi dengan Perusahaan.
+     */
+    public function perusahaan()
+    {
+        return $this->belongsTo(Perusahaan::class, 'kode_perusahaan', 'kode_perusahaan');
     }
 }

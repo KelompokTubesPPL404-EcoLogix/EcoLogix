@@ -1,4 +1,4 @@
-@extends('layouts.super-admin')
+@extends('layouts.appsuperadmin')
 
 @section('title', 'Dashboard Super Admin')
 
@@ -86,11 +86,11 @@
                     </div>
                 </div>
                 
-                <div class="d-grid mt-4">
+                {{-- <div class="d-grid mt-4">
                     <a href="{{ route('superadmin.perusahaan.create') }}" class="btn btn-success rounded-pill shadow-sm">
                         <i class="bi bi-plus-circle me-2"></i>Tambah Perusahaan Baru
                     </a>
-                </div>
+                </div> --}}
             </div>
         </div>
         
@@ -224,7 +224,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $perusahaan->email_perusahaan }}</td>
-                                <td><span class="badge bg-light text-dark">{{ $perusahaan->created_at->format('d M Y') }}</span></td>
+                                <td><span class="badge bg-light text-dark">{{ $perusahaan->created_at->timezone('Asia/Jakarta')->format('d M Y') }} WIB</span></td>
                                 <td>
                                     @php
                                         $totalEmisi = \App\Models\EmisiKarbon::where('kode_perusahaan', $perusahaan->kode_perusahaan)

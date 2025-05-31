@@ -49,6 +49,12 @@ class Notifikasi extends Model
         'tanggal_notifikasi',
         'kode_admin',
         'kode_staff',
+        'kode_manager',
+        'judul',
+        'isi',
+        'tipe',
+        'dibaca',
+        'kode_perusahaan',
     ];
 
     /**

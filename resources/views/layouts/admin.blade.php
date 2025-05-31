@@ -42,6 +42,15 @@
           <span>Kelola Emisi Karbon</span>
         </a>
       </li>
+      
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.carbon-credit-purchase*') ? 'active' : '' }}" href="{{ route('admin.carbon-credit-purchase.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-currency-exchange"></i>
+          </div>
+          <span>Pembelian Carbon Credit</span>
+        </a>
+      </li>
     </ul>
     
     <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Laporan & Data</div>
@@ -55,36 +64,11 @@
           <span>Laporan Emisi</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.data*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-database"></i>
-          </div>
-          <span>Data Perusahaan</span>
-        </a>
-      </li>
+     
     </ul>
     
-    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Pengaturan</div>
     
-    <ul class="nav flex-column gap-1">
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.users*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-people"></i>
-          </div>
-          <span>Manajemen Pengguna</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-gear"></i>
-          </div>
-          <span>Pengaturan</span>
-        </a>
-      </li>
-    </ul>
+    
   </div>
 </div>
 
