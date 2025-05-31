@@ -224,7 +224,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $perusahaan->email_perusahaan }}</td>
-                                <td><span class="badge bg-light text-dark">{{ $perusahaan->created_at->format('d M Y') }}</span></td>
+                                <td><span class="badge bg-light text-dark">{{ $perusahaan->created_at->timezone('Asia/Jakarta')->format('d M Y') }} WIB</span></td>
                                 <td>
                                     @php
                                         $totalEmisi = \App\Models\EmisiKarbon::where('kode_perusahaan', $perusahaan->kode_perusahaan)

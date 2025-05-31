@@ -96,4 +96,12 @@ class Perusahaan extends Model
         return $this->hasMany(User::class, 'kode_perusahaan', 'kode_perusahaan')
                     ->where('role', 'staff');
     }
+    
+    /**
+     * Relasi dengan PenyediaCarbonCredit.
+     */
+    public function penyediaCarbonCredit()
+    {
+        return $this->hasMany(PenyediaCarbonCredit::class, 'kode_perusahaan', 'kode_perusahaan');
+    }
 }

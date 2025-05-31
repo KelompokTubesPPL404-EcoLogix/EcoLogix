@@ -24,7 +24,7 @@
                             <tbody>
                                 <tr>
                                     <th width="30%">Kode Emisi Karbon</th>
-                                    <td>{{ $emisiCarbon->kode_emisi_karbon }}</td>
+                                    <td>{{ $emisiCarbon->kode_emisi_carbon }}</td>
                                 </tr>
                                 <tr>
                                     <th>Kategori</th>
@@ -48,7 +48,7 @@
                                 </tr>
                                 <tr>
                                     <th>Tanggal Emisi</th>
-                                    <td>{{ $emisiCarbon->tanggal_emisi->format('d-m-Y') }}</td>
+                                    <td>{{ $emisiCarbon->tanggal_emisi->timezone('Asia/Jakarta')->format('d-m-Y') }} WIB</td>
                                 </tr>
                                 <tr>
                                     <th>Status</th>
@@ -74,11 +74,11 @@
                                 </tr>
                                 <tr>
                                     <th>Tanggal Dibuat</th>
-                                    <td>{{ $emisiCarbon->created_at->format('d-m-Y H:i') }}</td>
+                                    <td>{{ $emisiCarbon->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i') }} WIB</td>
                                 </tr>
                                 <tr>
                                     <th>Terakhir Diperbarui</th>
-                                    <td>{{ $emisiCarbon->updated_at->format('d-m-Y H:i') }}</td>
+                                    <td>{{ $emisiCarbon->updated_at->timezone('Asia/Jakarta')->format('d-m-Y H:i') }} WIB</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -86,7 +86,7 @@
 
                     <div class="mt-3">
                         @if($emisiCarbon->status == 'submitted')
-                            <a href="{{ route('admin.emisicarbon.editStatus', $emisiCarbon->kode_emisi_karbon) }}" class="btn btn-primary">
+                            <a href="{{ route('admin.emisicarbon.editStatus', $emisiCarbon->kode_emisi_carbon) }}" class="btn btn-primary">
                                 <i class="fas fa-edit"></i> Ubah Status
                             </a>
                         @endif

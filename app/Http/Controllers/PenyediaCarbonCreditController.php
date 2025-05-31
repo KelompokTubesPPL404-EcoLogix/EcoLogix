@@ -19,7 +19,8 @@ class PenyediaCarbonCreditController extends Controller
             return redirect()->route('login');
         }
         
-        $penyediaList = PenyediaCarbonCredit::all();
+        $user = Auth::user();
+        $penyediaList = PenyediaCarbonCredit::where('kode_perusahaan', $user->kode_perusahaan)->get();
         return view('manager.penyedia-carbon-credit.index', compact('penyediaList'));
     }
 
@@ -62,8 +63,11 @@ class PenyediaCarbonCreditController extends Controller
             $newCode = 'PCC' . str_pad((int)$lastCode + 1, 3, '0', STR_PAD_LEFT);
         }
 
+        $user = Auth::user();
+        
         PenyediaCarbonCredit::create([
             'kode_penyedia' => $newCode,
+            'kode_perusahaan' => $user->kode_perusahaan,
             'nama_penyedia' => $request->nama_penyedia,
             'deskripsi' => $request->deskripsi,
             'harga_per_ton' => $request->harga_per_ton,
@@ -85,7 +89,11 @@ class PenyediaCarbonCreditController extends Controller
             return redirect()->route('login');
         }
         
-        $penyedia = PenyediaCarbonCredit::findOrFail($kodePenyedia);
+        $user = Auth::user();
+        $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $kodePenyedia)
+            ->where('kode_perusahaan', $user->kode_perusahaan)
+            ->firstOrFail();
+            
         return view('manager.penyedia-carbon-credit.show', compact('penyedia'));
     }
 
@@ -99,7 +107,11 @@ class PenyediaCarbonCreditController extends Controller
             return redirect()->route('login');
         }
         
-        $penyedia = PenyediaCarbonCredit::findOrFail($kodePenyedia);
+        $user = Auth::user();
+        $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $kodePenyedia)
+            ->where('kode_perusahaan', $user->kode_perusahaan)
+            ->firstOrFail();
+            
         return view('manager.penyedia-carbon-credit.edit', compact('penyedia'));
     }
 
@@ -121,13 +133,17 @@ class PenyediaCarbonCreditController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $penyedia = PenyediaCarbonCredit::findOrFail($kodePenyedia);
+        $user = Auth::user();
+        $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $kodePenyedia)
+            ->where('kode_perusahaan', $user->kode_perusahaan)
+            ->firstOrFail();
+            
         $penyedia->update([
             'nama_penyedia' => $request->nama_penyedia,
             'deskripsi' => $request->deskripsi,
             'harga_per_ton' => $request->harga_per_ton,
             'mata_uang' => $request->mata_uang,
-            'is_active' => $request->has('is_active'),
+            'is_active' => (bool) $request->is_active,
         ]);
 
         return redirect()->route('manager.penyedia-carbon-credit.index')
@@ -144,7 +160,10 @@ class PenyediaCarbonCreditController extends Controller
             return redirect()->route('login');
         }
         
-        $penyedia = PenyediaCarbonCredit::findOrFail($kodePenyedia);
+        $user = Auth::user();
+        $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $kodePenyedia)
+            ->where('kode_perusahaan', $user->kode_perusahaan)
+            ->firstOrFail();
         
         // Cek apakah penyedia sudah digunakan dalam pembelian
         $pembelianCount = $penyedia->pembelianCarbonCredit()->count();

@@ -19,11 +19,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-    @endif
 
     @if(session('error'))
     <div class="alert alert-danger">
@@ -66,7 +61,7 @@
                     <tbody>
                         @forelse($emisiCarbons ?? [] as $emisi)
                         <tr data-status="{{ $emisi->status }}">
-                            <td>{{ \Carbon\Carbon::parse($emisi->tanggal_emisi)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($emisi->tanggal_emisi)->timezone('Asia/Jakarta')->format('d/m/Y') }} WIB</td>
                             <td>{{ $emisi->kode_emisi_carbon }}</td>
                             <td>{{ $emisi->staff->nama ?? 'N/A' }}</td>
                             <td>{{ $emisi->kategori_emisi_karbon }} - {{ $emisi->sub_kategori }}</td>
