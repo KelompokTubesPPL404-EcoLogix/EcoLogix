@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\EmisiKarbon;
 use App\Models\FaktorEmisi; 
+use App\Models\User;
+use App\Http\Controllers\NotifikasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -129,6 +131,22 @@ class EmisiKarbonController extends Controller
                 Log::warning('Trigger database tidak mengisi faktor_emisi, mengisi secara manual');
                 $emisicarbon->faktor_emisi = $nilaiFaktorEmisi;
                 $emisicarbon->save();
+            }
+            
+            // Kirim notifikasi ke admin
+            $admins = User::where('role', 'admin')
+                ->where('kode_perusahaan', $user->kode_perusahaan)
+                ->get();
+            
+            foreach ($admins as $admin) {
+                $deskripsiNotifikasi = "Staff {$user->nama} telah menginputkan data emisi karbon baru dengan kode {$kodeEmisiCarbon}";
+                NotifikasiController::buatNotifikasi(
+                    'emisi_karbon',
+                    $deskripsiNotifikasi,
+                    $admin->kode_user,
+                    null,
+                    null
+                );
             }
         } catch (\Exception $e) {
             // Log::error('Error saat menyimpan emisi karbon: ' . $e->getMessage());
@@ -387,6 +405,9 @@ class EmisiKarbonController extends Controller
         ]);
 
         try {
+            // Simpan status lama untuk notifikasi
+            $statusLama = $emisicarbon->status;
+            
             $emisicarbon->status = $request->status;
             // Jika diperlukan, tambahkan kolom catatan di tabel emisi_carbon
             // $emisicarbon->catatan = $request->catatan;
@@ -395,6 +416,19 @@ class EmisiKarbonController extends Controller
 
             if (!$updated) {
                 return redirect()->back()->with('error', 'Gagal mengupdate status emisi karbon. Silakan coba lagi.');
+            }
+
+            // Kirim notifikasi ke staff yang menginputkan data
+            $staff = User::where('kode_user', $emisicarbon->kode_staff)->first();
+            if ($staff) {
+                $deskripsiNotifikasi = "Admin {$user->nama} telah mengubah status data emisi karbon {$emisicarbon->kode_emisi_carbon} dari {$statusLama} menjadi {$request->status}";
+                NotifikasiController::buatNotifikasi(
+                    'status_emisi',
+                    $deskripsiNotifikasi,
+                    null,
+                    $staff->kode_user,
+                    null
+                );
             }
 
             Log::info('Status emisi karbon berhasil diupdate untuk ID: ' . $emisicarbon->getKey() . ' menjadi: ' . $request->status);

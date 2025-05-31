@@ -32,6 +32,15 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
+// Route API untuk notifikasi (tersedia untuk semua user yang sudah login)
+Route::middleware('auth')->group(function () {
+    // Route untuk mendapatkan notifikasi via AJAX
+    Route::get('/api/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.get');
+    
+    // Route untuk menandai notifikasi sebagai dibaca
+    Route::post('/api/notifikasi/mark-as-read', [App\Http\Controllers\NotifikasiController::class, 'markAsRead'])->name('notifikasi.markAsRead');
+});
+
 // Dashboard redirect
 Route::get('/dashboard', function () {
     return redirect()->route('home');
@@ -117,15 +126,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/emisicarbon/{emisicarbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
         Route::put('/emisicarbon/{emisicarbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
         
+        // Notifikasi
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');
+        
+        
+        
         // Faktor Emisi
         Route::resource('faktor-emisi', FaktorEmisiController::class);
         
-        // Pembelian Carbon Credit (Original Controller)
-        Route::resource('pembelian-carbon-credit', PembelianCarbonCreditController::class);
+        // // Pembelian Carbon Credit (Original Controller)
+        // Route::resource('pembelian-carbon-credit', PembelianCarbonCreditController::class);
         
-        // Route for auto-populating form fields
-        Route::get('pembelian-carbon-credit-get-form-data', [PembelianCarbonCreditController::class, 'getFormData'])
-            ->name('pembelian-carbon-credit.get-form-data');
+        // // Route for auto-populating form fields
+        // Route::get('pembelian-carbon-credit-get-form-data', [PembelianCarbonCreditController::class, 'getFormData'])
+        //     ->name('pembelian-carbon-credit.get-form-data');
         
         // Improved Carbon Credit Purchase Feature
         Route::resource('carbon-credit-purchase', CarbonCreditPurchaseController::class);
@@ -146,12 +160,22 @@ Route::middleware('auth')->group(function () {
         
         // Route untuk Emisi Karbon - Staff
         Route::resource('emisicarbon', EmisiKarbonController::class);
+        
+        // Notifikasi
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');
+        
+        
     });
     
     // Manager dapat juga mengakses dan memodifikasi data faktor emisi dan penyedia carbon credit
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
         Route::resource('faktor-emisi', FaktorEmisiController::class);
         Route::resource('penyedia-carbon-credit', PenyediaCarbonCreditController::class);
+        
+        // Notifikasi
+        Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');
+        
+        
     });
     
     // Tambahkan route untuk history

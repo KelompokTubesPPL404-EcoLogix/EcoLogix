@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\KompensasiEmisiCarbon;
 use App\Models\EmisiKarbon;
+use App\Models\User;
+use App\Http\Controllers\NotifikasiController;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -135,13 +138,29 @@ class KompensasiEmisiController extends Controller
         // Simpan data kompensasi
         $kompensasi = new KompensasiEmisiCarbon();
         $kompensasi->kode_kompensasi = $kodeKompensasi;
-        $kompensasi->kode_emisi_carbon = $request->kode_emisi_carbon;
-        $kompensasi->jumlah_kompensasi = $request->jumlah_kompensasi;
-        $kompensasi->tanggal_kompensasi = $request->tanggal_kompensasi;
-        $kompensasi->status_kompensasi = 'Belum Terkompensasi'; // Default pending, menunggu approval admin
-        $kompensasi->kode_manager = $manager->kode_user;
-        $kompensasi->kode_perusahaan = $manager->kode_perusahaan;
-        $kompensasi->save();
+            $kompensasi->kode_emisi_carbon = $request->kode_emisi_carbon;
+            $kompensasi->jumlah_kompensasi = $request->jumlah_kompensasi;
+            $kompensasi->tanggal_kompensasi = $request->tanggal_kompensasi;
+            $kompensasi->status_kompensasi = 'Belum Terkompensasi'; // Default pending, menunggu approval admin
+            $kompensasi->kode_manager = $manager->kode_user;
+            $kompensasi->kode_perusahaan = $manager->kode_perusahaan;
+            $kompensasi->save();
+            
+            // Kirim notifikasi ke admin
+            $admins = User::where('role', 'admin')
+                ->where('kode_perusahaan', $manager->kode_perusahaan)
+                ->get();
+            
+            foreach ($admins as $admin) {
+                $deskripsiNotifikasi = "Manager {$manager->nama} telah menginputkan data kompensasi emisi karbon baru dengan kode {$kodeKompensasi}";
+                NotifikasiController::buatNotifikasi(
+                    'kompensasi_emisi',
+                    $deskripsiNotifikasi,
+                    $admin->kode_user,
+                    null,
+                    null
+                );
+            }
 
         return redirect()->back()->with('success', 'Data kompensasi berhasil disimpan dan menunggu persetujuan.');
     }
