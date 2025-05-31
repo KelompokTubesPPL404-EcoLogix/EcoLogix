@@ -77,6 +77,9 @@ Route::middleware('auth')->group(function () {
         // Super Admin dashboard
         Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'superAdmin'])->name('dashboard');
         
+        // Leaderboard perusahaan
+        Route::get('/leaderboard', [App\Http\Controllers\LeaderboardController::class, 'superAdminLeaderboard'])->name('leaderboard');
+        
         // Manajemen perusahaan
         Route::resource('perusahaan', PerusahaanController::class);
         
@@ -91,6 +94,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
         // Manager dashboard
         Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'manager'])->name('dashboard');
+        
+        // Leaderboard perusahaan
+        Route::get('/leaderboard', [App\Http\Controllers\LeaderboardController::class, 'managerLeaderboard'])->name('leaderboard');
         
         // Manajemen admin menggunakan AdminController
         Route::resource('admin', App\Http\Controllers\AdminController::class)->parameters(['admin' => 'admin']); // Parameter diubah ke 'admin' untuk route model binding User

@@ -40,6 +40,14 @@
     
     <ul class="nav flex-column gap-1">
       <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.leaderboard') ? 'active' : '' }}" href="{{ route('manager.leaderboard') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-trophy"></i>
+          </div>
+          <span>Leaderboard Perusahaan</span>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.reports*') ? 'active' : '' }}" href="#">
           <div class="icon-container me-3">
             <i class="bi bi-bar-chart"></i>

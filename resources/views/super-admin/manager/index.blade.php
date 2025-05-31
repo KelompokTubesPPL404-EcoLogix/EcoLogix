@@ -78,13 +78,11 @@
                 <h1 class="h3 mb-2 text-success fw-bold">
                     <i class="bi bi-people-fill me-2"></i>@yield('title')
                 </h1>
-                <p class="text-muted mb-0">
+                {{-- <p class="text-muted mb-0">
                     <i class="bi bi-leaf me-1"></i>Kelola manager untuk monitoring emisi karbon perusahaan di Ecologix
-                </p>
+                </p> --}}
             </div>
-            <div class="carbon-icon">
-                <i class="bi bi-person-workspace"></i>
-            </div>
+           
         </div>
     </div>
 
