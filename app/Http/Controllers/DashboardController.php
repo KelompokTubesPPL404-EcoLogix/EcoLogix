@@ -159,12 +159,26 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         
-        return view('staff.dashboard', compact(
-            'emisiChartData', 
-            'categoryChartData', 
-            'dashboardStats', 
-            'latestEmissions'
-        ));
+        try {
+
+
+            return view('staff.dashboard', compact(
+                'emisiChartData', 
+                'categoryChartData', 
+                'dashboardStats', 
+                'latestEmissions'
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error loading staff dashboard: ' . $e->getMessage(), ['exception' => $e]);
+            // Return an empty or error view, or redirect with an error message
+            return view('staff.dashboard', [
+                'emisiChartData' => ['labels' => [], 'data' => [], 'comparison' => 0],
+                'categoryChartData' => ['labels' => [], 'data' => [], 'colors' => [], 'percentages' => []],
+                'dashboardStats' => ['total_emisi' => 0, 'total_input' => 0],
+                'latestEmissions' => collect(),
+                'error' => 'Failed to load dashboard data. Please try again later.'
+            ]);
+        }
     }
     
     /**
@@ -209,6 +223,7 @@ class DashboardController extends Controller
      */
     private function prepareEmisiChartData($period, $role)
     {
+        
         // Tentukan rentang waktu berdasarkan periode
         $today = Carbon::now();
         $startDate = null;
@@ -261,6 +276,13 @@ class DashboardController extends Controller
         ->orderBy('date')
         ->get();
         
+        // Debug: Log raw emissions data
+        Log::info('Raw Emissions Data', [
+            'emissions' => $emissions->toArray(),
+            'query_sql' => $query->toSql(),
+            'query_bindings' => $query->getBindings()
+        ]);
+        
         // Buat array untuk labels dan data
         $dates = [];
         $emisiValues = [];
@@ -283,32 +305,57 @@ class DashboardController extends Controller
         }
         
         // Isi data dari database
+        $totalEmisi = 0;
         foreach ($emissions as $emission) {
-            $emisiValues[$emission->date] = (float) ($emission->total_emisi ?? 0);
+            // Periksa apakah tanggal adalah format literal atau tanggal sebenarnya
+            $dateKey = $emission->date;
+            $emissionValue = (float) ($emission->total_emisi ?? 0);
+            $totalEmisi += $emissionValue;
+            
+            // Jika tanggal adalah format literal, gunakan tanggal saat ini
+            if ($dateKey === 'Y-m' || $dateKey === 'Y-m-d' || $dateKey === 'Y') {
+                $dateKey = $today->format($groupByFormat);
+            }
+            
+            // Pastikan tanggal ada dalam array dates
+            if (isset($dates[$dateKey])) {
+                $emisiValues[$dateKey] = $emissionValue;
+            } else {
+                // Jika tanggal tidak ada dalam array, tambahkan ke bulan terakhir
+                $lastKey = array_key_last($dates);
+                if ($lastKey) {
+                    $emisiValues[$lastKey] = $emissionValue;
+                }
+            }
         }
         
         // Pastikan semua nilai adalah numerik dan tidak null
         $cleanData = [];
-        foreach ($emisiValues as $value) {
-            $cleanData[] = is_numeric($value) ? (float) $value : 0;
+        $cleanLabels = [];
+        
+        // Pastikan array labels dan data memiliki jumlah elemen yang sama
+        foreach ($dates as $key => $label) {
+            $cleanLabels[] = $label;
+            $cleanData[] = is_numeric($emisiValues[$key]) ? (float) $emisiValues[$key] : 0;
         }
         
         // Debug: Log the data being returned
         Log::info('Chart Data Debug', [
             'period' => $period,
             'role' => $role,
-            'labels_count' => count(array_values($dates)),
+            'labels_count' => count($cleanLabels),
             'data_count' => count($cleanData),
-            'labels' => array_values($dates),
+            'labels' => $cleanLabels,
             'data' => $cleanData,
-            'emissions_from_db' => $emissions->toArray()
+            'emissions_from_db' => $emissions->toArray(),
+            'total_emisi' => $totalEmisi
         ]);
         
         // Dapatkan nilai perbandingan dengan periode sebelumnya
         $comparison = $this->calculateComparison($period, $role);
         
-        // Pastikan data tidak kosong
-        if (empty($cleanData) || array_sum($cleanData) == 0) {
+        // Pastikan data tidak kosong - PERBAIKAN: Periksa total emisi, bukan array
+        if ($totalEmisi <= 0) {
             // Jika tidak ada data, berikan data dummy untuk mencegah chart kosong
             return [
                 'labels' => ['No Data'],
@@ -318,7 +365,7 @@ class DashboardController extends Controller
         }
         
         return [
-            'labels' => array_values($dates),
+            'labels' => $cleanLabels,
             'data' => $cleanData,
             'comparison' => $comparison
         ];

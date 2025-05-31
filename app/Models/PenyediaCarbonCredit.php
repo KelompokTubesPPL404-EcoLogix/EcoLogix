@@ -53,6 +53,16 @@ class PenyediaCarbonCredit extends Model
     ];
 
     /**
+     * Cast attributes to appropriate types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'harga_per_ton' => 'decimal:2',
+        'is_active' => 'boolean',
+    ];
+
+    /**
      * Relasi dengan PembelianCarbonCredit.
      */
     public function pembelianCarbonCredit()

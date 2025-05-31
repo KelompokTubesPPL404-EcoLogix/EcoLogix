@@ -164,8 +164,8 @@
 
     <div class="eco-card card border-0 shadow-lg mb-4">
         <div class="card-header eco-gradient text-white py-3">
-            <h6 class="m-0 fw-bold">
-                <i class="bi bi-table me-2"></i>Daftar Manager Ecologix
+            <h6 class="m-0 fw-bold text-success">
+                <i class="bi bi-table me-2 text-success"></i>Daftar Manager Ecologix
             </h6>
         </div>
         <div class="card-body p-0">

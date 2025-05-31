@@ -53,6 +53,11 @@
             transform: scale(1.01);
             transition: all 0.2s ease;
         }
+        .period-btn.active {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white !important;
+            border-color: #28a745;
+        }
         .btn-action {
             padding: 0.25rem 0.5rem;
             margin: 0 0.1rem;
@@ -92,27 +97,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Enhanced Eco Header Section -->
-    <div class="eco-header p-4 rounded-3 mb-4">
-        <div class="d-sm-flex align-items-center justify-content-between">
-            <div>
-                <h1 class="h3 mb-2 text-success fw-bold">
-                    <i class="bi bi-speedometer2 me-2"></i>Dashboard Staff
-                </h1>
-                <p class="text-muted mb-0">
-                    <i class="bi bi-info-circle me-1"></i>Pantau dan kelola emisi karbon perusahaan Anda
-                </p>
-            </div>
-            <div class="d-flex align-items-center">
-                <div class="carbon-badge me-3">
-                    <i class="bi bi-building-check me-1"></i>{{ Auth::user()->perusahaan->nama_perusahaan ?? 'Unknown' }}
-                </div>
-                <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success shadow-sm px-4">
-                    <i class="bi bi-plus-circle me-1"></i> Input Emisi Baru
-                </a>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="row">
         <div class="col-md-12 mb-4">
@@ -133,15 +118,15 @@
     <div class="row">
         <div class="col-md-8">
             <div class="eco-card card mb-4 shadow-lg rounded-3 overflow-hidden">
-                <div class="card-header eco-gradient text-white py-3 d-flex justify-content-between align-items-center">
+                <div class="card-header eco-gradient text-success py-3 d-flex justify-content-between align-items-center">
                     <h5 class="card-title fw-bold mb-0">
-                        <i class="bi bi-bar-chart-fill me-2"></i>Emisi Karbon Saya
+                        <i class="bi bi-graph-up me-2"></i>Emisi Karbon Saya (Line Chart)
                     </h5>
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-light active period-btn" data-period="1M">1M</button>
-                        <button type="button" class="btn btn-outline-light period-btn" data-period="3M">3M</button>
-                        <button type="button" class="btn btn-outline-light period-btn" data-period="6M">6M</button>
-                        <button type="button" class="btn btn-outline-light period-btn" data-period="1Y">1Y</button>
+                        <button type="button" class="btn btn-success active period-btn" data-period="1M">1M</button>
+                        <button type="button" class="btn btn-outline-success period-btn" data-period="3M">3M</button>
+                        <button type="button" class="btn btn-outline-success period-btn" data-period="6M">6M</button>
+                        <button type="button" class="btn btn-outline-success period-btn" data-period="1Y">1Y</button>
                     </div>
                 </div>
                 <div class="card-body p-4">
@@ -163,18 +148,18 @@
                             <span class="text-muted">vs periode sebelumnya</span>
                         </div>
                     </div>
-                    <div class="chart-container" style="height: 300px; width: 100%;">
+                    <div class="chart-container" style="height: 350px;">
                         <canvas id="emisiChart"></canvas>
                     </div>
                 </div>
             </div>
 
             <div class="eco-card card mb-4 shadow-lg rounded-3 overflow-hidden">
-                <div class="card-header eco-gradient text-white py-3 d-flex justify-content-between align-items-center">
+                <div class="card-header eco-gradient text-success py-3 d-flex justify-content-between align-items-center">
                     <h5 class="card-title fw-bold mb-0">
                         <i class="bi bi-list-check me-2"></i>Riwayat Input Data
                     </h5>
-                    <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-light btn-sm rounded-pill px-3">
+                    <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-success btn-sm rounded-pill px-3">
                         <i class="bi bi-eye me-1"></i>Lihat Semua
                     </a>
                 </div>
@@ -258,7 +243,7 @@
         
         <div class="col-md-4">
             <div class="eco-card card mb-4 shadow-lg rounded-3 overflow-hidden">
-                <div class="card-header eco-gradient text-white py-3">
+                <div class="card-header eco-gradient text-success py-3">
                     <h6 class="m-0 fw-bold">
                         <i class="bi bi-grid-1x2-fill me-2"></i>Statistik Saya
                     </h6>
@@ -327,7 +312,7 @@
             </div>
             
             <div class="eco-card card mb-4 shadow-lg rounded-3 overflow-hidden">
-                <div class="card-header eco-gradient text-white py-3">
+                <div class="card-header eco-gradient text-success py-3">
                     <h6 class="m-0 fw-bold">
                         <i class="bi bi-pie-chart-fill me-2"></i>Kategori Emisi
                     </h6>
@@ -352,21 +337,6 @@
                 </div>
             </div>
 
-            <div class="eco-card card mb-4 shadow-lg rounded-3 overflow-hidden">
-                <div class="card-header eco-gradient text-white py-3">
-                    <h6 class="m-0 fw-bold">
-                        <i class="bi bi-plus-circle-fill me-2"></i>Aksi Cepat
-                    </h6>
-                </div>
-                <div class="card-body p-4">
-                    <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success w-100 mb-3 shadow-sm">
-                        <i class="bi bi-plus-lg me-2"></i> Input Data Emisi Baru
-                    </a>
-                    <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-success w-100">
-                        <i class="bi bi-list-check me-2"></i> Lihat Semua Data Emisi
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -384,200 +354,358 @@
             }, 100 * index);
         });
         
-        // Chart data with validation
         const emisiChartData = @json($emisiChartData);
         const categoryChartData = @json($categoryChartData);
         
-        // Debug chart data
         console.log('Emisi Chart Data:', emisiChartData);
         console.log('Category Chart Data:', categoryChartData);
         
-        // Validate chart data
         if (!emisiChartData || !emisiChartData.labels || !emisiChartData.data) {
             console.error('Invalid emisi chart data:', emisiChartData);
-            return;
-        }
-        
-        // Check if we have valid data first
-        if (!emisiChartData.data || emisiChartData.data.length === 0) {
-            console.log('No chart data available');
-            // Create empty message in chart area
-            const emisiChartContainer = document.querySelector('.chart-container');
+            const emisiChartContainer = document.getElementById('emisiChart').parentElement;
             if (emisiChartContainer) {
-                const noDataMessage = document.createElement('div');
-                noDataMessage.className = 'text-center py-5';
-                noDataMessage.innerHTML = '<i class="bi bi-exclamation-circle text-muted fs-1"></i><p class="mt-3 text-muted">Belum ada data emisi karbon. Silahkan input data untuk melihat visualisasi.</p>';
-                emisiChartContainer.appendChild(noDataMessage);
+                emisiChartContainer.innerHTML = '<div class="text-center py-5"><i class="bi bi-exclamation-circle text-muted fs-1"></i><p class="mt-3 text-muted">Data emisi tidak valid.</p></div>';
             }
             return;
         }
         
-        // Format data to ensure consistent type
         const formattedData = emisiChartData.data.map(value => parseFloat(value) || 0);
-        
-        // Enhanced formatted data - check if we have any non-zero values
-        const hasData = formattedData.some(value => value > 0);
-        if (!hasData) {
-            console.log('All zero data values');
-        }
-        
-        // Emisi Chart
+        const hasActualData = formattedData.some(value => value > 0);
+
+        // Emisi Chart (Visualisasi Baru - Kombinasi Bar & Area Chart)
         const emisiCanvas = document.getElementById('emisiChart');
         if (!emisiCanvas) {
             console.error('Emisi chart canvas not found');
+        } else {
+            const emisiCtx = emisiCanvas.getContext('2d');
+            
+            // Debug data untuk troubleshooting
+            console.log('Checking emisiChartData:', emisiChartData);
+            console.log('Data values:', emisiChartData.data);
+            console.log('Sum of data:', emisiChartData.data.reduce((a, b) => a + parseFloat(b || 0), 0));
+            
+            // Perbaikan kondisi pengecekan data
+            const hasData = emisiChartData && 
+                           emisiChartData.labels && 
+                           emisiChartData.data && 
+                           emisiChartData.data.length > 0 && 
+                           !emisiChartData.labels.includes('No Data') &&
+                           emisiChartData.data.some(value => parseFloat(value) > 0);
+            
+            if (!hasData) {
+                console.log('No emission data available or all values are zero');
+                const emisiChartContainer = emisiCanvas.parentElement;
+                if (emisiChartContainer) {
+                    emisiChartContainer.innerHTML = '<div class="text-center py-5"><i class="bi bi-exclamation-circle text-muted fs-1"></i><p class="mt-3 text-muted">Belum ada data emisi karbon. Silahkan input data untuk melihat visualisasi.</p></div>';
+                }
+            } else {
+                // Generate target data (simulasi target pengurangan emisi 5% dari baseline)
+                const baselineValue = Math.max(...emisiChartData.data.map(d => parseFloat(d || 0)));
+                const targetData = emisiChartData.data.map(() => baselineValue * 0.95);
+
+                // Generate moving average untuk trendline
+                const movingAverage = [];
+                const window = 3; // window size untuk moving average
+
+                for (let i = 0; i < emisiChartData.data.length; i++) {
+                    if (i < window - 1) {
+                        movingAverage.push(null); // Awal data tidak punya cukup titik
+                    } else {
+                        let sum = 0;
+                        for (let j = 0; j < window; j++) {
+                            sum += parseFloat(emisiChartData.data[i - j] || 0);
+                        }
+                        movingAverage.push(sum / window);
+                    }
+                }
+
+                // Hitung total emisi - pastikan nilai numerik
+                const totalEmission = emisiChartData.data.reduce((a, b) => a + parseFloat(b || 0), 0);
+                
+                // Visualisasi baru - Kombinasi Bar & Area Chart dengan trendline
+                const emisiChart = new Chart(emisiCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: emisiChartData.labels,
+                        datasets: [
+                            {
+                                label: 'Emisi Karbon (kg CO₂e)',
+                                data: emisiChartData.data.map(d => parseFloat(d || 0)),
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderColor: '#28a745',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                barPercentage: 0.6,
+                                order: 2
+                            },
+                            {
+                                label: 'Trendline (Moving Average)',
+                                data: movingAverage,
+                                type: 'line',
+                                borderColor: '#fd7e14',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#fd7e14',
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                                fill: false,
+                                tension: 0.4,
+                                order: 1
+                            },
+                            {
+                                label: 'Target Pengurangan',
+                                data: targetData,
+                                type: 'line',
+                                borderColor: 'rgba(220, 53, 69, 0.7)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                fill: false,
+                                order: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('id-ID') + ' kg';
+                                    },
+                                    font: {
+                                        size: 11
+                                    },
+                                    color: '#666' // Set tick color to dark grey
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Total Emisi (kg CO₂e)',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    padding: {top: 10, bottom: 10},
+                                    color: '#333' // Set title color to dark grey
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    font: {
+                                        size: 10,
+                                        weight: 'bold'
+                                    },
+                                    color: '#666' // Set tick color to dark grey
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Bulan',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    padding: {top: 10, bottom: 0},
+                                    color: '#333' // Set title color to dark grey
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: {
+                                    size: 13
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                padding: 10,
+                                cornerRadius: 4,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += parseFloat(context.parsed.y).toLocaleString('id-ID') + ' kg CO₂e';
+                                        }
+                                        return label;
+                                    },
+                                    afterBody: function(tooltipItems) {
+                                        if (tooltipItems[0].datasetIndex === 0) { // Only for the main dataset
+                                            const currentValue = tooltipItems[0].parsed.y;
+                                            const targetValue = targetData[tooltipItems[0].dataIndex];
+                                            const difference = currentValue - targetValue;
+                                            const percentage = (difference / targetValue) * 100;
+                                            
+                                            return ['', 
+                                                `Selisih dari target: ${difference.toLocaleString('id-ID')} kg CO₂e`,
+                                                `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}% dari target`
+                                            ];
+                                        }
+                                        return '';
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Visualisasi Emisi Karbon Bulanan',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                padding: {top: 10, bottom: 20},
+                                color: '#333'
+                            },
+                            annotation: {
+                                annotations: {
+                                    totalEmissionLine: {
+                                        type: 'line',
+                                        yMin: totalEmission / emisiChartData.data.length,
+                                        yMax: totalEmission / emisiChartData.data.length,
+                                        borderColor: 'rgba(75, 192, 192, 0.5)',
+                                        borderWidth: 2,
+                                        borderDash: [2, 2],
+                                        label: {
+                                            display: true,
+                                            content: 'Rata-rata: ' + (totalEmission / emisiChartData.data.length).toLocaleString('id-ID') + ' kg',
+                                            position: 'end',
+                                            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                                            font: {
+                                                size: 10
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+                
+                // Tambahkan informasi ringkasan di bawah chart
+                const chartContainer = emisiCanvas.parentElement;
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'mt-3 p-3 bg-light rounded';
+                
+                chartContainer.appendChild(summaryDiv);
+            }
+        }
+
+        // Category Chart (Donut)
+        const categoryCanvas = document.getElementById('categoryChart');
+        if (!categoryCanvas) {
+            console.error('Category chart canvas not found');
             return;
         }
+        const categoryCtx = categoryCanvas.getContext('2d');
         
-        const emisiCtx = emisiCanvas.getContext('2d');
-        const emisiChart = new Chart(emisiCtx, {
-            type: 'bar', // Changed to bar for better monthly visualization
-            data: {
-                labels: emisiChartData.labels,
-                datasets: [{
-                    label: 'Emisi Karbon Bulanan (kg CO₂e)',
-                    data: formattedData,
-                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                    borderColor: '#28a745',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    hoverBackgroundColor: 'rgba(40, 167, 69, 0.8)',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+        if (!categoryChartData || !categoryChartData.labels || !categoryChartData.data || categoryChartData.data.every(d => d === 0 || d === 1 && categoryChartData.labels[0] === 'No Data')) {
+             console.log('No category data available or only placeholder data.');
+            const categoryChartContainer = categoryCanvas.parentElement;
+            if (categoryChartContainer) {
+                categoryChartContainer.innerHTML = '<div class="text-center py-5"><i class="bi bi-pie-chart text-muted fs-1"></i><p class="mt-3 text-muted">Tidak ada data kategori emisi untuk ditampilkan.</p></div>';
+            }
+        } else {
+            const categoryChart = new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryChartData.labels,
+                    datasets: [{
+                        data: categoryChartData.data,
+                        backgroundColor: categoryChartData.colors,
+                        borderWidth: 2, // Added border for separation
+                        borderColor: '#fff' // White border
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                           display: false // Switched off as details are below
                         },
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString('id-ID') + ' kg';
-                            },
-                            font: {
-                                size: 11
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${context.label}: ${parseFloat(value).toLocaleString('id-ID')} kg CO₂e (${percentage}%)`;
+                                }
                             }
                         },
                         title: {
-                            display: true,
-                            text: 'Total Emisi (kg CO₂e)',
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            },
-                            padding: {top: 10, bottom: 10}
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 45,
-                            font: {
-                                size: 10,
-                                weight: 'bold'
+                                display: true,
+                                text: 'Distribusi Emisi per Kategori',
+                                font: { size: 14, weight: 'bold' },
+                                padding: { top: 5, bottom: 15 },
+                                color: '#333' // Set title color to dark grey
                             }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Bulan',
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            },
-                            padding: {top: 10, bottom: 0}
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleFont: {
-                            size: 13
-                        },
-                        bodyFont: {
-                            size: 12
-                        },
-                        padding: 10,
-                        cornerRadius: 4,
-                        callbacks: {
-                            label: function(context) {
-                                return `${parseFloat(context.parsed.y).toLocaleString('id-ID')} kg CO₂e`;
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Visualisasi Emisi Karbon Bulanan',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: {top: 10, bottom: 30},
-                        color: '#28a745'
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            }
-        });
-        
-        // Category Chart (Donut)
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-        const categoryChart = new Chart(categoryCtx, {
-            type: 'doughnut',
-            data: {
-                labels: categoryChartData.labels,
-                datasets: [{
-                    data: categoryChartData.data,
-                    backgroundColor: categoryChartData.colors,
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${context.label}: ${value.toFixed(2)} kg CO₂e (${percentage}%)`;
-                            }
-                        }
                     }
                 }
-            }
-        });
+            });
+        }
         
         // Period buttons event listeners
         const periodButtons = document.querySelectorAll('.period-btn');
         periodButtons.forEach(button => {
             button.addEventListener('click', function() {
-                periodButtons.forEach(btn => btn.classList.remove('btn-success', 'active'));
-                periodButtons.forEach(btn => btn.classList.add('btn-outline-success'));
+                // Update active button styling
+                periodButtons.forEach(btn => {
+                    btn.classList.remove('btn-success', 'active'); // Remove active and btn-success from previously active button
+            btn.classList.add('btn-outline-success');
+                });
                 this.classList.remove('btn-outline-success');
-                this.classList.add('btn-success', 'active');
+            this.classList.add('btn-success', 'active'); // Add active and btn-success to the clicked button
                 
                 const period = this.getAttribute('data-period');
+                // Redirect to update data based on period
                 window.location.href = `{{ route('staff.dashboard') }}?period=${period}`;
             });
         });
+
+        // Set active period button based on URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPeriod = urlParams.get('period') || '1M'; // Default to 1M if no period in URL
+        periodButtons.forEach(button => {
+            if (button.getAttribute('data-period') === currentPeriod) {
+                button.classList.remove('btn-outline-success');
+            button.classList.add('btn-success', 'active');
+            } else {
+                button.classList.remove('btn-success', 'active');
+            button.classList.add('btn-outline-success');
+            }
+        });
+
     });
 </script>
 @endsection
@@ -603,5 +731,21 @@
     .chart-container {
         position: relative;
     }
+
+    /* Styling for period buttons */
+    .period-btn.active {
+        background-color: #ffffff !important; /* White background for active */
+        color: #28a745 !important; /* Green text for active */
+        border-color: #ffffff !important; 
+    }
+    .period-btn {
+        color: #f8f9fa; /* Light text for inactive */
+        border-color: #f8f9fa; /* Light border for inactive */
+    }
+    .period-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+    }
+
 </style>
 @endsection

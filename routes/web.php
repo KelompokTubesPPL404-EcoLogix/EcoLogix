@@ -6,6 +6,7 @@ use App\Http\Controllers\EmisiKarbonController;
 use App\Http\Controllers\FaktorEmisiController;
 use App\Http\Controllers\KompensasiEmisiController;
 use App\Http\Controllers\PembelianCarbonCreditController;
+use App\Http\Controllers\CarbonCreditPurchaseController;
 use App\Http\Controllers\PenyediaCarbonCreditController;
 use App\Http\Controllers\StaffController;
 use Illuminate\Http\Request;
@@ -118,6 +119,24 @@ Route::middleware('auth')->group(function () {
         
         // Faktor Emisi
         Route::resource('faktor-emisi', FaktorEmisiController::class);
+        
+        // Pembelian Carbon Credit (Original Controller)
+        Route::resource('pembelian-carbon-credit', PembelianCarbonCreditController::class);
+        
+        // Route for auto-populating form fields
+        Route::get('pembelian-carbon-credit-get-form-data', [PembelianCarbonCreditController::class, 'getFormData'])
+            ->name('pembelian-carbon-credit.get-form-data');
+        
+        // Improved Carbon Credit Purchase Feature
+        Route::resource('carbon-credit-purchase', CarbonCreditPurchaseController::class);
+        
+        // Additional routes for improved carbon credit purchase
+        Route::get('carbon-credit-purchase-get-form-data', [CarbonCreditPurchaseController::class, 'getFormData'])
+            ->name('carbon-credit-purchase.get-form-data');
+        Route::get('carbon-credit-purchase-dashboard', [CarbonCreditPurchaseController::class, 'dashboard'])
+            ->name('carbon-credit-purchase.dashboard');
+        Route::get('carbon-credit-purchase-report', [CarbonCreditPurchaseController::class, 'report'])
+            ->name('carbon-credit-purchase.report');
     });
 
     // Rute Staff
@@ -133,11 +152,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware(\App\Http\Middleware\CheckRole::class . ':manager')->prefix('manager')->name('manager.')->group(function () {
         Route::resource('faktor-emisi', FaktorEmisiController::class);
         Route::resource('penyedia-carbon-credit', PenyediaCarbonCreditController::class);
-        Route::resource('pembelian-carbon-credit', PembelianCarbonCreditController::class);
-        
-        // Route for auto-populating form fields
-        Route::get('pembelian-carbon-credit-get-form-data', [PembelianCarbonCreditController::class, 'getFormData'])
-            ->name('pembelian-carbon-credit.get-form-data');
     });
     
     // Tambahkan route untuk history

@@ -113,17 +113,6 @@
     body {
       padding-top: 70px; /* Space for fixed navbar */
     }
-
-    .notification-badge {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 0.7rem;
-      background-color: red;
-      color: white;
-      border-radius: 50%;
-      padding: 2px 6px;
-    }
   </style>
   @yield('styles')
 </head>
@@ -203,9 +192,10 @@
         </ul>
       </div>
 
-      <!-- Profile Dropdown -->
+      <!-- User Dropdown -->
       <div class="dropdown">
-        <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(0,0,0,0.2); border: none;">
+        
+          <button class="btn dropdown-toggle d-flex align-items-center gap-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(0,0,0,0.2); border: none;">
           <div class="rounded-circle bg-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
             <i class="bi bi-person-fill text-success"></i>
           </div>
@@ -237,36 +227,62 @@
     </div>
   </nav>
 
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    @yield('sidebar')
-  </div>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      @yield('sidebar')
+    </div>
 
-  <!-- Main Content -->
-  <div class="main-content p-4">
-      @if(session('success'))
-      <div class="alert alert-success">
-          {{ session('success') }}
-      </div>
-      @endif
-
-      @if(session('error'))
-      <div class="alert alert-danger">
-          {{ session('error') }}
-      </div>
-      @endif
-
+    <!-- Main Content -->
+    <div class="main-content flex-grow-1 p-4" id="mainContent">
       @yield('content')
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  @yield('scripts')
   <script>
-    document.getElementById('toggleSidebar').addEventListener('click', function () {
-      document.body.classList.toggle('sidebar-collapsed');
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleSidebarBtn = document.getElementById('toggleSidebar');
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
+
+      // Function to set sidebar state
+      function setSidebarState(isCollapsed) {
+        if (isCollapsed) {
+          sidebar.classList.add('sidebar-collapsed');
+          mainContent.classList.add('sidebar-collapsed');
+          sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
+        } else {
+          sidebar.classList.remove('sidebar-collapsed');
+          mainContent.classList.remove('sidebar-collapsed');
+          sidebarToggleIcon.classList.replace('bi-x-lg', 'bi-list');
+        }
+      }
+
+      // Check local storage for sidebar state on load
+      const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      setSidebarState(isSidebarCollapsed);
+
+      // Toggle sidebar on button click
+      toggleSidebarBtn.addEventListener('click', function() {
+        const currentCollapsedState = sidebar.classList.contains('sidebar-collapsed');
+        setSidebarState(!currentCollapsedState);
+        localStorage.setItem('sidebarCollapsed', !currentCollapsedState);
+      });
+
+      // Adjust main content margin on window resize for responsiveness
+      window.addEventListener('resize', function() {
+        if (window.innerWidth < 768) { // Bootstrap's md breakpoint
+          setSidebarState(true); // Collapse sidebar on small screens
+          localStorage.setItem('sidebarCollapsed', 'true');
+        } else {
+          const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+          setSidebarState(isCollapsed); // Restore state on larger screens
+        }
+      });
     });
   </script>
+  @yield('scripts')
 </body>
 </html>

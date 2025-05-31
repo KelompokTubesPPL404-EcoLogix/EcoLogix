@@ -149,3 +149,6 @@
   }
 </style>
 @endsection
+
+<div class="page-content">
+</div>

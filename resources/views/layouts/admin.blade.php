@@ -42,6 +42,22 @@
           <span>Kelola Emisi Karbon</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.pembelian-carbon-credit*') ? 'active' : '' }}" href="{{ route('admin.pembelian-carbon-credit.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-currency-exchange"></i>
+          </div>
+          <span>Pembelian Carbon Credit</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.carbon-credit-purchase*') ? 'active' : '' }}" href="{{ route('admin.carbon-credit-purchase.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-currency-exchange"></i>
+          </div>
+          <span>Pembelian Carbon Credit 2</span>
+        </a>
+      </li>
     </ul>
     
     <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Laporan & Data</div>

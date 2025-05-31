@@ -42,7 +42,7 @@
                             <span id="comparison-text">{{ $emisiChartData['comparison'] > 0 ? '+' : '' }}{{ $emisiChartData['comparison'] }}%</span> vs periode sebelumnya
                         </div>
                     </div>
-                    <div class="chart-container" style="height: 300px; width: 100%;">
+                    <div class="chart-container" style="height: 350px;">
                         <canvas id="emisiChart"></canvas>
                     </div>
                 </div>
@@ -215,95 +215,249 @@
         // Format data to ensure consistent type
         const formattedData = emisiChartData.data.map(value => parseFloat(value) || 0);
         
-        // Emisi Chart
+        // Emisi Chart (Visualisasi Baru - Kombinasi Bar & Area Chart)
         const emisiCanvas = document.getElementById('emisiChart');
         if (!emisiCanvas) {
             console.error('Emisi chart canvas not found');
-            return;
-        }
-        
-        const emisiCtx = emisiCanvas.getContext('2d');
-        const emisiChart = new Chart(emisiCtx, {
-            type: 'line',
-            data: {
-                labels: emisiChartData.labels,
-                datasets: [{
-                    label: 'Emisi Karbon (kg CO₂e)',
-                    data: formattedData,
-                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
-                    borderColor: '#28a745',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#28a745',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(1) + ' kg';
-                            },
-                            font: {
-                                size: 11
-                            }
+        } else {
+            const emisiCtx = emisiCanvas.getContext('2d');
+            
+            // Debug data untuk troubleshooting
+            console.log('Checking emisiChartData:', emisiChartData);
+            console.log('Data values:', emisiChartData.data);
+            console.log('Sum of data:', emisiChartData.data.reduce((a, b) => a + parseFloat(b || 0), 0));
+            
+            // Perbaikan kondisi pengecekan data
+            const hasData = emisiChartData && 
+                           emisiChartData.labels && 
+                           emisiChartData.data && 
+                           emisiChartData.data.length > 0 && 
+                           !emisiChartData.labels.includes('No Data') &&
+                           emisiChartData.data.some(value => parseFloat(value) > 0);
+            
+            if (!hasData) {
+                console.log('No emission data available or all values are zero');
+                const emisiChartContainer = emisiCanvas.parentElement;
+                if (emisiChartContainer) {
+                    emisiChartContainer.innerHTML = '<div class="text-center py-5"><i class="bi bi-exclamation-circle text-muted fs-1"></i><p class="mt-3 text-muted">Belum ada data emisi karbon. Silahkan input data untuk melihat visualisasi.</p></div>';
+                }
+            } else {
+                // Generate target data (simulasi target pengurangan emisi 5% dari baseline)
+                const baselineValue = Math.max(...emisiChartData.data.map(d => parseFloat(d || 0)));
+                const targetData = emisiChartData.data.map(() => baselineValue * 0.95);
+
+                // Generate moving average untuk trendline
+                const movingAverage = [];
+                const window = 3; // window size untuk moving average
+
+                for (let i = 0; i < emisiChartData.data.length; i++) {
+                    if (i < window - 1) {
+                        movingAverage.push(null); // Awal data tidak punya cukup titik
+                    } else {
+                        let sum = 0;
+                        for (let j = 0; j < window; j++) {
+                            sum += parseFloat(emisiChartData.data[i - j] || 0);
                         }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 45,
-                            font: {
-                                size: 10
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleFont: {
-                            size: 13
-                        },
-                        bodyFont: {
-                            size: 12
-                        },
-                        padding: 10,
-                        cornerRadius: 4,
-                        callbacks: {
-                            label: function(context) {
-                                return `${parseFloat(context.parsed.y).toFixed(2)} kg CO₂e`;
-                            }
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                elements: {
-                    line: {
-                        borderJoinStyle: 'round'
+                        movingAverage.push(sum / window);
                     }
                 }
+
+                // Hitung total emisi - pastikan nilai numerik
+                const totalEmission = emisiChartData.data.reduce((a, b) => a + parseFloat(b || 0), 0);
+                
+                // Visualisasi baru - Kombinasi Bar & Area Chart dengan trendline
+                const emisiChart = new Chart(emisiCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: emisiChartData.labels,
+                        datasets: [
+                            {
+                                label: 'Emisi Karbon (kg CO₂e)',
+                                data: emisiChartData.data.map(d => parseFloat(d || 0)),
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderColor: '#28a745',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                barPercentage: 0.6,
+                                order: 2
+                            },
+                            {
+                                label: 'Trendline (Moving Average)',
+                                data: movingAverage,
+                                type: 'line',
+                                borderColor: '#fd7e14',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#fd7e14',
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                                fill: false,
+                                tension: 0.4,
+                                order: 1
+                            },
+                            {
+                                label: 'Target Pengurangan',
+                                data: targetData,
+                                type: 'line',
+                                borderColor: 'rgba(220, 53, 69, 0.7)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                fill: false,
+                                order: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('id-ID') + ' kg';
+                                    },
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Total Emisi (kg CO₂e)',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    padding: {top: 10, bottom: 10}
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    font: {
+                                        size: 10,
+                                        weight: 'bold'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Bulan',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    padding: {top: 10, bottom: 0}
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: {
+                                    size: 13
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                padding: 10,
+                                cornerRadius: 4,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += parseFloat(context.parsed.y).toLocaleString('id-ID') + ' kg CO₂e';
+                                        }
+                                        return label;
+                                    },
+                                    afterBody: function(tooltipItems) {
+                                        if (tooltipItems[0].datasetIndex === 0) { // Only for the main dataset
+                                            const currentValue = tooltipItems[0].parsed.y;
+                                            const targetValue = targetData[tooltipItems[0].dataIndex];
+                                            const difference = currentValue - targetValue;
+                                            const percentage = (difference / targetValue) * 100;
+                                            
+                                            return ['', 
+                                                `Selisih dari target: ${difference.toLocaleString('id-ID')} kg CO₂e`,
+                                                `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}% dari target`
+                                            ];
+                                        }
+                                        return '';
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Visualisasi Emisi Karbon Bulanan',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                padding: {top: 10, bottom: 20},
+                                color: '#333'
+                            },
+                            annotation: {
+                                annotations: {
+                                    totalEmissionLine: {
+                                        type: 'line',
+                                        yMin: totalEmission / emisiChartData.data.length,
+                                        yMax: totalEmission / emisiChartData.data.length,
+                                        borderColor: 'rgba(75, 192, 192, 0.5)',
+                                        borderWidth: 2,
+                                        borderDash: [2, 2],
+                                        label: {
+                                            display: true,
+                                            content: 'Rata-rata: ' + (totalEmission / emisiChartData.data.length).toLocaleString('id-ID') + ' kg',
+                                            position: 'end',
+                                            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                                            font: {
+                                                size: 10
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+                
+                // Tambahkan informasi ringkasan di bawah chart
+                const chartContainer = emisiCanvas.parentElement;
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'mt-3 p-3 bg-light rounded';
+                
+                chartContainer.appendChild(summaryDiv);
             }
-        });
-        
+        }
+
         // Category Chart (Donut)
         const categoryCanvas = document.getElementById('categoryChart');
         if (!categoryCanvas) {

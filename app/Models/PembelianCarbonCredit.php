@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Perusahaan;
 
 class PembelianCarbonCredit extends Model
 {
@@ -47,6 +49,7 @@ class PembelianCarbonCredit extends Model
         'kode_penyedia',
         'kode_kompensasi',
         'kode_admin',
+        'kode_perusahaan',
         'jumlah_kompensasi',
         'harga_per_ton',
         'total_harga',
@@ -72,10 +75,18 @@ class PembelianCarbonCredit extends Model
     }
 
     /**
-     * Relasi dengan Admin.
+     * Relasi dengan Admin (User dengan role admin).
      */
     public function admin()
     {
-        return $this->belongsTo(Admin::class, 'kode_admin', 'kode_admin');
+        return $this->belongsTo(User::class, 'kode_admin', 'kode_user');
+    }
+    
+    /**
+     * Relasi dengan Perusahaan.
+     */
+    public function perusahaan()
+    {
+        return $this->belongsTo(Perusahaan::class, 'kode_perusahaan', 'kode_perusahaan');
     }
 }

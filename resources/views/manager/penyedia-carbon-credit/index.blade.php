@@ -111,9 +111,9 @@
                             <th class="border-0 fw-bold text-center">
                                 <i class="bi bi-hash me-1"></i>No
                             </th>
-                            <th class="border-0 fw-bold">
+                            {{-- <th class="border-0 fw-bold">
                                 <i class="bi bi-code-square me-1"></i>Kode Penyedia
-                            </th>
+                            </th> --}}
                             <th class="border-0 fw-bold">
                                 <i class="bi bi-building me-1"></i>Nama Penyedia
                             </th>
@@ -140,9 +140,9 @@
                             <td class="text-center">
                                 <span class="badge bg-light text-dark fw-bold">{{ $index + 1 }}</span>
                             </td>
-                            <td>
+                            {{-- <td>
                                 <span class="badge bg-success text-white px-3 py-2">{{ $penyedia->kode_penyedia }}</span>
-                            </td>
+                            </td> --}}
                             <td>
                                 <div class="fw-bold text-success">{{ $penyedia->nama_penyedia }}</div>
                                 <small class="text-muted">
@@ -152,9 +152,9 @@
                             <td>
                                 @if($penyedia->perusahaan)
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-light text-success border border-success me-2">
+                                    {{-- <span class="badge bg-light text-success border border-success me-2">
                                         {{ $penyedia->kode_perusahaan }}
-                                    </span>
+                                    </span> --}}
                                     <span class="fw-bold">{{ $penyedia->perusahaan->nama_perusahaan }}</span>
                                 </div>
                                 @else
