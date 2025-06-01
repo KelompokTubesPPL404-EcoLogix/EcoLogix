@@ -9,11 +9,12 @@
             <div class="card bg-gradient-success-light">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-success p-3 me-3">
+                        <div class="d-flex align-items-center justify-content-center me-3"
+                            style="background-color: #019D20; width: 56px; height: 56px; border-radius: 50%;">
                             <i class="bi bi-person-fill text-white fs-4"></i>
                         </div>
                         <div>
-                            <h4 class="card-title fw-bold text-success mb-1">Selamat Datang, {{ Auth::user()->nama }}!</h4>
+                            <h4 class="card-title fw-bold text-custom-green mb-1">Selamat Datang, {{ Auth::user()->nama }}!</h4>
                             <p class="text-muted mb-0">Anda login sebagai Staff untuk perusahaan {{ Auth::user()->perusahaan->nama_perusahaan ?? 'Unknown' }}</p>
                         </div>
                     </div>
@@ -27,7 +28,7 @@
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                     <h5 class="card-title fw-bold">
-                        <i class="bi bi-bar-chart-fill text-success me-2"></i>Emisi Karbon Saya
+                        <i class="bi bi-bar-chart-fill text-custom-green me-2"></i>Emisi Karbon Saya
                     </h5>
                     <div class="btn-group btn-group-sm" role="group">
                         <button type="button" class="btn btn-success active period-btn" data-period="1M">1M</button>
@@ -38,7 +39,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
-                        <div class="text-success">
+                        <div class="text-custom-green">
                             <span id="comparison-text">{{ $emisiChartData['comparison'] > 0 ? '+' : '' }}{{ $emisiChartData['comparison'] }}%</span> vs periode sebelumnya
                         </div>
                     </div>
@@ -51,7 +52,7 @@
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                     <h5 class="card-title fw-bold">
-                        <i class="bi bi-list-check text-success me-2"></i>Riwayat Input Data
+                        <i class="bi bi-list-check text-custom-green me-2"></i>Riwayat Input Data
                     </h5>
                     <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-sm btn-outline-success rounded-pill">
                         <i class="bi bi-eye me-1"></i>Lihat Semua
@@ -104,18 +105,22 @@
         
         <div class="col-md-4">
             <div class="card mb-4 border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title fw-bold">
-                        <i class="bi bi-grid-1x2-fill text-success me-2"></i>Statistik Saya
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0">
+                        {{-- Pastikan menggunakan kelas warna hijau kustom Anda --}}
+                        <i class="bi bi-grid-1x2-fill text-custom-green me-2"></i>Statistik Saya
                     </h5>
+                    <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Input Data Emisi Baru
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="stats-item mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-muted">Total Emisi Karbon</span>
-                            <i class="bi bi-cloud text-success"></i>
+                            <i class="bi bi-cloud text-custom-green"></i>
                         </div>
-                        <h3 class="fw-bold text-success">{{ number_format($dashboardStats['total_emisi'], 2) }} kg CO₂e</h3>
+                        <h3 class="fw-bold text-custom-green">{{ number_format($dashboardStats['total_emisi'], 2) }} kg CO₂e</h3>
                         <div class="progress" style="height: 5px;">
                             <div class="progress-bar bg-success" style="width: 100%"></div>
                         </div>
@@ -145,7 +150,7 @@
                         <div class="col-md-4">
                             <div class="text-center mb-3">
                                 <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-success bg-opacity-10 p-3" style="width: 64px; height: 64px;">
-                                    <i class="bi bi-check-circle text-success fs-4"></i>
+                                    <i class="bi bi-check-circle text-custom-green fs-4"></i>
                                 </div>
                                 <h4 class="mt-2 mb-0">{{ $latestEmissions->where('status', 'approved')->count() }}</h4>
                                 <span class="text-muted small">Approved</span>
@@ -167,7 +172,7 @@
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-white border-0">
                     <h5 class="card-title fw-bold">
-                        <i class="bi bi-pie-chart-fill text-success me-2"></i>Kategori Emisi
+                        <i class="bi bi-pie-chart-fill text-custom-green me-2"></i>Kategori Emisi
                     </h5>
                 </div>
                 <div class="card-body">
@@ -190,21 +195,6 @@
                 </div>
             </div>
 
-            <div class="card mb-4 border-0 shadow-sm">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title fw-bold">
-                        <i class="bi bi-plus-circle-fill text-success me-2"></i>Aksi Cepat
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success w-100 mb-3">
-                        <i class="bi bi-plus-lg me-2"></i> Input Data Emisi Baru
-                    </a>
-                    <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-success w-100">
-                        <i class="bi bi-list-check me-2"></i> Lihat Semua Data Emisi
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -274,11 +264,11 @@
                 datasets: [{
                     label: 'Emisi Karbon Bulanan (kg CO₂e)',
                     data: formattedData,
-                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(1, 157, 32, 0.6)',
+                    borderColor: '#019D20',
                     borderWidth: 1,
                     borderRadius: 4,
-                    hoverBackgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    hoverBackgroundColor: 'rgba(1, 157, 32, 0.8)',
                 }]
             },
             options: {
@@ -359,7 +349,7 @@
                             weight: 'bold'
                         },
                         padding: {top: 10, bottom: 30},
-                        color: '#28a745'
+                        color: '#019D20'
                     }
                 },
                 interaction: {

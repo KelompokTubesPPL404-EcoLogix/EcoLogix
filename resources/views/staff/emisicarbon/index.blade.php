@@ -26,7 +26,7 @@
     <!-- Data Emisi Table -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-success">Daftar Emisi Karbon</h6>
+            <h6 class="m-0 font-weight-bold text-custom-green">Daftar Emisi Karbon</h6>
             <div>
                 <form action="{{ route('staff.emisicarbon.index') }}" method="GET" class="d-none d-md-inline-block form-inline ml-auto mr-0 my-2 my-md-0">
                     <div class="input-group">

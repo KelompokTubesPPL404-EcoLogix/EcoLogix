@@ -19,7 +19,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-success">Form Edit Emisi Karbon</h6>
+            <h6 class="m-0 font-weight-bold text-custom-green">Form Edit Emisi Karbon</h6>
         </div>
         <div class="card-body">
             <form action="{{ route('staff.emisicarbon.update', $emisicarbon->kode_emisi_carbon) }}" method="POST">
