@@ -209,7 +209,7 @@
             </div>
           </li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-person-gear me-2 text-success"></i> Profil Saya</a></li>
+          <li><a class="dropdown-item" href="{{ route(Auth::user()->role . '.profile.index') }}"><i class="bi bi-person-gear me-2 text-success"></i> Profil Saya</a></li>
           <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2 text-success"></i> Pengaturan</a></li>
           <li><hr class="dropdown-divider"></li>
           <li>

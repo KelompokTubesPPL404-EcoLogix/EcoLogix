@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Admin extends Authenticatable
+class Admin extends User
 {
     use HasFactory, Notifiable;
 
@@ -16,14 +16,14 @@ class Admin extends Authenticatable
      *
      * @var string
      */
-    protected $table = 'admin';
+    protected $table = 'users';
 
     /**
      * Primary key tabel.
      *
      * @var string
      */
-    protected $primaryKey = 'kode_admin';
+    protected $primaryKey = 'kode_user';
 
     /**
      * Menunjukkan bahwa primary key bukan auto-increment.
@@ -45,12 +45,13 @@ class Admin extends Authenticatable
      * @var array<string>
      */
     protected $fillable = [
-        'kode_admin',
-        'nama_admin',
+        'kode_user',
+        'name',
         'email',
         'password',
         'no_hp',
         'kode_perusahaan',
+        'role',
     ];
 
     /**

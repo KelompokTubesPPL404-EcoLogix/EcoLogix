@@ -57,39 +57,8 @@
       </li>
     </ul>
     
-    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Laporan & Data</div>
     
-    <ul class="nav flex-column gap-1">
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('staff.reports*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-file-earmark-text"></i>
-          </div>
-          <span>Laporan</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('staff.history*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-clock-history"></i>
-          </div>
-          <span>Riwayat Aktivitas</span>
-        </a>
-      </li>
-    </ul>
     
-    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Pengaturan</div>
-    
-    <ul class="nav flex-column gap-1">
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('staff.profile*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-person"></i>
-          </div>
-          <span>Profil Saya</span>
-        </a>
-      </li>
-    </ul>
   </div>
 </div>
 

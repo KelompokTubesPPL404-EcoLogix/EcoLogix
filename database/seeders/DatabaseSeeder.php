@@ -18,6 +18,14 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SuperAdminSeeder::class,
+            PerusahaanSeeder::class,
+            ManagerSeeder::class,
+            AdminSeeder::class,
+            StaffSeeder::class,
+
+            FaktorEmisiSeeder::class,
+            EmisiKarbonSeeder::class,
+            PenyediaCarbonCreditSeeder::class
         ]);
     }
 }
