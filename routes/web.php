@@ -88,6 +88,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('manager', App\Http\Controllers\ManagerController::class)->parameters(['manager' => 'manager']); // Parameter diubah ke 'manager' untuk route model binding User
         // Rute tambahan jika diperlukan, misalnya untuk menampilkan form create dengan kode perusahaan tertentu
         Route::get('/manager/create/for-perusahaan/{kode_perusahaan}', [App\Http\Controllers\ManagerController::class, 'create'])->name('superadmin.manager.create.for_perusahaan');
+
+        // Rute Profil Super Admin
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
+            Route::put('/', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        });
     });
 
     // Rute Manager
@@ -97,6 +103,12 @@ Route::middleware('auth')->group(function () {
         
         // Leaderboard perusahaan
         Route::get('/leaderboard', [App\Http\Controllers\LeaderboardController::class, 'managerLeaderboard'])->name('leaderboard');
+
+        // Rute Profil Manager
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
+            Route::put('/', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        });
         
         // Manajemen admin menggunakan AdminController
         Route::resource('admin', App\Http\Controllers\AdminController::class)->parameters(['admin' => 'admin']); // Parameter diubah ke 'admin' untuk route model binding User
@@ -135,7 +147,11 @@ Route::middleware('auth')->group(function () {
         // Notifikasi
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');
         
-        
+        // Rute Profil Admin
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
+            Route::put('/', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        });
         
         // Faktor Emisi
         Route::resource('faktor-emisi', FaktorEmisiController::class);
@@ -169,8 +185,12 @@ Route::middleware('auth')->group(function () {
         
         // Notifikasi
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');
-        
-        
+
+        // Rute Profil Staff
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
+            Route::put('/', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        });
     });
     
     // Manager dapat juga mengakses dan memodifikasi data faktor emisi dan penyedia carbon credit

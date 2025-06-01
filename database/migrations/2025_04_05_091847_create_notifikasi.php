@@ -16,10 +16,12 @@ return new class extends Migration
             $table->string('kategori_notifikasi');
             $table->string('deskripsi');
             $table->date('tanggal_notifikasi');
-            $table->string('kode_admin');
-            $table->string('kode_staff');
-            $table->foreign('kode_admin')->references('kode_user')->on('users');
-            $table->foreign('kode_staff')->references('kode_user')->on('users');
+            $table->string('kode_admin')->nullable();
+            $table->string('kode_staff')->nullable();
+            $table->string('kode_manager')->nullable();
+            $table->foreign('kode_admin')->references('kode_user')->on('users')->onDelete('set null');
+            $table->foreign('kode_staff')->references('kode_user')->on('users')->onDelete('set null');
+            $table->foreign('kode_manager')->references('kode_user')->on('users')->onDelete('set null');
             $table->timestamps();
         });
     }
