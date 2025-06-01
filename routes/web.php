@@ -144,6 +144,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/emisicarbon/{emisicarbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
         Route::put('/emisicarbon/{emisicarbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
         Route::get('/emisicarbon-report', [EmisiKarbonController::class, 'report'])->name('emisicarbon.report');
+        Route::get('/emisicarbon-admin-report', [EmisiKarbonController::class, 'adminReport'])->name('emisicarbon.admin-report');
         
         // Notifikasi
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');

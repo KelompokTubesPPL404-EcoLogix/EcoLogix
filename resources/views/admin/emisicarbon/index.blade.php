@@ -16,6 +16,9 @@
             <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary btn-sm">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
+            <a href="{{ route('admin.emisicarbon.admin-report') }}" class="btn btn-success btn-sm ms-2" target="_blank">
+                <i class="fas fa-print"></i> Cetak Laporan Admin
+            </a>
         </div>
     </div>
 

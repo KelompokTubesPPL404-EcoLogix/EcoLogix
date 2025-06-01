@@ -497,4 +497,78 @@ class EmisiKarbonController extends Controller
         
         return $pdf->stream('laporan_emisi_karbon.pdf');
     }
+    
+    /**
+     * Generate a PDF report of all carbon emission data for administrators
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function adminReport()
+    {
+        $user = Auth::user();
+        
+        // Verifikasi bahwa pengguna adalah admin
+        if ($user->role != 'admin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk melihat laporan ini.');
+        }
+        
+        // Ambil semua data emisi karbon dari perusahaan yang sama dengan admin
+        $emisiKarbons = EmisiKarbon::select([
+                'emisi_carbon.kode_emisi_carbon',
+                'emisi_carbon.kategori_emisi_karbon',
+                'emisi_carbon.sub_kategori',
+                'emisi_carbon.nilai_aktivitas',
+                'emisi_carbon.faktor_emisi',
+                'emisi_carbon.kadar_emisi_karbon',
+                DB::raw('ROUND(emisi_carbon.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton'),
+                'emisi_carbon.tanggal_emisi',
+                'emisi_carbon.status',
+                'users.nama as nama_staff'
+            ])
+            ->leftJoin('users', 'emisi_carbon.kode_staff', '=', 'users.kode_user')
+            ->where('emisi_carbon.kode_perusahaan', $user->kode_perusahaan)
+            ->orderBy('emisi_carbon.tanggal_emisi', 'desc')
+            ->get();
+        
+        // Hitung total emisi
+        $totalEmisi = $emisiKarbons->sum('kadar_emisi_karbon') / 1000; // Convert to tons
+        
+        // Kelompokkan emisi berdasarkan kategori
+        $emisiByKategori = $emisiKarbons->groupBy('kategori_emisi_karbon')
+            ->map(function($group) {
+                return [
+                    'count' => $group->count(),
+                    'total' => $group->sum('kadar_emisi_karbon') / 1000, // Convert to tons
+                ];
+            });
+        
+        // Kelompokkan emisi berdasarkan staff
+        $emisiByStaff = $emisiKarbons->groupBy('nama_staff')
+            ->map(function($group) {
+                return [
+                    'count' => $group->count(),
+                    'total' => $group->sum('kadar_emisi_karbon') / 1000, // Convert to tons
+                ];
+            });
+        
+        // Kelompokkan emisi berdasarkan status
+        $emisiByStatus = $emisiKarbons->groupBy('status')
+            ->map(function($group) {
+                return [
+                    'count' => $group->count(),
+                    'total' => $group->sum('kadar_emisi_karbon') / 1000, // Convert to tons
+                ];
+            });
+        
+        $pdf = Pdf::loadView('admin.emisicarbon.admin_report', compact(
+            'emisiKarbons', 
+            'totalEmisi',
+            'emisiByKategori',
+            'emisiByStaff',
+            'emisiByStatus',
+            'user'
+        ));
+        
+        return $pdf->stream('laporan_emisi_karbon_admin.pdf');
+    }
 }
