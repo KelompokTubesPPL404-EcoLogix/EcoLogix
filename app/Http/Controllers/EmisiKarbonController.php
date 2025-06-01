@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmisiKarbonController extends Controller
 {
@@ -439,5 +441,60 @@ class EmisiKarbonController extends Controller
 
         return redirect()->route('admin.emisicarbon.index')
                          ->with('success', 'Status emisi karbon berhasil diupdate.');
+    }
+    
+    /**
+     * Generate PDF report of emission data
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function report()
+    {
+        $user = Auth::user();
+        
+        // Verify user has permission to access this report
+        if (!in_array($user->role, ['admin', 'staff', 'manager'])) {
+            return redirect()->route('login') ->with('error', 'Anda tidak memiliki izin untuk mengakses laporan ini.');
+        }
+        
+        // Get emission data with calculated fields
+        $emisiKarbons = EmisiKarbon::select([
+                'emisi_carbon.kode_emisi_carbon',
+                'emisi_carbon.kategori_emisi_karbon',
+                'emisi_carbon.sub_kategori',
+                'emisi_carbon.nilai_aktivitas',
+                'emisi_carbon.faktor_emisi',
+                'emisi_carbon.kadar_emisi_karbon',
+                DB::raw('ROUND(emisi_carbon.kadar_emisi_karbon / 1000, 2) as kadar_emisi_ton'),
+                'emisi_carbon.tanggal_emisi',
+                'emisi_carbon.status',
+                'users.nama as nama_staff'
+            ])
+            ->leftJoin('users', 'emisi_carbon.kode_staff', '=', 'users.kode_user')
+            ->where('emisi_carbon.kode_perusahaan', $user->kode_perusahaan)
+            ->orderBy('emisi_carbon.tanggal_emisi', 'desc')
+            ->get();
+        
+        // Calculate total emissions
+        $totalEmisi = $emisiKarbons->sum('kadar_emisi_karbon') / 1000; // Convert to tons
+        
+        // Group emissions by category for summary
+        $emisiByKategori = $emisiKarbons->groupBy('kategori_emisi_karbon')
+            ->map(function($group) {
+                return [
+                    'count' => $group->count(),
+                    'total' => $group->sum('kadar_emisi_karbon') / 1000, // Convert to tons
+                ];
+            });
+        
+        // Generate PDF
+        $pdf = Pdf::loadView('staff.emisicarbon.report', compact(
+            'emisiKarbons', 
+            'totalEmisi',
+            'emisiByKategori',
+            'user'
+        ));
+        
+        return $pdf->stream('laporan_emisi_karbon.pdf');
     }
 }

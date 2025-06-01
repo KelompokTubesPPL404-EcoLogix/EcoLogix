@@ -143,6 +143,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/emisicarbon/{emisicarbon}', [EmisiKarbonController::class, 'show'])->name('emisicarbon.show');
         Route::get('/emisicarbon/{emisicarbon}/edit-status', [EmisiKarbonController::class, 'editStatus'])->name('emisicarbon.editStatus');
         Route::put('/emisicarbon/{emisicarbon}/update-status', [EmisiKarbonController::class, 'updateStatus'])->name('emisicarbon.updateStatus');
+        Route::get('/emisicarbon-report', [EmisiKarbonController::class, 'report'])->name('emisicarbon.report');
         
         // Notifikasi
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');
@@ -163,16 +164,17 @@ Route::middleware('auth')->group(function () {
         // Route::get('pembelian-carbon-credit-get-form-data', [PembelianCarbonCreditController::class, 'getFormData'])
         //     ->name('pembelian-carbon-credit.get-form-data');
         
-        // Improved Carbon Credit Purchase Feature
-        Route::resource('carbon-credit-purchase', CarbonCreditPurchaseController::class);
-        
-        // Additional routes for improved carbon credit purchase
-        Route::get('carbon-credit-purchase-get-form-data', [CarbonCreditPurchaseController::class, 'getFormData'])
-            ->name('carbon-credit-purchase.get-form-data');
-        Route::get('carbon-credit-purchase-dashboard', [CarbonCreditPurchaseController::class, 'dashboard'])
-            ->name('carbon-credit-purchase.dashboard');
-        Route::get('carbon-credit-purchase-report', [CarbonCreditPurchaseController::class, 'report'])
-            ->name('carbon-credit-purchase.report');
+        // Carbon Credit Purchase routes for admin
+        Route::get('/carbon-credit-purchase', [CarbonCreditPurchaseController::class, 'index'])->name('carbon-credit-purchase.index');
+        Route::get('/carbon-credit-purchase/create', [CarbonCreditPurchaseController::class, 'create'])->name('carbon-credit-purchase.create');
+        Route::post('/carbon-credit-purchase', [CarbonCreditPurchaseController::class, 'store'])->name('carbon-credit-purchase.store');
+        Route::get('/carbon-credit-purchase/{purchase}', [CarbonCreditPurchaseController::class, 'show'])->name('carbon-credit-purchase.show');
+        Route::get('/carbon-credit-purchase/{purchase}/edit', [CarbonCreditPurchaseController::class, 'edit'])->name('carbon-credit-purchase.edit');
+        Route::put('/carbon-credit-purchase/{purchase}', [CarbonCreditPurchaseController::class, 'update'])->name('carbon-credit-purchase.update');
+        Route::delete('/carbon-credit-purchase/{purchase}', [CarbonCreditPurchaseController::class, 'destroy'])->name('carbon-credit-purchase.destroy');
+        Route::get('/carbon-credit-purchase-dashboard', [CarbonCreditPurchaseController::class, 'dashboard'])->name('carbon-credit-purchase.dashboard');
+        Route::get('/carbon-credit-purchase-report', [CarbonCreditPurchaseController::class, 'report'])->name('carbon-credit-purchase.report');
+        Route::get('/carbon-credit-purchase-get-form-data', [CarbonCreditPurchaseController::class, 'getFormData'])->name('carbon-credit-purchase.get-form-data');
     });
 
     // Rute Staff
@@ -182,6 +184,7 @@ Route::middleware('auth')->group(function () {
         
         // Route untuk Emisi Karbon - Staff
         Route::resource('emisicarbon', EmisiKarbonController::class);
+        Route::get('/emisicarbon-report', [EmisiKarbonController::class, 'report'])->name('emisicarbon.report');
         
         // Notifikasi
         Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.index');

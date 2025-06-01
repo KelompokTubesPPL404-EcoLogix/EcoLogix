@@ -90,8 +90,11 @@
                 <div class="carbon-badge me-3">
                     <i class="bi bi-cloud-check me-1"></i>{{ $emisiKarbons->count() }} Data
                 </div>
-                <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success shadow-sm px-4">
+                <a href="{{ route('staff.emisicarbon.create') }}" class="btn btn-success shadow-sm px-4 me-2">
                     <i class="bi bi-plus-circle me-1"></i> Tambah Data Emisi
+                </a>
+                <a href="{{ route('staff.emisicarbon.report') }}" class="btn btn-primary shadow-sm px-4" target="_blank">
+                    <i class="bi bi-file-pdf me-1"></i> Laporan PDF
                 </a>
             </div>
         </div>
