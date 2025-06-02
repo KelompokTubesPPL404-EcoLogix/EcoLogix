@@ -62,6 +62,9 @@
             <a href="{{ route('admin.carbon-credit-purchase.create') }}" class="btn btn-success btn-sm shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i> Tambah Pembelian
             </a>
+            <a href="{{ route('admin.carbon-credit-purchase.report') }}" class="btn btn-primary btn-sm shadow-sm" target="_blank">
+                <i class="bi bi-file-pdf me-1"></i> Laporan PDF
+            </a>
         </div>
     </div>
 

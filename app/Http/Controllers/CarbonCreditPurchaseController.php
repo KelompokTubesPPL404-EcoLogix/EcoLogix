@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CarbonCreditPurchaseController extends Controller
 {
@@ -801,68 +802,7 @@ class CarbonCreditPurchaseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\View\View
      */
-    public function report(Request $request)
-    {
-        // Get authenticated user
-        $user = Auth::user();
-        
-        // Get filter parameters
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $kode_perusahaan = $request->input('kode_perusahaan');
-        
-        // Query purchases with relationships
-        $query = PembelianCarbonCredit::with([
-            'penyedia', 
-            'kompensasiEmisiCarbon', 
-            'admin', 
-            'perusahaan'
-        ]);
-        
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $query->whereBetween('tanggal_pembelian', [$startDate, $endDate]);
-        } elseif ($startDate) {
-            $query->where('tanggal_pembelian', '>=', $startDate);
-        } elseif ($endDate) {
-            $query->where('tanggal_pembelian', '<=', $endDate);
-        }
-        
-        // Filter by company if provided or if user is not super-admin
-        if ($kode_perusahaan) {
-            $query->where('kode_perusahaan', $kode_perusahaan);
-        } elseif ($user->role != 'super-admin') {
-            $query->where('kode_perusahaan', $user->kode_perusahaan);
-        }
-        
-        // Get purchases ordered by date
-        $purchases = $query->orderBy('tanggal_pembelian', 'desc')->get();
-        
-        // Calculate summary statistics
-        $totalCarbon = $purchases->sum('jumlah_kompensasi');
-        $totalSpent = $purchases->sum('total_harga');
-        
-        $summary = [
-            'total_purchases' => $purchases->count(),
-            'total_carbon' => $totalCarbon,
-            'total_spent' => $totalSpent,
-            'average_price' => ($purchases->count() > 0 && $totalCarbon > 0) 
-                ? $totalSpent / $totalCarbon 
-                : 0
-        ];
-        
-        // Get all companies for filter dropdown
-        $companies = Perusahaan::orderBy('nama_perusahaan')->get();
-        
-        return view('admin.carbon-credit-purchase.report', compact(
-            'purchases', 
-            'summary',
-            'companies',
-            'startDate',
-            'endDate',
-            'kode_perusahaan'
-        ));
-    }
+
     
     /**
      * Display dashboard for carbon credit purchases
@@ -1027,5 +967,88 @@ class CarbonCreditPurchaseController extends Controller
         }
     }
     
-
+    /**
+     * Generate PDF report of carbon credit purchases
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function report()
+    {
+        try {
+            $user = Auth::user();
+            
+            // Verify user has permission to access this report
+            if (!in_array($user->role, ['admin', 'manager'])) {
+                return redirect()->route('login')
+                    ->with('error', 'Anda tidak memiliki izin untuk mengakses laporan ini.');
+            }
+            
+            // Get purchase data with relationships
+            $purchases = PembelianCarbonCredit::with([
+                    'penyedia', 
+                    'kompensasiEmisiCarbon', 
+                    'admin', 
+                    'perusahaan'
+                ])
+                ->when($user->role != 'super-admin', function ($query) use ($user) {
+                    return $query->where('kode_perusahaan', $user->kode_perusahaan);
+                })
+                ->orderBy('tanggal_pembelian', 'desc')
+                ->get();
+            
+            // Calculate statistics
+            $totalCarbon = $purchases->sum('jumlah_kompensasi') / 1000; // Convert to tons
+            $totalSpent = $purchases->sum('total_harga');
+            $averagePrice = ($purchases->count() > 0 && $totalCarbon > 0) ? $totalSpent / $totalCarbon : 0;
+            
+            // Group purchases by provider
+            $purchasesByProvider = $purchases->groupBy('kode_penyedia')
+                ->map(function($group) {
+                    return [
+                        'nama_penyedia' => $group->first()->penyedia->nama_penyedia,
+                        'count' => $group->count(),
+                        'total_carbon' => $group->sum('jumlah_kompensasi') / 1000, // Convert to tons
+                        'total_spent' => $group->sum('total_harga')
+                    ];
+                });
+            
+            // Group purchases by month
+            $purchasesByMonth = $purchases
+                ->groupBy(function($purchase) {
+                    return Carbon::parse($purchase->tanggal_pembelian)->format('M Y');
+                })
+                ->map(function($group) {
+                    return [
+                        'count' => $group->count(),
+                        'total_carbon' => $group->sum('jumlah_kompensasi') / 1000, // Convert to tons
+                        'total_spent' => $group->sum('total_harga')
+                    ];
+                });
+            
+            // Generate PDF
+            $pdf = Pdf::loadView('admin.carbon-credit-purchase.report', compact(
+                'purchases', 
+                'totalCarbon', 
+                'totalSpent', 
+                'averagePrice',
+                'purchasesByProvider',
+                'purchasesByMonth',
+                'user'
+            ));
+            
+            return $pdf->stream('laporan_pembelian_carbon_credit.pdf');
+            
+        } catch (\Exception $e) {
+            // Log error
+            Log::error("Error generating carbon credit purchase report", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'user_role' => Auth::user() ? Auth::user()->role : 'unknown'
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat membuat laporan. Silakan coba lagi atau hubungi administrator.');
+        }
+    }
 }
