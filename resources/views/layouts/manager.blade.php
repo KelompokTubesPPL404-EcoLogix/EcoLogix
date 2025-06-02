@@ -1,165 +1,162 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@yield('title', 'Dashboard') - EcoLogix</title>
+@extends('layouts.app')
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+@section('title', 'Manager Dashboard')
 
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f9fa;
-    }
-
-    .sidebar {
-      background-color: #007f2d;
-      min-height: 100vh;
-      color: white;
-      transition: all 0.3s ease;
-      width: 250px;
-    }
-
-    .sidebar .nav-link {
-      color: white;
-      font-weight: 500;
-    }
-
-    .sidebar .nav-link:hover,
-    .sidebar .nav-link.active {
-      background-color: #006622;
-      border-radius: 8px;
-    }
-
-    .card {
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .chart-container {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .sidebar-collapsed #sidebar {
-      margin-left: -250px;
-    }
-
-    .sidebar-collapsed .flex-grow-1 {
-      width: 100%;
-    }
-
-    .notification-badge {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 0.7rem;
-      background-color: red;
-      color: white;
-      border-radius: 50%;
-      padding: 2px 6px;
-    }
-  </style>
-  @yield('styles')
-</head>
-<body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
-    <button class="btn btn-outline-success me-2 d-none d-md-block" id="toggleSidebar">
-      <i id="sidebarToggleIcon" class="bi bi-list"></i>
-    </button>
-
-    <a class="navbar-brand d-flex align-items-center" href="{{ route('manager.dashboard') }}">
-      <img src="{{ asset('img/ECOLOGIX.png') }}" alt="Logo" height="30" class="me-2" />
-      <span class="fw-bold text-success">EcoLogix</span>
-    </a>
-
-    <div class="ms-auto d-flex align-items-center gap-3">
-      <!-- Notifikasi -->
-      <div class="dropdown position-relative">
-        <button class="btn btn-light position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-bell-fill"></i>
-          <span class="notification-badge">2</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 300px;">
-          <li class="dropdown-header fw-bold">Notifikasi</li>
-          <li>
-            <a class="dropdown-item d-flex justify-content-between small text-wrap">
-              <span>Pengajuan kompensasi baru masuk.</span>
-              <span class="text-muted">5 menit lalu</span>
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item d-flex justify-content-between small text-wrap">
-              <span>Data faktor emisi diperbarui.</span>
-              <span class="text-muted">1 jam lalu</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Profile Dropdown -->
-      <div class="dropdown">
-        <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle"></i> Refka Maulana Sidik
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="{{ route('manager.profile') }}">Profile</a></li>
-        </ul>
-      </div>
+@section('sidebar')
+<div class="p-3">
+  <div class="d-flex align-items-center mb-4 mt-2">
+    <div class="eco-icon-bg rounded-circle p-2 me-3 d-flex align-items-center justify-content-center">
+      <i class="bi bi-briefcase-fill text-white fs-5"></i>
     </div>
-  </nav>
-
-  <div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar p-3" id="sidebar">
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <a href="{{ route('manager.dashboard') }}" class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-house-door me-2"></i> Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('manager.faktor-emisi.*') ? 'active' : '' }}" href="{{ route('manager.faktor-emisi.index') }}">
-            <i class="bi bi-calculator me-2"></i> Faktor Emisi
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('manager.kompensasi.*') ? 'active' : '' }}" href="{{ route('manager.kompensasi.index') }}">
-            <i class="bi bi-arrow-left-right me-2"></i> Kompensasi Emisi
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('manager.carbon_credit.*') ? 'active' : '' }}" href="{{ route('manager.carbon_credit.index') }}">
-            <i class="bi bi-currency-exchange me-2"></i> Lihat pembelian
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('manager.penyedia.*') ? 'active' : '' }}" href="{{ route('manager.penyedia.index') }}">
-            <i class="bi bi-building me-2"></i> Kelola penyedia
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="flex-grow-1 p-4">
-      @yield('content')
+    <div>
+      <h5 class="text-white mb-0 fw-bold">Manager Panel</h5>
+      <small class="text-white-50">{{ Auth::user()->perusahaan->nama_perusahaan ?? 'EcoLogix' }}</small>
     </div>
   </div>
+  
+  <div class="sidebar-menu">
+    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2">Menu Utama</div>
+    
+    <ul class="nav flex-column gap-1">
+      <li class="nav-item">
+        <a href="{{ route('manager.dashboard') }}" class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-speedometer2"></i>
+          </div>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.admin') ? 'active' : '' }}" href="{{ route('manager.admin.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-people"></i>
+          </div>
+          <span>Manajemen Admin</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Karbon & Emisi</div>
+    
+    <ul class="nav flex-column gap-1">
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.leaderboard') ? 'active' : '' }}" href="{{ route('manager.leaderboard') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-trophy"></i>
+          </div>
+          <span>Leaderboard Perusahaan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.reports*') ? 'active' : '' }}" href="#">
+          <div class="icon-container me-3">
+            <i class="bi bi-bar-chart"></i>
+          </div>
+          <span>Laporan Emisi</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.kompensasi*') ? 'active' : '' }}" href="{{ route('manager.kompensasi.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-arrow-left-right"></i>
+          </div>
+          <span>Kompensasi Emisi</span>
+        </a>
+      </li>
+      {{-- <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.carbon_credit*') ? 'active' : '' }}" href="{{ route('manager.pembelian-carbon-credit.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-currency-exchange"></i>
+          </div>
+          <span>Carbon Credit</span>
+        </a>
+      </li> --}}
+    </ul>
+    
+    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Konfigurasi</div>
+    
+    <ul class="nav flex-column gap-1">
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.faktor-emisi*') ? 'active' : '' }}" href="{{ route('manager.faktor-emisi.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-rulers"></i>
+          </div>
+          <span>Faktor Emisi</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.penyedia-carbon-credit*') ? 'active' : '' }}" href="{{ route('manager.penyedia-carbon-credit.index') }}">
+          <div class="icon-container me-3">
+            <i class="bi bi-building"></i>
+          </div>
+          <span>Penyedia Carbon Credit</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.settings*') ? 'active' : '' }}" href="#">
+          <div class="icon-container me-3">
+            <i class="bi bi-gear"></i>
+          </div>
+          <span>Pengaturan</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  @yield('scripts')
-  <script>
-    document.getElementById('toggleSidebar').addEventListener('click', function () {
-      document.body.classList.toggle('sidebar-collapsed');
-    });
-  </script>
-</body>
-</html>
+<style>
+  .sidebar-menu {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .sidebar-heading {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .eco-icon-bg {
+    background-color: rgba(40, 167, 69, 0.8);
+    width: 38px;
+    height: 38px;
+  }
+  
+  .eco-nav-link {
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .eco-nav-link .icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+  }
+  
+  .eco-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: translateX(5px);
+  }
+  
+  .eco-nav-link.active {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .eco-nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: #fff;
+  }
+</style>
+@endsection
