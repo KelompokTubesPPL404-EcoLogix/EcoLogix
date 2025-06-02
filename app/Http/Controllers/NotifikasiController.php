@@ -36,6 +36,7 @@ class NotifikasiController extends Controller
         $notifikasi->kode_admin = $kodeAdmin;
         $notifikasi->kode_staff = $kodeStaff;
         $notifikasi->kode_manager = $kodeManager;
+        $notifikasi->dibaca = false; // Inisialisasi status dibaca sebagai false (belum dibaca)
         $notifikasi->save();
         
         return $notifikasi;
@@ -110,5 +111,49 @@ class NotifikasiController extends Controller
             ->update(['dibaca' => true]);
         
         return response()->json(['success' => true]);
+    }
+    
+    /**
+     * Menandai satu notifikasi sebagai dibaca berdasarkan ID
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function markOneAsRead(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        
+        // Validasi request
+        $request->validate([
+            'id' => 'required|exists:notifikasi,kode_notifikasi'
+        ]);
+        
+        // Tentukan kondisi berdasarkan role user
+        $condition = [];
+        
+        if ($user->role === 'admin') {
+            $condition['kode_admin'] = $user->kode_user;
+        } elseif ($user->role === 'staff') {
+            $condition['kode_staff'] = $user->kode_user;
+        } elseif ($user->role === 'manager') {
+            $condition['kode_manager'] = $user->kode_user;
+        }
+        
+        // Tambahkan kondisi kode_notifikasi
+        $condition['kode_notifikasi'] = $request->id;
+        
+        // Update notifikasi yang dipilih
+        $updated = Notifikasi::where($condition)
+            ->update(['dibaca' => true]);
+        
+        if ($updated) {
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['error' => 'Notifikasi tidak ditemukan atau bukan milik Anda'], 404);
+        }
     }
 }

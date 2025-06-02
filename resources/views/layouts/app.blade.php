@@ -38,9 +38,66 @@
     }
     
     /* Notifikasi yang belum dibaca */
-    .dropdown-item.fw-bold {
+    .dropdown-item.unread {
       background-color: rgba(40, 167, 69, 0.05);
       border-left: 3px solid #28a745;
+    }
+    
+    /* Notification dropdown scrollable area */
+    .notification-scrollable {
+      max-height: 350px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    
+    .notification-scrollable::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .notification-scrollable::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .notification-scrollable::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    
+    .notification-scrollable::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    /* Notification item styles */
+    .notification-item {
+      transition: all 0.2s ease;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .notification-item:hover {
+      background-color: rgba(40, 167, 69, 0.03);
+    }
+    
+    .notification-item .notification-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+    
+    .notification-item .notification-time {
+      font-size: 0.7rem;
+      color: #6c757d;
+    }
+    
+    .notification-actions {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background-color: #f8f9fa;
+      border-top: 1px solid rgba(0,0,0,0.05);
     }
     
     /* Carbon Theme Gradients */
@@ -75,7 +132,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
       opacity: 0.15;
       z-index: 0;
     }
@@ -170,22 +227,60 @@
           <i class="bi bi-bell-fill text-white"></i>
           <span class="notification-badge" id="notificationCount">0</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="width: 320px; border-radius: 8px; border: none; margin-top: 10px;">
-          <li class="dropdown-header fw-bold d-flex justify-content-between align-items-center p-3">
+        <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="width: 350px; border-radius: 8px; border: none; margin-top: 10px; padding: 0;">
+          <!-- Header -->
+          <div class="dropdown-header fw-bold d-flex justify-content-between align-items-center p-3">
             <span>Notifikasi</span>
             <span class="badge bg-success rounded-pill" id="newNotificationCount">0 Baru</span>
-          </li>
-          <li><hr class="dropdown-divider my-0"></li>
-          <div id="notificationList">
-            <!-- Notifikasi akan dimuat di sini -->
           </div>
-          <li><hr class="dropdown-divider my-0"></li>
-          <li>
-            <a class="dropdown-item text-center p-2" href="{{ route(Auth::user()->role . '.notifikasi.index') }}">
-              <span class="text-success fw-medium small">Lihat Semua Notifikasi</span>
+          
+          <!-- Tabs -->
+          <ul class="nav nav-tabs nav-fill" id="notificationTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active small py-2" id="recent-tab" data-bs-toggle="tab" data-bs-target="#recent" type="button" role="tab" aria-controls="recent" aria-selected="true">Terbaru</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link small py-2" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="false">Semua</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link small py-2" id="unread-tab" data-bs-toggle="tab" data-bs-target="#unread" type="button" role="tab" aria-controls="unread" aria-selected="false">Belum Dibaca</button>
+            </li>
+          </ul>
+          
+          <!-- Tab Content -->
+          <div class="tab-content" id="notificationTabContent">
+            <!-- Recent Notifications -->
+            <div class="tab-pane fade show active notification-scrollable" id="recent" role="tabpanel" aria-labelledby="recent-tab">
+              <div id="recentNotificationList">
+                <!-- Recent notifications will be loaded here -->
+              </div>
+            </div>
+            
+            <!-- All Notifications -->
+            <div class="tab-pane fade notification-scrollable" id="all" role="tabpanel" aria-labelledby="all-tab">
+              <div id="allNotificationList">
+                <!-- All notifications will be loaded here -->
+              </div>
+            </div>
+            
+            <!-- Unread Notifications -->
+            <div class="tab-pane fade notification-scrollable" id="unread" role="tabpanel" aria-labelledby="unread-tab">
+              <div id="unreadNotificationList">
+                <!-- Unread notifications will be loaded here -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Footer Actions -->
+          <div class="notification-actions">
+            <button class="btn btn-sm btn-outline-secondary" id="markAllAsRead">
+              <i class="bi bi-check-all me-1"></i>Tandai Semua Dibaca
+            </button>
+            <a class="btn btn-sm btn-success" href="#" id="refreshNotifications">
+              <i class="bi bi-arrow-clockwise me-1"></i>Segarkan
             </a>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
 
       <!-- User Dropdown -->
@@ -288,110 +383,201 @@
         fetch('{{ route("notifikasi.get") }}')
           .then(response => response.json())
           .then(data => {
-            const notificationList = document.getElementById('notificationList');
             const notificationCount = document.getElementById('notificationCount');
             const newNotificationCount = document.getElementById('newNotificationCount');
+            const recentNotificationList = document.getElementById('recentNotificationList');
+            const allNotificationList = document.getElementById('allNotificationList');
+            const unreadNotificationList = document.getElementById('unreadNotificationList');
             
             // Hitung notifikasi yang belum dibaca
-            const unreadCount = data.filter(notif => !notif.dibaca).length;
+            const unreadNotifications = data.filter(notif => !notif.dibaca);
+            const unreadCount = unreadNotifications.length;
             
             // Update badge count
             notificationCount.textContent = unreadCount > 0 ? unreadCount : '0';
             newNotificationCount.textContent = unreadCount > 0 ? unreadCount + ' Baru' : '0 Baru';
             
             // Kosongkan list notifikasi
-            notificationList.innerHTML = '';
+            recentNotificationList.innerHTML = '';
+            allNotificationList.innerHTML = '';
+            unreadNotificationList.innerHTML = '';
             
-            // Tampilkan maksimal 5 notifikasi terbaru
+            // Tampilkan maksimal 5 notifikasi terbaru untuk tab Recent
             const recentNotifications = data.slice(0, 5);
             
-            if (recentNotifications.length === 0) {
-              const emptyItem = document.createElement('li');
-              emptyItem.innerHTML = `
-                <div class="dropdown-item p-3 text-center">
-                  <p class="text-muted mb-0">Tidak ada notifikasi</p>
-                </div>
-              `;
-              notificationList.appendChild(emptyItem);
-            } else {
-              recentNotifications.forEach(notif => {
-                const notifItem = document.createElement('li');
-                
-                // Tentukan ikon berdasarkan tipe notifikasi
-                let iconClass = 'bi-bell';
-                let bgColorClass = 'bg-success';
-                
+            // Fungsi untuk membuat HTML notifikasi
+            function createNotificationHTML(notif) {
+              // Tentukan ikon berdasarkan tipe notifikasi
+              let iconClass = 'bi-bell';
+              let bgColorClass = 'bg-success';
+              let textColorClass = 'text-success';
+              
+              if (notif.kategori_notifikasi === 'emisi_karbon') {
+                iconClass = 'bi-cloud-plus';
+                bgColorClass = 'bg-info';
+                textColorClass = 'text-info';
+              } else if (notif.kategori_notifikasi === 'status_emisi') {
+                iconClass = 'bi-check-circle';
+                bgColorClass = 'bg-warning';
+                textColorClass = 'text-warning';
+              } else if (notif.kategori_notifikasi === 'kompensasi_emisi') {
+                iconClass = 'bi-currency-exchange';
+                bgColorClass = 'bg-primary';
+                textColorClass = 'text-primary';
+              }
+              
+              // Format tanggal
+              const date = new Date(notif.created_at || notif.tanggal_notifikasi);
+              const now = new Date();
+              const diffTime = Math.abs(now - date);
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+              const diffMinutes = Math.floor(diffTime / (1000 * 60));
+              
+              let timeAgo;
+              if (diffDays > 0) {
+                timeAgo = diffDays + ' hari lalu';
+              } else if (diffHours > 0) {
+                timeAgo = diffHours + ' jam lalu';
+              } else if (diffMinutes > 0) {
+                timeAgo = diffMinutes + ' menit lalu';
+              } else {
+                timeAgo = 'Baru saja';
+              }
+              
+              // Tentukan judul berdasarkan kategori notifikasi
+              let title = notif.judul || '';
+              if (!title) {
                 if (notif.kategori_notifikasi === 'emisi_karbon') {
-                  iconClass = 'bi-cloud-plus';
-                  bgColorClass = 'bg-info';
+                  title = 'Input Emisi Karbon Baru';
                 } else if (notif.kategori_notifikasi === 'status_emisi') {
-                  iconClass = 'bi-check-circle';
-                  bgColorClass = 'bg-warning';
+                  title = 'Perubahan Status Emisi';
                 } else if (notif.kategori_notifikasi === 'kompensasi_emisi') {
-                  iconClass = 'bi-currency-exchange';
-                  bgColorClass = 'bg-primary';
+                  title = 'Kompensasi Emisi Baru';
                 }
-                
-                // Format tanggal
-                const date = new Date(notif.created_at);
-                const now = new Date();
-                const diffTime = Math.abs(now - date);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-                const diffMinutes = Math.floor(diffTime / (1000 * 60));
-                
-                let timeAgo;
-                if (diffDays > 0) {
-                  timeAgo = diffDays + ' hari lalu';
-                } else if (diffHours > 0) {
-                  timeAgo = diffHours + ' jam lalu';
-                } else if (diffMinutes > 0) {
-                  timeAgo = diffMinutes + ' menit lalu';
-                } else {
-                  timeAgo = 'Baru saja';
-                }
-                
-                // Tentukan judul berdasarkan kategori notifikasi
-                let title = notif.judul || '';
-                if (!title) {
-                  if (notif.kategori_notifikasi === 'emisi_karbon') {
-                    title = 'Input Emisi Karbon Baru';
-                  } else if (notif.kategori_notifikasi === 'status_emisi') {
-                    title = 'Perubahan Status Emisi';
-                  } else if (notif.kategori_notifikasi === 'kompensasi_emisi') {
-                    title = 'Kompensasi Emisi Baru';
-                  }
-                }
-                
-                notifItem.innerHTML = `
-                  <a class="dropdown-item p-3 d-flex align-items-start gap-2 ${!notif.dibaca ? 'fw-bold bg-light' : ''}" href="#">
-                    <div class="flex-shrink-0">
-                      <div class="rounded-circle ${bgColorClass} bg-opacity-10 p-2">
-                        <i class="bi ${iconClass} text-${bgColorClass.replace('bg-', '')}"></i>
+              }
+              
+              return `
+                <div class="notification-item p-3 ${!notif.dibaca ? 'unread' : ''}" data-id="${notif.id}">
+                  <div class="d-flex align-items-start gap-2">
+                    <div class="notification-icon ${bgColorClass} bg-opacity-10">
+                      <i class="bi ${iconClass} ${textColorClass}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="mb-0 fw-medium">${title}</h6>
+                        <div class="dropdown">
+                          <button class="btn btn-sm text-muted p-0" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical"></i>
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <li><button class="dropdown-item mark-as-read" data-id="${notif.id}"><i class="bi bi-check-circle me-2"></i>Tandai Dibaca</button></li>
+                          </ul>
+                        </div>
+                      </div>
+                      <p class="text-muted small mb-1">${notif.isi || notif.deskripsi}</p>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="notification-time"><i class="bi bi-clock me-1"></i>${timeAgo}</span>
+                        ${!notif.dibaca ? '<span class="badge bg-success bg-opacity-10 text-success small">Baru</span>' : ''}
                       </div>
                     </div>
-                    <div>
-                      <p class="mb-0 fw-medium">${title}</p>
-                      <p class="text-muted small mb-0">${notif.isi || notif.deskripsi}</p>
-                      <p class="text-muted small mb-0">${timeAgo}</p>
-                    </div>
-                  </a>
-                `;
-                
-                notificationList.appendChild(notifItem);
-                
-                // Tambahkan divider setelah setiap notifikasi kecuali yang terakhir
-                if (recentNotifications.indexOf(notif) < recentNotifications.length - 1) {
-                  const divider = document.createElement('li');
-                  divider.innerHTML = '<hr class="dropdown-divider my-0">';
-                  notificationList.appendChild(divider);
-                }
+                  </div>
+                </div>
+              `;
+            }
+            
+            // Fungsi untuk menampilkan pesan kosong
+            function createEmptyMessage(message) {
+              return `
+                <div class="p-4 text-center">
+                  <i class="bi bi-bell-slash fs-3 text-muted mb-2"></i>
+                  <p class="text-muted mb-0">${message}</p>
+                </div>
+              `;
+            }
+            
+            // Tampilkan notifikasi terbaru
+            if (recentNotifications.length === 0) {
+              recentNotificationList.innerHTML = createEmptyMessage('Tidak ada notifikasi terbaru');
+            } else {
+              recentNotifications.forEach(notif => {
+                recentNotificationList.innerHTML += createNotificationHTML(notif);
               });
             }
+            
+            // Tampilkan semua notifikasi
+            if (data.length === 0) {
+              allNotificationList.innerHTML = createEmptyMessage('Tidak ada notifikasi');
+            } else {
+              data.forEach(notif => {
+                allNotificationList.innerHTML += createNotificationHTML(notif);
+              });
+            }
+            
+            // Tampilkan notifikasi yang belum dibaca
+            if (unreadNotifications.length === 0) {
+              unreadNotificationList.innerHTML = createEmptyMessage('Tidak ada notifikasi yang belum dibaca');
+            } else {
+              unreadNotifications.forEach(notif => {
+                unreadNotificationList.innerHTML += createNotificationHTML(notif);
+              });
+            }
+            
+            // Tambahkan event listener untuk tombol "Tandai Dibaca"
+            document.querySelectorAll('.mark-as-read').forEach(button => {
+              button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const notificationId = this.getAttribute('data-id');
+                markOneAsRead(notificationId);
+              });
+            });
           })
           .catch(error => {
             console.error('Error loading notifications:', error);
           });
+      }
+      
+      // Fungsi untuk menandai satu notifikasi sebagai dibaca
+      function markOneAsRead(notificationId) {
+        fetch('{{ route("notifikasi.markOneAsRead") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({ id: notificationId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Reload notifikasi setelah ditandai sebagai dibaca
+            loadNotifications();
+          }
+        })
+        .catch(error => {
+          console.error('Error marking notification as read:', error);
+        });
+      }
+      
+      // Fungsi untuk menandai semua notifikasi sebagai dibaca
+      function markAllAsRead() {
+        fetch('{{ route("notifikasi.markAsRead") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Reload notifikasi setelah ditandai sebagai dibaca
+            loadNotifications();
+          }
+        })
+        .catch(error => {
+          console.error('Error marking all notifications as read:', error);
+        });
       }
       
       // Muat notifikasi saat halaman dimuat
@@ -400,29 +586,15 @@
       // Muat notifikasi setiap 30 detik
       setInterval(loadNotifications, 30000);
       
-      // Tambahkan event listener untuk menandai notifikasi sebagai dibaca saat dropdown dibuka
-      const notificationDropdown = document.getElementById('notificationDropdown');
-      notificationDropdown.addEventListener('click', function() {
-        // Tandai semua notifikasi sebagai dibaca setelah delay singkat
-        setTimeout(() => {
-          fetch('{{ route("notifikasi.markAsRead") }}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              // Reload notifikasi setelah ditandai sebagai dibaca
-              loadNotifications();
-            }
-          })
-          .catch(error => {
-            console.error('Error marking notifications as read:', error);
-          });
-        }, 1000); // Delay 1 detik
+      // Event listener untuk tombol "Tandai Semua Dibaca"
+      document.getElementById('markAllAsRead').addEventListener('click', function() {
+        markAllAsRead();
+      });
+      
+      // Event listener untuk tombol "Segarkan"
+      document.getElementById('refreshNotifications').addEventListener('click', function(e) {
+        e.preventDefault();
+        loadNotifications();
       });
     });
   </script>
