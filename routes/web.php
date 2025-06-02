@@ -37,8 +37,11 @@ Route::middleware('auth')->group(function () {
     // Route untuk mendapatkan notifikasi via AJAX
     Route::get('/api/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'getNotifikasi'])->name('notifikasi.get');
     
-    // Route untuk menandai notifikasi sebagai dibaca
+    // Route untuk menandai semua notifikasi sebagai dibaca
     Route::post('/api/notifikasi/mark-as-read', [App\Http\Controllers\NotifikasiController::class, 'markAsRead'])->name('notifikasi.markAsRead');
+    
+    // Route untuk menandai satu notifikasi sebagai dibaca
+    Route::post('/api/notifikasi/mark-one-as-read', [App\Http\Controllers\NotifikasiController::class, 'markOneAsRead'])->name('notifikasi.markOneAsRead');
 });
 
 // Dashboard redirect

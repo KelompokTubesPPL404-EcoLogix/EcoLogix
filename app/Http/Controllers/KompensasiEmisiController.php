@@ -117,7 +117,7 @@ class KompensasiEmisiController extends Controller
         // Validasi input
         $request->validate([
             'kode_emisi_carbon' => 'required|exists:emisi_carbon,kode_emisi_carbon',
-            'jumlah_kompensasi' => 'required|numeric|min:0.01',
+            'jumlah_kompensasi' => 'required|numeric|min:0.001', // Ubah validasi menjadi ton
             'tanggal_kompensasi' => 'required|date',
         ]);
 
@@ -128,8 +128,8 @@ class KompensasiEmisiController extends Controller
             return redirect()->back()->with('error', 'Data emisi karbon tidak ditemukan.');
         }
 
-        // Konversi ke ton (jika input dalam kg)
-        $jumlahTon = $request->jumlah_kompensasi / 1000;
+        // Jumlah kompensasi langsung dalam ton
+        $jumlahKompensasiTon = $request->jumlah_kompensasi;
 
         // Buat kode kompensasi (K + timestamp)
         $kodeKompensasi = 'K' . Carbon::now()->format('YmdHis');
@@ -139,7 +139,7 @@ class KompensasiEmisiController extends Controller
         $kompensasi = new KompensasiEmisiCarbon();
         $kompensasi->kode_kompensasi = $kodeKompensasi;
             $kompensasi->kode_emisi_carbon = $request->kode_emisi_carbon;
-            $kompensasi->jumlah_kompensasi = $request->jumlah_kompensasi;
+            $kompensasi->jumlah_kompensasi = $jumlahKompensasiTon * 1000; // Simpan dalam kg di database
             $kompensasi->tanggal_kompensasi = $request->tanggal_kompensasi;
             $kompensasi->status_kompensasi = 'Belum Terkompensasi'; // Default pending, menunggu approval admin
             $kompensasi->kode_manager = $manager->kode_user;
@@ -189,19 +189,19 @@ class KompensasiEmisiController extends Controller
     public function update(Request $request, $kodeKompensasi)
     {
         $request->validate([
-            'jumlah_kompensasi' => 'required|numeric|min:0.001',
+            'jumlah_kompensasi' => 'required|numeric|min:0.001', // Ubah validasi menjadi ton
         ]);
 
         $manager = Auth::user();
         DB::beginTransaction();
 
         try {
-            $jumlahKompensasiKg = $request->jumlah_kompensasi * 1000;
+            $jumlahKompensasiTon = $request->jumlah_kompensasi;
 
             $updated = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
                 ->where('status_kompensasi', 'Belum Terkompensasi')
                 ->update([
-                    'jumlah_kompensasi' => $jumlahKompensasiKg,
+                    'jumlah_kompensasi' => $jumlahKompensasiTon * 1000, // Simpan dalam kg di database
                     'updated_at' => now(),
                     'kode_manager' => $manager->kode_user,
                 ]);

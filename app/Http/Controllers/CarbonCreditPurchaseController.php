@@ -87,6 +87,7 @@ class CarbonCreditPurchaseController extends Controller
         // Get compensations with "Belum Terkompensasi" status
         $compensations = KompensasiEmisiCarbon::where('kode_perusahaan', $kode_perusahaan)
             ->where('status_kompensasi', 'Belum Terkompensasi')
+            ->select('*', DB::raw('jumlah_kompensasi / 1000 as jumlah_kompensasi_ton')) // Select jumlah_kompensasi in tons
             ->orderBy('tanggal_kompensasi', 'desc')
             ->get();
         
@@ -141,9 +142,8 @@ class CarbonCreditPurchaseController extends Controller
                         return response()->json($data, 422);
                     }
                     
-                    // Return the actual value in kg (will be converted to tons in frontend)
-                    // Nilai disimpan dalam kg di database, akan dikonversi ke ton di frontend
-                    $data['jumlah_kompensasi'] = $kompensasi->jumlah_kompensasi;
+                    // Return the actual value in tons (converted from kg in database)
+                    $data['jumlah_kompensasi'] = $kompensasi->jumlah_kompensasi / 1000; // Convert kg to tons for display
                     
                     // Add company info
                     if ($kompensasi->perusahaan) {
@@ -189,7 +189,7 @@ class CarbonCreditPurchaseController extends Controller
                 if ($penyedia) {
                     // Return exact value without modification
                     $data['harga_per_ton'] = $penyedia->harga_per_ton;
-                    $data['mata_uang'] = $penyedia->mata_uang ?: 'IDR';
+                    $data['mata_uang'] = $penyedia->mata_uang; // Use the currency directly from the provider
                     $data['penyedia_info'] = [
                         'nama_penyedia' => $penyedia->nama_penyedia,
                         'alamat' => $penyedia->alamat,
