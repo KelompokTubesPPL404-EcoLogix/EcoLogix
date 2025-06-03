@@ -54,13 +54,17 @@ class PenyediaCarbonCreditController extends Controller
             'mata_uang' => 'required|string|max:10',
         ]);
 
-        // Generate kode penyedia
-        $lastPenyedia = PenyediaCarbonCredit::orderBy('kode_penyedia', 'desc')->first();
-        $newCode = 'PCC001';
+        // Generate kode penyedia - use company prefix to ensure uniqueness per company
+        $user = Auth::user();
+        $companyPrefix = substr($user->kode_perusahaan, -3); // Get last 3 chars of company code
+        $lastPenyedia = PenyediaCarbonCredit::where('kode_perusahaan', $user->kode_perusahaan)
+            ->orderBy('kode_penyedia', 'desc')
+            ->first();
+        $newCode = 'PCC' . $companyPrefix . '001';
         
         if ($lastPenyedia) {
-            $lastCode = substr($lastPenyedia->kode_penyedia, 3);
-            $newCode = 'PCC' . str_pad((int)$lastCode + 1, 3, '0', STR_PAD_LEFT);
+            $lastCode = substr($lastPenyedia->kode_penyedia, -3);
+            $newCode = 'PCC' . $companyPrefix . str_pad((int)$lastCode + 1, 3, '0', STR_PAD_LEFT);
         }
 
         $user = Auth::user();

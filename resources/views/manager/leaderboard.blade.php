@@ -78,7 +78,7 @@
                                     <td class="text-right">{{ number_format($data->total_kompensasi, 2) }}</td>
                                     <td class="text-right">
                                         <span class="font-weight-bold {{ $data->sisa_emisi > 0 ? 'text-danger' : 'text-success' }}">
-                                            {{ number_format($data->sisa_emisi, 2) }}
+                                            {{ number_format(max(0, $data->sisa_emisi), 2) }}
                                         </span>
                                     </td>
                                     <td>
@@ -213,7 +213,7 @@
             labels.push("{{ $data->nama_perusahaan }}");
             emisiData.push({{ $data->total_emisi }});
             kompensasiData.push({{ $data->total_kompensasi }});
-            sisaData.push({{ $data->sisa_emisi }});
+            sisaData.push({{ max(0, $data->sisa_emisi) }});
             
             // Highlight perusahaan saat ini dengan warna berbeda
             @if($data->kode_perusahaan === Auth::user()->kode_perusahaan)

@@ -20,7 +20,12 @@ class KompensasiEmisiController extends Controller
 {
     public function index(Request $request)
     {
+        // Ambil user yang sedang login dan kode perusahaannya
+        $user = Auth::user();
+        $kodePerusahaan = $user->kode_perusahaan;
+        
         // Ambil data emisi approved dengan relasi kompensasi, hitung total kompensasi dan sisa emisi
+        // Filter berdasarkan kode_perusahaan user yang login
         $emisiApproved = EmisiKarbon::select([
                 'emisi_carbon.kode_emisi_carbon as kode_emisi_carbon',
                 'kategori_emisi_karbon',
@@ -37,6 +42,7 @@ class KompensasiEmisiController extends Controller
             ])
             ->leftJoin('kompensasi_emisi_carbon', 'emisi_carbon.kode_emisi_carbon', '=', 'kompensasi_emisi_carbon.kode_emisi_carbon')
             ->where('status', 'approved')
+            ->where('emisi_carbon.kode_perusahaan', $kodePerusahaan) // Filter berdasarkan perusahaan
             ->groupBy(
                 'kode_emisi_carbon',
                 'kategori_emisi_karbon',
@@ -50,7 +56,7 @@ class KompensasiEmisiController extends Controller
             )
             ->get();
 
-        // Query riwayat kompensasi dengan filter
+        // Query riwayat kompensasi dengan filter berdasarkan perusahaan yang login
         $riwayatQuery = KompensasiEmisiCarbon::select([
                 'kompensasi_emisi_carbon.kode_kompensasi',
                 'kompensasi_emisi_carbon.kode_emisi_carbon',
@@ -61,6 +67,7 @@ class KompensasiEmisiController extends Controller
                 DB::raw('COALESCE(emisi_carbon.sub_kategori, "-") as sub_kategori'),
             ])
             ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
+            ->where('kompensasi_emisi_carbon.kode_perusahaan', $kodePerusahaan) // Filter berdasarkan perusahaan
             ->orderByDesc('kompensasi_emisi_carbon.created_at');
 
         if ($request->filled('search')) {
@@ -97,10 +104,11 @@ class KompensasiEmisiController extends Controller
             ];
         });
 
-        // Kategori distinct
+        // Kategori distinct untuk perusahaan ini
         $kategoris = EmisiKarbon::select('kategori_emisi_karbon')
                     ->distinct()
                     ->whereNotNull('kategori_emisi_karbon')
+                    ->where('kode_perusahaan', $kodePerusahaan) // Filter berdasarkan perusahaan
                     ->orderBy('kategori_emisi_karbon')
                     ->get();
 
@@ -167,6 +175,10 @@ class KompensasiEmisiController extends Controller
 
     public function show($kodeKompensasi)
     {
+        // Ambil user yang sedang login dan kode perusahaannya
+        $user = Auth::user();
+        $kodePerusahaan = $user->kode_perusahaan;
+        
         $kompensasi = KompensasiEmisiCarbon::select([
                 'kompensasi_emisi_carbon.*',
                 DB::raw('ROUND(kompensasi_emisi_carbon.jumlah_kompensasi / 1000, 2) as jumlah_ton'),
@@ -177,6 +189,7 @@ class KompensasiEmisiController extends Controller
             ])
             ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
             ->where('kompensasi_emisi_carbon.kode_kompensasi', $kodeKompensasi)
+            ->where('kompensasi_emisi_carbon.kode_perusahaan', $kodePerusahaan) // Filter berdasarkan perusahaan
             ->first();
 
         if (!$kompensasi) {
@@ -193,13 +206,25 @@ class KompensasiEmisiController extends Controller
         ]);
 
         $manager = Auth::user();
+        $kodePerusahaan = $manager->kode_perusahaan;
         DB::beginTransaction();
 
         try {
+            // Cek dulu apakah data ini milik perusahaan yang sama dengan user
+            $kompensasiCheck = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
+                ->where('kode_perusahaan', $kodePerusahaan)
+                ->first();
+                
+            if (!$kompensasiCheck) {
+                DB::rollback();
+                return redirect()->back()->with('error', 'Data kompensasi tidak ditemukan atau Anda tidak memiliki akses.');
+            }
+            
             $jumlahKompensasiTon = $request->jumlah_kompensasi;
 
             $updated = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
                 ->where('status_kompensasi', 'Belum Terkompensasi')
+                ->where('kode_perusahaan', $kodePerusahaan) // Tambahkan filter perusahaan
                 ->update([
                     'jumlah_kompensasi' => $jumlahKompensasiTon * 1000, // Simpan dalam kg di database
                     'updated_at' => now(),
@@ -213,7 +238,7 @@ class KompensasiEmisiController extends Controller
 
             DB::commit();
 
-            return redirect()->route('manager.manager.kompensasi.index')
+            return redirect()->route('manager.kompensasi.index')
                 ->with('success', 'Data kompensasi berhasil diupdate');
 
         } catch (\Exception $e) {
@@ -224,8 +249,22 @@ class KompensasiEmisiController extends Controller
 
     public function destroy($kodeKompensasi)
     {
+        // Get user and company code
+        $user = Auth::user();
+        $kodePerusahaan = $user->kode_perusahaan;
+        
+        // Check first if data exists for this company
+        $exists = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
+            ->where('kode_perusahaan', $kodePerusahaan)
+            ->exists();
+            
+        if (!$exists) {
+            return back()->with('error', 'Data kompensasi tidak ditemukan atau Anda tidak memiliki akses.');
+        }
+        
         $deleted = KompensasiEmisiCarbon::where('kode_kompensasi', $kodeKompensasi)
             ->where('status_kompensasi', 'Belum Terkompensasi')
+            ->where('kode_perusahaan', $kodePerusahaan) // Filter by company
             ->delete();
 
         if (!$deleted) {
@@ -238,6 +277,10 @@ class KompensasiEmisiController extends Controller
 
     public function edit($kodeKompensasi)
     {
+        // Get user and company code
+        $user = Auth::user();
+        $kodePerusahaan = $user->kode_perusahaan;
+        
         $kompensasi = KompensasiEmisiCarbon::select([
                 'kompensasi_emisi_carbon.*',
                 DB::raw('ROUND(kompensasi_emisi_carbon.jumlah_kompensasi / 1000, 2) as jumlah_ton'),
@@ -249,6 +292,7 @@ class KompensasiEmisiController extends Controller
             ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
             ->where('kompensasi_emisi_carbon.kode_kompensasi', $kodeKompensasi)
             ->where('kompensasi_emisi_carbon.status_kompensasi', 'Belum Terkompensasi')
+            ->where('kompensasi_emisi_carbon.kode_perusahaan', $kodePerusahaan) // Filter by company
             ->first();
 
         if (!$kompensasi) {
@@ -260,6 +304,10 @@ class KompensasiEmisiController extends Controller
 
     public function report()
     {
+        // Get user and company code
+        $user = Auth::user();
+        $kodePerusahaan = $user->kode_perusahaan;
+        
         $kompensasi = KompensasiEmisiCarbon::select([
                 'kompensasi_emisi_carbon.kode_kompensasi',
                 'kompensasi_emisi_carbon.kode_emisi_carbon',
@@ -270,6 +318,7 @@ class KompensasiEmisiController extends Controller
                 DB::raw('COALESCE(emisi_carbon.sub_kategori, "-") as sub_kategori'),
             ])
             ->leftJoin('emisi_carbon', 'kompensasi_emisi_carbon.kode_emisi_carbon', '=', 'emisi_carbon.kode_emisi_carbon')
+            ->where('kompensasi_emisi_carbon.kode_perusahaan', $kodePerusahaan) // Filter by company
             ->orderByDesc('kompensasi_emisi_carbon.created_at')
             ->get();
 

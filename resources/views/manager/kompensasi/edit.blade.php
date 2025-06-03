@@ -79,7 +79,7 @@
               </table>
               <hr>
               <h6 class="border-bottom pb-2">Edit Kompensasi</h6>
-              <form action="{{ route('manager.kompensasi.edit', $kompensasi->kode_kompensasi) }}" method="POST">
+              <form action="{{ route('manager.kompensasi.update', $kompensasi->kode_kompensasi) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="mb-3">

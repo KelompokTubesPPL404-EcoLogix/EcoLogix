@@ -197,7 +197,7 @@
                 <select class="form-select @error('kode_super_admin') is-invalid @enderror" id="kode_super_admin" name="kode_super_admin" required>
                     <option value="">Pilih Super Admin</option>
                     @foreach($superAdmins as $admin)
-                    <option value="{{ $admin->kode_super_admin }}" {{ old('kode_super_admin') == $admin->kode_super_admin ? 'selected' : '' }}>{{ $admin->nama_super_admin }}</option>
+                    <option value="{{ $admin->kode_super_admin }}" {{ old('kode_super_admin') == $admin->kode_super_admin ? 'selected' : '' }}>{{ $admin->nama }} - {{ $admin->kode_user }}</option>
                     @endforeach
                 </select>
                 @error('kode_super_admin')

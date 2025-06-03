@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class CarbonCreditPurchaseController extends Controller
 {
@@ -43,8 +42,21 @@ class CarbonCreditPurchaseController extends Controller
         
         // Calculate statistics for dashboard
         $totalCarbon = $purchases->sum('jumlah_kompensasi');
-        $totalSpent = $purchases->sum('total_harga');
-        // Fix division by zero
+        
+        // Calculate total spent with currency conversion
+        $totalSpent = 0;
+        foreach ($purchases as $purchase) {
+            // Convert all to IDR (Rupiah)
+            $exchangeRate = 1; // Default for IDR
+            if ($purchase->penyedia && $purchase->penyedia->mata_uang == 'USD') {
+                $exchangeRate = 15500; // USD to IDR conversion rate
+            } elseif ($purchase->penyedia && $purchase->penyedia->mata_uang == 'EUR') {
+                $exchangeRate = 16700; // EUR to IDR conversion rate
+            }
+            $totalSpent += $purchase->total_harga * $exchangeRate;
+        }
+        
+        // Fix division by zero and calculate average price in Rupiah
         $averagePrice = ($purchases->count() > 0 && $totalCarbon > 0) ? $totalSpent / $totalCarbon : 0;
         
         // Group purchases by month for chart data
@@ -56,10 +68,22 @@ class CarbonCreditPurchaseController extends Controller
                     return Carbon::parse($purchase->tanggal_pembelian)->format('M Y');
                 })
                 ->map(function($group) {
+                    $totalValue = 0;
+                    foreach ($group as $purchase) {
+                        // Convert all to IDR (Rupiah)
+                        $exchangeRate = 1; // Default for IDR
+                        if ($purchase->penyedia && $purchase->penyedia->mata_uang == 'USD') {
+                            $exchangeRate = 15500; // USD to IDR conversion rate
+                        } elseif ($purchase->penyedia && $purchase->penyedia->mata_uang == 'EUR') {
+                            $exchangeRate = 16700; // EUR to IDR conversion rate
+                        }
+                        $totalValue += $purchase->total_harga * $exchangeRate;
+                    }
+                    
                     return [
                         'count' => $group->count(),
-                        'amount' => $group->sum('jumlah_kompensasi'),
-                        'value' => $group->sum('total_harga')
+                        'amount' => $group->sum('jumlah_kompensasi')/100, // Convert to tons
+                        'value' => $totalValue
                     ];
                 });
         }
@@ -87,14 +111,21 @@ class CarbonCreditPurchaseController extends Controller
         // Get compensations with "Belum Terkompensasi" status
         $compensations = KompensasiEmisiCarbon::where('kode_perusahaan', $kode_perusahaan)
             ->where('status_kompensasi', 'Belum Terkompensasi')
-            ->select('*', DB::raw('jumlah_kompensasi / 1000 as jumlah_kompensasi_ton')) // Select jumlah_kompensasi in tons
             ->orderBy('tanggal_kompensasi', 'desc')
             ->get();
+            
+        // Check if no compensations available
+        $noCompensations = $compensations->isEmpty();
         
-        // Get active providers
+        // Get active providers that belong to user's company
+        $user = Auth::user();
         $providers = PenyediaCarbonCredit::where('is_active', true)
+            ->where('kode_perusahaan', $user->kode_perusahaan)
             ->orderBy('nama_penyedia', 'asc')
             ->get();
+            
+        // Check if no providers available
+        $noProviders = $providers->isEmpty();
             
         // Get currencies for dropdown
         $currencies = ['IDR' => 'Rupiah (IDR)', 'USD' => 'US Dollar (USD)', 'EUR' => 'Euro (EUR)'];
@@ -102,7 +133,9 @@ class CarbonCreditPurchaseController extends Controller
         return view('admin.carbon-credit-purchase.create', compact(
             'compensations', 
             'providers',
-            'currencies'
+            'currencies',
+            'noCompensations',
+            'noProviders'
         ));
     }
     
@@ -142,8 +175,9 @@ class CarbonCreditPurchaseController extends Controller
                         return response()->json($data, 422);
                     }
                     
-                    // Return the actual value in tons (converted from kg in database)
-                    $data['jumlah_kompensasi'] = $kompensasi->jumlah_kompensasi / 1000; // Convert kg to tons for display
+                    // Return the actual value in kg (will be converted to tons in frontend)
+                    // Nilai disimpan dalam kg di database, akan dikonversi ke ton di frontend
+                    $data['jumlah_kompensasi'] = $kompensasi->jumlah_kompensasi;
                     
                     // Add company info
                     if ($kompensasi->perusahaan) {
@@ -184,12 +218,15 @@ class CarbonCreditPurchaseController extends Controller
             }
             
             if ($kode_penyedia) {
-                $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $kode_penyedia)->first();
+                $user = Auth::user();
+                $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $kode_penyedia)
+                    ->where('kode_perusahaan', $user->kode_perusahaan)
+                    ->first();
                 
                 if ($penyedia) {
                     // Return exact value without modification
                     $data['harga_per_ton'] = $penyedia->harga_per_ton;
-                    $data['mata_uang'] = $penyedia->mata_uang; // Use the currency directly from the provider
+                    $data['mata_uang'] = $penyedia->mata_uang ?: 'IDR';
                     $data['penyedia_info'] = [
                         'nama_penyedia' => $penyedia->nama_penyedia,
                         'alamat' => $penyedia->alamat,
@@ -269,8 +306,10 @@ class CarbonCreditPurchaseController extends Controller
                 return back()->with('error', 'Anda tidak memiliki akses untuk memproses kompensasi emisi ini.');
             }
             
-            // Get provider data
-            $penyedia = PenyediaCarbonCredit::findOrFail($request->kode_penyedia);
+            // Get provider data and ensure it belongs to the user's company
+            $penyedia = PenyediaCarbonCredit::where('kode_penyedia', $request->kode_penyedia)
+                ->where('kode_perusahaan', $user->kode_perusahaan)
+                ->firstOrFail();
             
             // Verify total price calculation is correct
             $expectedTotal = $request->jumlah_kompensasi * $request->harga_per_ton;
@@ -424,10 +463,11 @@ class CarbonCreditPurchaseController extends Controller
         ])->findOrFail($id);
         
         // Calculate environmental impact estimates
+        $jumlahKompensasiTon = $purchase->jumlah_kompensasi / 100; // Convert to tons (based on view display)
         $impact = [
-            'trees_equivalent' => round($purchase->jumlah_kompensasi * 45), // ~45 trees per ton CO2
-            'energy_savings' => round($purchase->jumlah_kompensasi * 2400), // kWh
-            'emission_reduction' => $purchase->jumlah_kompensasi // tons
+            'trees_equivalent' => round($jumlahKompensasiTon * 45), // ~45 trees per ton CO2
+            'energy_savings' => round($jumlahKompensasiTon * 2400), // ~2400 kWh per ton CO2
+            'emission_reduction' => $jumlahKompensasiTon // tons
         ];
         
         return view('admin.carbon-credit-purchase.show', compact('purchase', 'impact'));
@@ -464,8 +504,12 @@ class CarbonCreditPurchaseController extends Controller
             ->orderBy('tanggal_kompensasi', 'desc')
             ->get();
         
-        // Get providers
-        $providers = PenyediaCarbonCredit::where('is_active', true)
+        // Get providers that belong to user's company
+        $user = Auth::user();
+        $providers = PenyediaCarbonCredit::where(function($query) use ($purchase, $user) {
+                $query->where('is_active', true)
+                      ->where('kode_perusahaan', $user->kode_perusahaan);
+            })
             ->orWhere('kode_penyedia', $purchase->kode_penyedia)
             ->orderBy('nama_penyedia', 'asc')
             ->get();
@@ -802,7 +846,68 @@ class CarbonCreditPurchaseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\View\View
      */
-
+    public function report(Request $request)
+    {
+        // Get authenticated user
+        $user = Auth::user();
+        
+        // Get filter parameters
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $kode_perusahaan = $request->input('kode_perusahaan');
+        
+        // Query purchases with relationships
+        $query = PembelianCarbonCredit::with([
+            'penyedia', 
+            'kompensasiEmisiCarbon', 
+            'admin', 
+            'perusahaan'
+        ]);
+        
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $query->whereBetween('tanggal_pembelian', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('tanggal_pembelian', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('tanggal_pembelian', '<=', $endDate);
+        }
+        
+        // Filter by company if provided or if user is not super-admin
+        if ($kode_perusahaan) {
+            $query->where('kode_perusahaan', $kode_perusahaan);
+        } elseif ($user->role != 'super-admin') {
+            $query->where('kode_perusahaan', $user->kode_perusahaan);
+        }
+        
+        // Get purchases ordered by date
+        $purchases = $query->orderBy('tanggal_pembelian', 'desc')->get();
+        
+        // Calculate summary statistics
+        $totalCarbon = $purchases->sum('jumlah_kompensasi');
+        $totalSpent = $purchases->sum('total_harga');
+        
+        $summary = [
+            'total_purchases' => $purchases->count(),
+            'total_carbon' => $totalCarbon,
+            'total_spent' => $totalSpent,
+            'average_price' => ($purchases->count() > 0 && $totalCarbon > 0) 
+                ? $totalSpent / $totalCarbon 
+                : 0
+        ];
+        
+        // Get all companies for filter dropdown
+        $companies = Perusahaan::orderBy('nama_perusahaan')->get();
+        
+        return view('admin.carbon-credit-purchase.report', compact(
+            'purchases', 
+            'summary',
+            'companies',
+            'startDate',
+            'endDate',
+            'kode_perusahaan'
+        ));
+    }
     
     /**
      * Display dashboard for carbon credit purchases
@@ -967,88 +1072,5 @@ class CarbonCreditPurchaseController extends Controller
         }
     }
     
-    /**
-     * Generate PDF report of carbon credit purchases
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function report()
-    {
-        try {
-            $user = Auth::user();
-            
-            // Verify user has permission to access this report
-            if (!in_array($user->role, ['admin', 'manager'])) {
-                return redirect()->route('login')
-                    ->with('error', 'Anda tidak memiliki izin untuk mengakses laporan ini.');
-            }
-            
-            // Get purchase data with relationships
-            $purchases = PembelianCarbonCredit::with([
-                    'penyedia', 
-                    'kompensasiEmisiCarbon', 
-                    'admin', 
-                    'perusahaan'
-                ])
-                ->when($user->role != 'super-admin', function ($query) use ($user) {
-                    return $query->where('kode_perusahaan', $user->kode_perusahaan);
-                })
-                ->orderBy('tanggal_pembelian', 'desc')
-                ->get();
-            
-            // Calculate statistics
-            $totalCarbon = $purchases->sum('jumlah_kompensasi') / 1000; // Convert to tons
-            $totalSpent = $purchases->sum('total_harga');
-            $averagePrice = ($purchases->count() > 0 && $totalCarbon > 0) ? $totalSpent / $totalCarbon : 0;
-            
-            // Group purchases by provider
-            $purchasesByProvider = $purchases->groupBy('kode_penyedia')
-                ->map(function($group) {
-                    return [
-                        'nama_penyedia' => $group->first()->penyedia->nama_penyedia,
-                        'count' => $group->count(),
-                        'total_carbon' => $group->sum('jumlah_kompensasi') / 1000, // Convert to tons
-                        'total_spent' => $group->sum('total_harga')
-                    ];
-                });
-            
-            // Group purchases by month
-            $purchasesByMonth = $purchases
-                ->groupBy(function($purchase) {
-                    return Carbon::parse($purchase->tanggal_pembelian)->format('M Y');
-                })
-                ->map(function($group) {
-                    return [
-                        'count' => $group->count(),
-                        'total_carbon' => $group->sum('jumlah_kompensasi') / 1000, // Convert to tons
-                        'total_spent' => $group->sum('total_harga')
-                    ];
-                });
-            
-            // Generate PDF
-            $pdf = Pdf::loadView('admin.carbon-credit-purchase.report', compact(
-                'purchases', 
-                'totalCarbon', 
-                'totalSpent', 
-                'averagePrice',
-                'purchasesByProvider',
-                'purchasesByMonth',
-                'user'
-            ));
-            
-            return $pdf->stream('laporan_pembelian_carbon_credit.pdf');
-            
-        } catch (\Exception $e) {
-            // Log error
-            Log::error("Error generating carbon credit purchase report", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
-                'user_role' => Auth::user() ? Auth::user()->role : 'unknown'
-            ]);
-            
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat membuat laporan. Silakan coba lagi atau hubungi administrator.');
-        }
-    }
+
 }

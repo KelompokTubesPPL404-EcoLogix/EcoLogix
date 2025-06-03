@@ -19,8 +19,8 @@
         @foreach($kategoriEmisi as $data)
         <div class="col-xl-4 col-md-6 mb-3">
             <div class="card shadow h-100 border-0 rounded-lg overflow-hidden">
-                <div class="card-header bg-gradient-success text-white py-3">
-                    <h6 class="m-0 font-weight-bold text-white">{{ $data['kategori'] }}</h6>
+                <div class="card-header bg-gradient-success text py-3">
+                    <h6 class="m-0 font-weight-bold text">{{ $data['kategori'] }}</h6>
                 </div>
                 <div class="card-body position-relative">
                     <div class="row align-items-center">
@@ -34,8 +34,8 @@
                                 <div class="text-success">
                                     <i class="bi bi-check-circle me-1"></i> {{ number_format($data['terkompensasi'], 2) }} ton
                                 </div>
-                                <div class="text-danger">
-                                    <i class="bi bi-exclamation-circle me-1"></i> {{ number_format($data['sisa'], 2) }} ton
+                                <div class="text-{{ $data['sisa'] > 0 ? 'danger' : 'success' }}">
+                                    <i class="bi bi-exclamation-circle me-1"></i> {{ number_format(max(0, $data['sisa']), 2) }} ton
                                 </div>
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                                     <span class="text-success fw-medium">{{ number_format($item->kompensasi_ton, 2) }}</span>
                                 </td>
                                 <td class="px-3 py-2 text-end">
-                                    <span class="text-danger fw-medium">{{ number_format($item->sisa_emisi_ton, 2) }}</span>
+                                    <span class="text-{{ $item->sisa_emisi_ton > 0 ? 'danger' : 'success' }} fw-medium">{{ number_format(max(0, $item->sisa_emisi_ton), 2) }}</span>
                                 </td>
                                 <td class="px-3 py-2">{{ Str::limit($item->deskripsi, 50) }}</td>
                                 <td class="px-3 py-2 text-center">
@@ -174,7 +174,7 @@
                                 <option value="" disabled selected>-- Pilih Emisi --</option>
                                 @foreach($emisiApproved as $item)
                                 <option value="{{ $item->kode_emisi_carbon }}" {{ old('kode_emisi_carbon') == $item->kode_emisi_carbon ? 'selected' : '' }}>
-                                    {{ $item->kode_emisi_carbon }} - {{ $item->kategori_emisi_karbon }} (Sisa: {{ number_format($item->sisa_emisi_ton, 2) }} ton)
+                                    {{ $item->kode_emisi_carbon }} - {{ $item->kategori_emisi_karbon }} (Sisa: {{ number_format(max(0, $item->sisa_emisi_ton), 2) }} ton)
                                 </option>
                                 @endforeach
                             </select>

@@ -38,20 +38,24 @@
         color: #212529;
     }
     .badge-status {
-        padding: 0.35em 0.65em;
-        font-size: 0.75em;
+        padding: 0.35em 0.65em !important;
+        font-size: 0.75em !important;
+        display: inline-block !important;
+        border-radius: 0.25rem !important;
+        text-align: center !important;
+        font-weight: 700 !important;
     }
     .badge-status-success {
-        background-color: #28a745;
-        color: #fff;
+        background-color: #28a745 !important;
+        color: #212529 !important;
     }
     .badge-status-pending {
-        background-color: #ffc107;
-        color: #212529;
+        background-color: #ffc107 !important;
+        color: #212529 !important;
     }
     .badge-status-failed {
-        background-color: #dc3545;
-        color: #fff;
+        background-color: #dc3545 !important;
+        color: #212529 !important;
     }
     .detail-section {
         background-color: #f8f9fa;
@@ -123,7 +127,7 @@
             <!-- Purchase Details -->
             <div class="card shadow">
                 <div class="card-header py-3 eco-gradient">
-                    <h6 class="m-0 font-weight-bold text-white">Informasi Pembelian</h6>
+                    <h6 class="m-0 font-weight-bold text">Informasi Pembelian</h6>
                 </div>
                 <div class="card-body">
                     <div class="detail-section">
@@ -145,16 +149,16 @@
                                     <div class="detail-value">
                                         @if(isset($purchase->status_pembelian))
                                             @if($purchase->status_pembelian == 'Sukses')
-                                                <span class="badge badge-status badge-status-success">Sukses</span>
+                                                <span class="badge-status badge-status-success">Sukses</span>
                                             @elseif($purchase->status_pembelian == 'Pending')
-                                                <span class="badge badge-status badge-status-pending">Pending</span>
+                                                <span class="badge-status badge-status-pending">Pending</span>
                                             @elseif($purchase->status_pembelian == 'Gagal')
-                                                <span class="badge badge-status badge-status-failed">Gagal</span>
+                                                <span class="badge-status badge-status-failed">Gagal</span>
                                             @else
-                                                <span class="badge badge-status badge-secondary">{{ $purchase->status_pembelian }}</span>
+                                                <span class="badge-status" style="background-color: #6c757d !important; color: #212529 !important;">{{ $purchase->status_pembelian }}</span>
                                             @endif
                                         @else
-                                            <span class="badge badge-status badge-status-success">Sukses</span>
+                                            <span class="badge-status badge-status-success">Sukses</span>
                                         @endif
                                     </div>
                                 </div>
@@ -240,7 +244,7 @@
                             <div class="col-md-6">
                                 <div class="detail-item">
                                     <div class="detail-label">Jumlah Kompensasi</div>
-                                    <div class="detail-value">{{ number_format($purchase->jumlah_kompensasi, 2) }} ton</div>
+                                    <div class="detail-value">{{ number_format($purchase->jumlah_kompensasi / 100, 2) }} ton</div>
                                 </div>
                                 <div class="detail-item">
                                     <div class="detail-label">Harga Per Ton</div>
@@ -257,7 +261,7 @@
                                         @if($purchase->penyedia)
                                             {{ $purchase->penyedia->mata_uang }} 
                                         @endif
-                                        {{ number_format($purchase->total_harga, 0, ',', '.') }}
+                                        {{ number_format($purchase->total_harga, 2, ',', '.') }}
                                     </div>
                                 </div>
                             </div>
@@ -272,10 +276,11 @@
                 </div>
             </div>
 
+            <br>
             <!-- Environmental Impact -->
             <div class="card shadow">
                 <div class="card-header py-3 eco-gradient">
-                    <h6 class="m-0 font-weight-bold text-white">Dampak Lingkungan</h6>
+                    <h6 class="m-0 font-weight-bold text">Dampak Lingkungan</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -302,7 +307,7 @@
                                 <div class="impact-icon">
                                     <i class="bi bi-cloud-minus"></i>
                                 </div>
-                                <div class="impact-value">{{ number_format($impact['emission_reduction'], 2) }}</div>
+                                <div class="impact-value">{{ number_format($impact['emission_reduction'] * 1000, 2) }}</div>
                                 <div class="impact-label">kg CO₂ dikurangi</div>
                             </div>
                         </div>

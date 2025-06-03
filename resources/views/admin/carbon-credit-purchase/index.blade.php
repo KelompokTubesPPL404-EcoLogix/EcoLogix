@@ -26,20 +26,25 @@
         background-color: rgba(40, 167, 69, 0.05);
     }
     .badge-status {
-        padding: 0.35em 0.65em;
-        font-size: 0.75em;
+        padding: 0.35em 0.65em !important;
+        font-size: 0.75em !important;
+        display: inline-block !important;
+        border-radius: 0.25rem !important;
+        text-align: center !important;
+        font-weight: 700 !important;
     }
     .badge-status-success {
-        background-color: #28a745;
-        color: #fff;
+        background-color: #28a745 !important;
+        color: #212529 !important;
     }
     .badge-status-pending {
-        background-color: #ffc107;
-        color: #212529;
+        background-color: #ffc107 !important;
+        color: #212529 !important;
     }
     .badge-status-failed {
-        background-color: #dc3545;
-        color: #fff;
+        background-color: #dc3545 !important;
+        color: #212529 !important;
+        color: #212529;
     }
     .chart-container {
         height: 300px;
@@ -53,18 +58,18 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Pembelian Carbon Credit</h1>
         <div>
-            <a href="{{ route('admin.carbon-credit-purchase.dashboard') }}" class="btn btn-info btn-sm shadow-sm mr-2">
+            <!-- <a href="{{ route('admin.carbon-credit-purchase.dashboard') }}" class="btn btn-info btn-sm shadow-sm mr-2">
                 <i class="bi bi-graph-up me-1"></i> Dashboard
             </a>
             <a href="{{ route('admin.carbon-credit-purchase.report') }}" class="btn btn-secondary btn-sm shadow-sm mr-2">
                 <i class="bi bi-file-earmark-text me-1"></i> Laporan
-            </a>
+            </a> -->
             <a href="{{ route('admin.carbon-credit-purchase.create') }}" class="btn btn-success btn-sm shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i> Tambah Pembelian
             </a>
-            <a href="{{ route('admin.carbon-credit-purchase.report') }}" class="btn btn-primary btn-sm shadow-sm" target="_blank">
+            <!-- <a href="{{ route('admin.carbon-credit-purchase.report') }}" class="btn btn-primary btn-sm shadow-sm" target="_blank">
                 <i class="bi bi-file-pdf me-1"></i> Laporan PDF
-            </a>
+            </a> -->
         </div>
     </div>
 
@@ -86,7 +91,7 @@
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Total Carbon Credit
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($totalCarbon, 2) }} ton</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($totalCarbon/100, 2) }} ton</div>
                         </div>
                         <div class="col-auto">
                             <i class="bi bi-tree stats-icon text-success"></i>
@@ -152,11 +157,11 @@
     </div>
 
     <!-- Monthly Purchases Chart -->
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 eco-gradient">
-                    <h6 class="m-0 font-weight-bold text-white">Pembelian Carbon Credit Per Bulan</h6>
+                    <h6 class="m-0 font-weight-bold text">Pembelian Carbon Credit Per Bulan</h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
@@ -165,18 +170,18 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Purchases Table -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 eco-gradient">
-            <h6 class="m-0 font-weight-bold text-white">Daftar Pembelian Carbon Credit</h6>
+            <h6 class="m-0 font-weight-bold text">Daftar Pembelian Carbon Credit</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                     <thead class="bg-light">
-                        <tr>
+                        <tr class="table-success">
                             <th>Kode Pembelian</th>
                             <th>Tanggal</th>
                             <th>Perusahaan</th>
@@ -211,21 +216,21 @@
                                 @if($purchase->penyedia)
                                     {{ $purchase->penyedia->mata_uang }} 
                                 @endif
-                                {{ number_format($purchase->total_harga, 0, ',', '.') }}
+                                {{ number_format($purchase->total_harga, 2, ',', '.') }}
                             </td>
                             <td>
                                 @if(isset($purchase->status_pembelian))
                                     @if($purchase->status_pembelian == 'Sukses')
-                                        <span class="badge badge-status badge-status-success">Sukses</span>
+                                        <span class="badge-status badge-status-success">Sukses</span>
                                     @elseif($purchase->status_pembelian == 'Pending')
-                                        <span class="badge badge-status badge-status-pending">Pending</span>
+                                        <span class="badge-status badge-status-pending">Pending</span>
                                     @elseif($purchase->status_pembelian == 'Gagal')
-                                        <span class="badge badge-status badge-status-failed">Gagal</span>
+                                        <span class="badge-status badge-status-failed">Gagal</span>
                                     @else
-                                        <span class="badge badge-status badge-secondary">{{ $purchase->status_pembelian }}</span>
+                                        <span class="badge-status" style="background-color: #6c757d !important; color: #212529 !important;">{{ $purchase->status_pembelian }}</span>
                                     @endif
                                 @else
-                                    <span class="badge badge-status badge-status-success">Sukses</span>
+                                    <span class="badge-status badge-status-success">Sukses</span>
                                 @endif
                             </td>
                             <td>
@@ -295,7 +300,7 @@
             months = Object.keys(chartData);
             purchaseCounts = months.map(month => chartData[month].count);
             purchaseAmounts = months.map(month => chartData[month].amount);
-            purchaseValues = months.map(month => chartData[month].value / 1000000); // Convert to millions
+            purchaseValues = months.map(month => chartData[month].value / 1000000); // Already in Rupiah, convert to millions
         }
 
         const ctx = document.getElementById('monthlyPurchasesChart').getContext('2d');
