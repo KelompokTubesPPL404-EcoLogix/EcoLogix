@@ -599,5 +599,12 @@
       });
     });
   </script>
+  <script>
+    document.getElementById('toggleSidebar').addEventListener('click', function () {
+      document.body.classList.toggle('sidebar-collapsed');
+    });
+  </script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    @stack('js') 
 </body>
 </html>
