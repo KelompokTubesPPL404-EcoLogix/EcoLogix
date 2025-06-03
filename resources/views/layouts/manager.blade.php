@@ -48,14 +48,6 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.reports*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-bar-chart"></i>
-          </div>
-          <span>Laporan Emisi</span>
-        </a>
-      </li>
-      <li class="nav-item">
         <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.kompensasi*') ? 'active' : '' }}" href="{{ route('manager.kompensasi.index') }}">
           <div class="icon-container me-3">
             <i class="bi bi-arrow-left-right"></i>
@@ -90,14 +82,6 @@
             <i class="bi bi-building"></i>
           </div>
           <span>Penyedia Carbon Credit</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('manager.settings*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-gear"></i>
-          </div>
-          <span>Pengaturan</span>
         </a>
       </li>
     </ul>

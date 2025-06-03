@@ -111,22 +111,37 @@
     
     /* Update these CSS rules in the <style> section */
     .sidebar {
-        background: linear-gradient(#007f2d 100%);
-        min-height: 100vh;
-        color: white;
-        transition: all 0.3s ease;
-        width: 250px;
-        box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1000;
-        overflow-y: auto;
-        padding-top: 70px;
+      background: linear-gradient(#007f2d 100%);
+      min-height: 100vh;
+      color: rgb(255, 255, 255);
+      transition: all 0.3s ease;
+      width: 250px;
+      box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      overflow-y: auto;
+      padding-top: 70px;
     }
 
     .sidebar.collapsed {
-        margin-left: -250px;
+      margin-left: -250px;
+    }
+
+    /* Make the sidebar toggle icon button bigger */
+    #toggleSidebar {
+      width: 48px;
+      height: 48px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    #sidebarToggleIcon {
+      font-size: 2rem;
+      line-height: 1;
     }
 
     .main-content {
@@ -188,8 +203,7 @@
     <button class="btn btn-outline-black me-2 d-none d-md-block" id="toggleSidebar">
         <i id="sidebarToggleIcon" class="bi bi-list"></i>
     </button>
-
-    <a class="navbar-brand d-flex align-items-center" href="#">
+    <a class="navbar-brand d-flex align-items-center ms-" href="#">
       <img src="{{ asset('ECOLOGIXputihround.png') }}" alt="EcoLogix" height="36" class="me-2" />
       <span class="fw-bold text-white d-none d-md-inline-block"></span>
     </a>
@@ -211,7 +225,7 @@
       <!-- Notifikasi -->
       <div class="dropdown position-relative">
         <button class="btn btn-dark position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(0,0,0,0.2); border: none;">
-          <i class="bi bi-bell-fill text-white"></i>
+          <i class="bi bi-bell-fill text-black"></i>
           <span class="notification-badge" id="notificationCount">0</span>
         </button>
         <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="width: 350px; border-radius: 8px; border: none; margin-top: 10px; padding: 0;">
@@ -339,14 +353,6 @@
                   localStorage.setItem('sidebarState', 'expanded');
               }
           }
-
-        // Check saved state on page load
-        const savedState = localStorage.getItem('sidebarState');
-        if (savedState === 'collapsed') {
-            sidebar.classList.add('collapsed');
-            mainContent.classList.add('expanded');
-            sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
-        }
 
         // Add click event listener
         toggleSidebarBtn.addEventListener('click', toggleSidebar);

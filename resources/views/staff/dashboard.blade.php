@@ -2,6 +2,7 @@
 
 @section('title', 'Dashboard Staff')
 
+@section('styles')
 @push('css')
     <style>
         .eco-gradient {
@@ -92,8 +93,38 @@
             border-radius: 50%;
             display: inline-block;
         }
+        .period-btn {
+            background-color: white;
+            color: #28a745 !important;
+            border: 1px solid #28a745 !important;
+            font-weight: 500;
+            padding: 5px 15px;
+        }
+
+        .period-btn.active {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-color: #28a745 !important;
+        }
+
+        .period-btn:hover {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+
+        .btn-group .period-btn:first-child {
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+        }
+
+        .btn-group .period-btn:last-child {
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        
     </style>
 @endpush
+@endsection
 
 @section('content')
 <div class="container-fluid">
@@ -123,10 +154,10 @@
                         <i class="bi bi-graph-up me-2"></i>Emisi Karbon Saya (Line Chart)
                     </h5>
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-success active period-btn" data-period="1M">1M</button>
-                        <button type="button" class="btn btn-outline-success period-btn" data-period="3M">3M</button>
-                        <button type="button" class="btn btn-outline-success period-btn" data-period="6M">6M</button>
-                        <button type="button" class="btn btn-outline-success period-btn" data-period="1Y">1Y</button>
+                        <button type="button" class="btn period-btn active" data-period="1M">1M</button>
+                        <button type="button" class="btn period-btn" data-period="3M">3M</button>
+                        <button type="button" class="btn period-btn" data-period="6M">6M</button>
+                        <button type="button" class="btn period-btn" data-period="1Y">1Y</button>
                     </div>
                 </div>
                 <div class="card-body p-4">
