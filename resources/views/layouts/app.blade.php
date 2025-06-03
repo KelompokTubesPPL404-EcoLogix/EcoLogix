@@ -111,7 +111,7 @@
     
     /* Update these CSS rules in the <style> section */
     .sidebar {
-        background: linear-gradient(180deg, #104117 0%, #007f2d 100%);
+        background: linear-gradient(#007f2d 100%);
         min-height: 100vh;
         color: white;
         transition: all 0.3s ease;
@@ -184,9 +184,9 @@
 </head>
 <body>
   <!-- Enhanced Navbar with EcoLogix Theme -->
-  <nav class="navbar navbar-expand-lg navbar-dark px-3" style="background: linear-gradient(#007f2d 100%); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-    <button class="btn btn-outline-light me-2 d-none d-md-block" id="toggleSidebar">
-      <i id="sidebarToggleIcon" class="bi bi-list"></i>
+  <nav class="navbar navbar-expand-lg navbar-dark px-3" style="background: linear-gradient(#ffffff 100%); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+    <button class="btn btn-outline-black me-2 d-none d-md-block" id="toggleSidebar">
+        <i id="sidebarToggleIcon" class="bi bi-list"></i>
     </button>
 
     <a class="navbar-brand d-flex align-items-center" href="#">
@@ -326,19 +326,19 @@
         const mainContent = document.getElementById('mainContent');
         const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            
-            // Toggle icon
-            if (sidebar.classList.contains('collapsed')) {
-                sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
-                localStorage.setItem('sidebarState', 'collapsed');
-            } else {
-                sidebarToggleIcon.classList.replace('bi-x-lg', 'bi-list');
-                localStorage.setItem('sidebarState', 'expanded');
-            }
-        }
+          function toggleSidebar() {
+              sidebar.classList.toggle('collapsed');
+              mainContent.classList.toggle('expanded');
+              
+              // Toggle icon
+              if (sidebar.classList.contains('collapsed')) {
+                  sidebarToggleIcon.classList.replace('bi-x-lg', 'bi-list');
+                  localStorage.setItem('sidebarState', 'collapsed');
+              } else {
+                  sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
+                  localStorage.setItem('sidebarState', 'expanded');
+              }
+          }
 
         // Check saved state on page load
         const savedState = localStorage.getItem('sidebarState');
