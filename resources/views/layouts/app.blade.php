@@ -109,48 +109,35 @@
       background: linear-gradient(135deg, #104117 0%, #007f2d 100%);
     }
     
+    /* Update these CSS rules in the <style> section */
     .sidebar {
-      background: linear-gradient(180deg, #104117 0%, #007f2d 100%);
-      min-height: 100vh;
-      color: white;
-      transition: all 0.3s ease;
-      width: 250px;
-      box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      overflow-y: auto;
-      padding-top: 70px; /* Space for navbar */
-    }
-    
-    /* Carbon theme overlay pattern */
-    .sidebar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      opacity: 0.15;
-      z-index: 0;
+        background: linear-gradient(180deg, #104117 0%, #007f2d 100%);
+        min-height: 100vh;
+        color: white;
+        transition: all 0.3s ease;
+        width: 250px;
+        box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        overflow-y: auto;
+        padding-top: 70px;
     }
 
-    .sidebar .nav-link {
-      color: white;
-      font-weight: 500;
-      position: relative;
-      z-index: 1;
-      transition: all 0.3s ease;
-      margin-bottom: 5px;
+    .sidebar.collapsed {
+        margin-left: -250px;
     }
 
-    .sidebar .nav-link:hover,
-    .sidebar .nav-link.active {
-      background-color: rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      transform: translateX(5px);
+    .main-content {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+        width: calc(100% - 250px);
+    }
+
+    .main-content.expanded {
+        margin-left: 0;
+        width: 100%;
     }
 
     .card {
@@ -197,7 +184,7 @@
 </head>
 <body>
   <!-- Enhanced Navbar with EcoLogix Theme -->
-  <nav class="navbar navbar-expand-lg navbar-dark px-3" style="background: linear-gradient(135deg, #104117 0%, #007f2d 100%); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+  <nav class="navbar navbar-expand-lg navbar-dark px-3" style="background: linear-gradient(#007f2d 100%); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
     <button class="btn btn-outline-light me-2 d-none d-md-block" id="toggleSidebar">
       <i id="sidebarToggleIcon" class="bi bi-list"></i>
     </button>
@@ -332,46 +319,54 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+// Replace the existing sidebar toggle JavaScript code
     document.addEventListener('DOMContentLoaded', function() {
-      const toggleSidebarBtn = document.getElementById('toggleSidebar');
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
 
-      // Function to set sidebar state
-      function setSidebarState(isCollapsed) {
-        if (isCollapsed) {
-          sidebar.classList.add('sidebar-collapsed');
-          mainContent.classList.add('sidebar-collapsed');
-          sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
-        } else {
-          sidebar.classList.remove('sidebar-collapsed');
-          mainContent.classList.remove('sidebar-collapsed');
-          sidebarToggleIcon.classList.replace('bi-x-lg', 'bi-list');
+        function toggleSidebar() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            // Toggle icon
+            if (sidebar.classList.contains('collapsed')) {
+                sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
+                localStorage.setItem('sidebarState', 'collapsed');
+            } else {
+                sidebarToggleIcon.classList.replace('bi-x-lg', 'bi-list');
+                localStorage.setItem('sidebarState', 'expanded');
+            }
         }
-      }
 
-      // Check local storage for sidebar state on load
-      const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-      setSidebarState(isSidebarCollapsed);
-
-      // Toggle sidebar on button click
-      toggleSidebarBtn.addEventListener('click', function() {
-        const currentCollapsedState = sidebar.classList.contains('sidebar-collapsed');
-        setSidebarState(!currentCollapsedState);
-        localStorage.setItem('sidebarCollapsed', !currentCollapsedState);
-      });
-
-      // Adjust main content margin on window resize for responsiveness
-      window.addEventListener('resize', function() {
-        if (window.innerWidth < 768) { // Bootstrap's md breakpoint
-          setSidebarState(true); // Collapse sidebar on small screens
-          localStorage.setItem('sidebarCollapsed', 'true');
-        } else {
-          const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-          setSidebarState(isCollapsed); // Restore state on larger screens
+        // Check saved state on page load
+        const savedState = localStorage.getItem('sidebarState');
+        if (savedState === 'collapsed') {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+            sidebarToggleIcon.classList.replace('bi-list', 'bi-x-lg');
         }
-      });
+
+        // Add click event listener
+        toggleSidebarBtn.addEventListener('click', toggleSidebar);
+
+        // Handle responsive behavior
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            } else if (savedState !== 'collapsed') {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        }
+
+        // Add resize event listener
+        window.addEventListener('resize', handleResize);
+        
+        // Initial check for screen size
+        handleResize();
     });
   </script>
   @yield('scripts')

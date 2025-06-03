@@ -244,7 +244,6 @@
     <div class="split-container">
         <div class="left-side">
             <div class="hero-content">
-                <img src="{{ asset('ECOLOGIX.png') }}" alt="EcoLogix Logo" class="hero-logo">
                 <h1 class="hero-text">Pantau & Kelola Emisi Karbon untuk Masa Depan yang Lebih Hijau</h1>
                 <p class="hero-description">EcoLogix membantu perusahaan memonitor, menganalisis, dan menurunkan jejak karbon demi keberlanjutan lingkungan dan kepatuhan terhadap regulasi.</p>
                 
@@ -265,10 +264,6 @@
             </div>
         </div>
         <div class="right-side">
-            <a href="#" class="back-link">
-                <i class="bi bi-arrow-left"></i>
-                <span>Kembali ke Beranda</span>
-            </a>
             <img src="{{ asset('ECOLOGIX.png') }}" alt="Logo" class="logo">
             
             <div class="login-form">
@@ -298,27 +293,9 @@
                     <div class="form-floating mb-3" id="adminTokenGroup" style="display: none;">
                         <input type="password" class="form-control" id="admin_token" name="admin_token" placeholder="Admin Token">
                         <label for="admin_token">Admin Token</label>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="remember">Ingat saya</label>
-                        </div>
-                        <a href="#" class="text-decoration-none" style="color: #28a745; font-weight: 500;">Lupa password?</a>
-                    </div>
-                    
+                    </div>                    
                     <button type="submit" class="btn-login">Masuk</button>
                 </form>
-                
-                <div class="divider my-4">
-                    <span>atau</span>
-                </div>
-
-                <div class="carbon-footer">
-                    <p class="mb-1"> 2025 EcoLogix - Platform Manajemen Emisi Karbon</p>
-                    <p class="small">Bersama menciptakan masa depan yang berkelanjutan</p>
-                </div>
             </div>
         </div>
     </div>
