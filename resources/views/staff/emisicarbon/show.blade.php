@@ -7,74 +7,92 @@
         .eco-gradient {
             background: linear-gradient(135deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
         }
-        .eco-card {
-            border-left: 4px solid #28a745;
-            transition: all 0.3s ease;
-        }
-        .eco-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.15);
-        }
         .eco-header {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-bottom: 3px solid #28a745;
         }
-        .stats-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border-left: 4px solid #28a745;
-            transition: all 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.2);
-        }
-        .stats-icon {
+        .carbon-badge {
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
-            width: 50px;
-            height: 50px;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        }
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #28a745, #20c997);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-size: 1.1rem;
         }
-        .detail-item {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: #f8f9fa;
-            margin-bottom: 1rem;
-            border-left: 3px solid #28a745;
-        }
-        .detail-item .label {
-            font-weight: 600;
-            color: #2c3e50;
+        .icon-circle-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .detail-item .value {
-            font-weight: 500;
-        }
-        .detail-icon {
-            margin-right: 0.5rem;
-            color: #28a745;
-        }
-        .carbon-badge {
-            background: linear-gradient(45deg, #28a745, #20c997);
+            justify-content: center;
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 2rem;
         }
-        .btn-action {
-            padding: 0.25rem 0.5rem;
-            margin: 0 0.1rem;
-            border-radius: 0.5rem;
+        .table tbody tr:hover {
+            background-color: rgba(40, 167, 69, 0.02);
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .card-header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem;
             transition: all 0.2s ease;
         }
-        .btn-action:hover {
+        .btn:hover {
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .badge {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .text-success {
+            color: #28a745 !important;
+        }
+        .border-bottom {
+            border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+        }
+        .status-info .badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        .price-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(40, 167, 69, 0.1);
+        }
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(220, 53, 69, 0.1);
+            padding: 2rem;
+        }
+        .alert-custom .icon-circle-large {
+            background: linear-gradient(45deg, #dc3545, #c82333);
         }
     </style>
 @endpush
@@ -96,140 +114,224 @@
                 <div class="carbon-badge me-3">
                     <i class="bi bi-hash me-1"></i>{{ $emisiCarbon->kode_emisi_carbon ?? 'N/A' }}
                 </div>
-                <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-secondary shadow-sm px-4">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-success shadow-sm px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Emisi
                 </a>
             </div>
         </div>
     </div>
 
     @if(isset($emisiCarbon) && $emisiCarbon)
-        <div class="eco-card card border-0 shadow-lg mb-4 rounded-3 overflow-hidden">
-            <div class="card-header eco-gradient text-white py-3">
-                <h6 class="m-0 fw-bold">
-                    <i class="bi bi-clipboard-data me-2"></i>Data Emisi Karbon {{ $emisiCarbon->kode_emisi_carbon }}
-                </h6>
-            </div>
-            <div class="card-body p-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-calendar-date detail-icon"></i>Tanggal Emisi
+        <div class="row">
+            <!-- Main Content - Informasi Emisi Karbon -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle me-3">
+                                <i class="bi bi-info-circle"></i>
                             </div>
-                            <div class="value">
-                                {{ $emisiCarbon->tanggal_emisi ? \Carbon\Carbon::parse($emisiCarbon->tanggal_emisi)->timezone('Asia/Jakarta')->format('d M Y') . ' WIB' : 'N/A' }}
-                            </div>
-                        </div>
-                        
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-tags detail-icon"></i>Kategori Emisi
-                            </div>
-                            <div class="value">
-                                {{ $emisiCarbon->kategori_emisi_karbon ?? 'N/A' }}
-                            </div>
-                        </div>
-                        
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-tag detail-icon"></i>Sub Kategori
-                            </div>
-                            <div class="value">
-                                {{ $emisiCarbon->sub_kategori ?? 'N/A' }}
-                            </div>
-                        </div>
-                        
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-card-text detail-icon"></i>Deskripsi
-                            </div>
-                            <div class="value">
-                                {{ $emisiCarbon->deskripsi ?? 'N/A' }}
-                            </div>
+                            <h5 class="mb-0 text-success fw-semibold">Informasi Emisi Karbon</h5>
                         </div>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-calculator detail-icon"></i>Faktor Emisi
-                            </div>
-                            <div class="value">
-                                {{ $emisiCarbon->faktorEmisi ? ($emisiCarbon->faktorEmisi->nama_kegiatan ?? $emisiCarbon->faktorEmisi->sub_kategori) : 'N/A' }} 
-                                <span class="badge bg-light text-success">
-                                    {{ $emisiCarbon->faktorEmisi ? number_format($emisiCarbon->faktorEmisi->nilai_faktor, 2) : '' }} 
-                                    {{ $emisiCarbon->faktorEmisi ? $emisiCarbon->faktorEmisi->satuan : '' }}
-                                </span>
-                            </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-borderless mb-0">
+                                <tbody>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium" style="width: 200px;">
+                                            <i class="bi bi-hash me-2"></i>Kode Emisi
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="badge bg-success text-white px-3 py-2 rounded-pill">{{ $emisiCarbon->kode_emisi_carbon }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-tags me-2"></i>Kategori Emisi
+                                        </td>
+                                        <td class="py-3 px-4 fw-medium">{{ $emisiCarbon->kategori_emisi_karbon ?? 'N/A' }}</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-tag me-2"></i>Sub Kategori
+                                        </td>
+                                        <td class="py-3 px-4">{{ $emisiCarbon->sub_kategori ?? 'N/A' }}</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-card-text me-2"></i>Deskripsi
+                                        </td>
+                                        <td class="py-3 px-4">{{ $emisiCarbon->deskripsi ?? 'Tidak ada deskripsi' }}</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-activity me-2"></i>Nilai Aktivitas
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="fw-semibold">{{ number_format($emisiCarbon->nilai_aktivitas, 2) }}</span>
+                                            <span class="text-muted">{{ $emisiCarbon->faktorEmisi ? $emisiCarbon->faktorEmisi->satuan : '' }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-calculator me-2"></i>Faktor Emisi
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            @if($emisiCarbon->faktorEmisi)
+                                                <div>{{ $emisiCarbon->faktorEmisi->nama_kegiatan ?? $emisiCarbon->faktorEmisi->sub_kategori }}</div>
+                                                <small class="text-success fw-semibold">{{ number_format($emisiCarbon->faktorEmisi->nilai_faktor, 4) }} {{ $emisiCarbon->faktorEmisi->satuan }}</small>
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-cloud me-2"></i>Total Emisi Karbon
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="fw-bold text-success fs-5">{{ number_format($emisiCarbon->kadar_emisi_karbon, 2) }}</span>
+                                            <span class="text-muted">kg CO₂e</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-circle-fill me-2"></i>Status
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            @if($emisiCarbon->status == 'approved')
+                                            <span class="badge bg-success text-white px-3 py-2">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Disetujui
+                                            </span>
+                                            @elseif($emisiCarbon->status == 'rejected')
+                                            <span class="badge bg-danger text-white px-3 py-2">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Ditolak
+                                            </span>
+                                            @else
+                                            <span class="badge bg-warning text-dark px-3 py-2">
+                                                <i class="bi bi-hourglass-split me-1"></i> Pending
+                                            </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-person me-2"></i>Staff Input
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="badge bg-primary text-white px-3 py-1">{{ $emisiCarbon->staff ? $emisiCarbon->staff->nama : 'N/A' }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-muted fw-medium">
+                                            <i class="bi bi-clock me-2"></i>Terakhir Diperbarui
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <i class="bi bi-clock me-1 text-muted"></i>{{ $emisiCarbon->updated_at ? $emisiCarbon->updated_at->timezone('Asia/Jakarta')->format('d-m-Y H:i') . ' WIB' : 'N/A' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-activity detail-icon"></i>Nilai Aktivitas
-                            </div>
-                            <div class="value">
-                                {{ number_format($emisiCarbon->nilai_aktivitas, 2) ?? 'N/A' }} 
-                                {{ $emisiCarbon->faktorEmisi ? $emisiCarbon->faktorEmisi->satuan : '' }}
-                            </div>
-                        </div>
-                        
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-cloud detail-icon"></i>Total Emisi
-                            </div>
-                            <div class="value fs-4 fw-bold text-success">
-                                {{ number_format($emisiCarbon->kadar_emisi_karbon, 2) ?? 'N/A' }} kg CO₂e
-                            </div>
-                        </div>
-                        
-                        <div class="detail-item">
-                            <div class="label">
-                                <i class="bi bi-circle-fill detail-icon"></i>Status
-                            </div>
-                            <div class="value">
-                                @if($emisiCarbon->status == 'approved')
-                                <span class="badge bg-success text-white px-3 py-2">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Disetujui
-                                </span>
-                                @elseif($emisiCarbon->status == 'rejected')
-                                <span class="badge bg-danger text-white px-3 py-2">
-                                    <i class="bi bi-x-circle-fill me-1"></i> Ditolak
-                                </span>
-                                @else
-                                <span class="badge bg-warning text-dark px-3 py-2">
-                                    <i class="bi bi-hourglass-split me-1"></i> Pending
-                                </span>
-                                @endif
-                            </div>
+                    </div>
+                    <div class="card-footer bg-light border-0 py-3">
+                        <div class="d-flex gap-2">
+                            @if($emisiCarbon->status != 'approved')
+                                <a href="{{ route('staff.emisicarbon.edit', $emisiCarbon->kode_emisi_carbon) }}" class="btn btn-warning">
+                                    <i class="bi bi-pencil-square me-1"></i> Edit Data Emisi
+                                </a>
+                            @endif
+                            <button type="button" class="btn btn-danger" onclick="deleteEmisi()">
+                                <i class="bi bi-trash me-1"></i> Hapus Emisi
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card-footer bg-light py-3 d-flex justify-content-between">
-                <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
-                </a>
-                @if($emisiCarbon->status != 'approved')
-                    <a href="{{ route('staff.emisicarbon.edit', $emisiCarbon->kode_emisi_carbon) }}" class="btn btn-warning">
-                        <i class="bi bi-pencil-square me-1"></i> Edit Data
-                    </a>
-                @endif
+
+            <!-- Sidebar - Summary Card -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <div class="icon-circle-large mx-auto mb-3">
+                                <i class="bi bi-cloud"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark">{{ $emisiCarbon->kode_emisi_carbon }}</h4>
+                            <p class="text-muted mb-3">Data Emisi Karbon</p>
+                        </div>
+                        
+                        <div class="status-info mb-4">
+                            @if($emisiCarbon->status == 'approved')
+                            <span class="badge bg-success text-white px-4 py-2 fs-6">
+                                <i class="bi bi-check-circle-fill me-2"></i> Aktif
+                            </span>
+                            @elseif($emisiCarbon->status == 'rejected')
+                            <span class="badge bg-danger text-white px-4 py-2 fs-6">
+                                <i class="bi bi-x-circle-fill me-2"></i> Ditolak
+                            </span>
+                            @else
+                            <span class="badge bg-warning text-dark px-4 py-2 fs-6">
+                                <i class="bi bi-hourglass-split me-2"></i> Pending
+                            </span>
+                            @endif
+                        </div>
+
+                        <div class="price-info">
+                            <div class="text-muted">Total Emisi Karbon:</div>
+                            <div class="h3 fw-bold text-success mb-1">{{ number_format($emisiCarbon->kadar_emisi_karbon, 2) }}</div>
+                            <div class="text-muted">kg CO₂e</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     @else
-        <div class="alert alert-danger shadow-sm p-4" role="alert">
+        <div class="alert alert-danger alert-custom" role="alert">
             <div class="d-flex align-items-center">
-                <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                <div class="icon-circle-large me-4">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
                 <div>
-                    <h5 class="fw-bold mb-1">Data Tidak Ditemukan</h5>
-                    <p class="mb-0">Data emisi karbon yang Anda cari tidak ditemukan dalam sistem.</p>
+                    <h4 class="fw-bold mb-2">Data Tidak Ditemukan</h4>
+                    <p class="mb-0">Data emisi karbon yang Anda cari tidak ditemukan dalam sistem. Silakan periksa kembali atau hubungi administrator.</p>
                 </div>
             </div>
+            <div class="mt-3 text-end">
+                <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
+                </a>
+            </div>
         </div>
-        <a href="{{ route('staff.emisicarbon.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
-        </a>
     @endif
 </div>
+
+<script>
+function deleteEmisi() {
+    if (confirm('Apakah Anda yakin ingin menghapus data emisi karbon ini?')) {
+        // Create a form to submit delete request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ route('staff.emisicarbon.destroy', $emisiCarbon->kode_emisi_carbon ?? '') }}";
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = "{{ csrf_token() }}";
+        form.appendChild(csrfInput);
+        
+        // Add method spoofing for DELETE
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        form.appendChild(methodInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 @endsection

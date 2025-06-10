@@ -30,10 +30,7 @@
                         <i class="bi bi-bar-chart-fill text-success me-2"></i>Total Emisi Karbon
                     </h5>
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-success active period-btn" data-period="1M">1M</button>
-                        <button type="button" class="btn btn-outline-success period-btn" data-period="3M">3M</button>
-                        <button type="button" class="btn btn-outline-success period-btn" data-period="6M">6M</button>
-                        <button type="button" class="btn btn-outline-success period-btn" data-period="1Y">1Y</button>
+                        <button type="button" class="btn btn-success active period-btn" data-period="1M">ALL</button>
                     </div>
                 </div>
                 <div class="card-body">

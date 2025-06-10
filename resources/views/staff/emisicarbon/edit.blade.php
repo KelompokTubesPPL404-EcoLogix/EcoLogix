@@ -83,9 +83,9 @@
     @endif
 
     <div class="eco-card card border-0 shadow-lg mb-4 rounded-3 overflow-hidden">
-        <div class="card-header eco-gradient text-white py-3">
+        <div class="card-header eco-gradient text py-3" style="color: #198754;">
             <h6 class="m-0 fw-bold">
-                <i class="bi bi-pencil-fill me-2"></i>Form Edit Emisi Karbon {{ $emisicarbon->kode_emisi_carbon }}
+                <i class="bi bi-pencil-fill me-2" style="color: #198754;"></i>Form Edit Emisi Karbon {{ $emisicarbon->kode_emisi_carbon }}
             </h6>
         </div>
         <div class="card-body p-4">

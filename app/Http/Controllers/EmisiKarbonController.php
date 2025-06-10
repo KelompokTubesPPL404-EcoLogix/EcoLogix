@@ -172,7 +172,10 @@ class EmisiKarbonController extends Controller
     
             return redirect()->route('staff.emisicarbon.index')->with('error', 'Anda tidak memiliki izin untuk melihat data ini.');
         }
-        return view('staff.emisicarbon.show', compact('emisicarbon'));
+        // Load relationships and rename variable to match the view expectation
+        $emisicarbon->load(['faktorEmisi', 'staff']);
+        $emisiCarbon = $emisicarbon;
+        return view('staff.emisicarbon.show', compact('emisiCarbon'));
     }
 
     /**

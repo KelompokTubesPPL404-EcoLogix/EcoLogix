@@ -81,15 +81,17 @@ class LeaderboardController extends Controller
     {
         // Query untuk mendapatkan total emisi, kompensasi, dan sisa emisi per perusahaan
         $leaderboardData = DB::table('perusahaan')
-            ->leftJoin('emisi_carbon', 'perusahaan.kode_perusahaan', '=', 'emisi_carbon.kode_perusahaan')
+            ->leftJoin('emisi_carbon', function($join) {
+                $join->on('perusahaan.kode_perusahaan', '=', 'emisi_carbon.kode_perusahaan')
+                     ->where('emisi_carbon.status', '=', 'approved');
+            })
             ->leftJoin('kompensasi_emisi_carbon', 'emisi_carbon.kode_emisi_carbon', '=', 'kompensasi_emisi_carbon.kode_emisi_carbon')
-            ->where('emisi_carbon.status', 'approved')
             ->select(
                 'perusahaan.kode_perusahaan',
                 'perusahaan.nama_perusahaan',
-                DB::raw('SUM(emisi_carbon.kadar_emisi_karbon) as total_emisi'),
+                DB::raw('COALESCE(SUM(emisi_carbon.kadar_emisi_karbon), 0) as total_emisi'),
                 DB::raw('COALESCE(SUM(kompensasi_emisi_carbon.jumlah_kompensasi), 0) as total_kompensasi'),
-                DB::raw('(SUM(emisi_carbon.kadar_emisi_karbon) - COALESCE(SUM(kompensasi_emisi_carbon.jumlah_kompensasi), 0)) as sisa_emisi')
+                DB::raw('(COALESCE(SUM(emisi_carbon.kadar_emisi_karbon), 0) - COALESCE(SUM(kompensasi_emisi_carbon.jumlah_kompensasi), 0)) as sisa_emisi')
             )
             ->groupBy('perusahaan.kode_perusahaan', 'perusahaan.nama_perusahaan')
             ->orderBy('sisa_emisi', 'asc') // Urutkan berdasarkan sisa emisi (terkecil ke terbesar)

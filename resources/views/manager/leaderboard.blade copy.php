@@ -157,16 +157,16 @@
                                     <td class="text-center">
                                         @if($index < 3)
                                             @if($index == 0)
-                                                <span class="badge rank-gold p-2" style="color: #FFD700;">
-                                                    <i class="bi bi-trophy-fill me-1" style="color: #FFA500;"></i>{{ $index + 1 }}
+                                                <span class="badge rank-gold p-2">
+                                                    <i class="bi bi-trophy-fill me-1"></i>{{ $index + 1 }}
                                                 </span>
                                             @elseif($index == 1)
-                                                <span class="badge rank-silver p-2" style="color: #C0C0C0;">
-                                                    <i class="bi bi-trophy-fill me-1" style="color: #A9A9A9;"></i>{{ $index + 1 }}
+                                                <span class="badge rank-silver p-2">
+                                                    <i class="bi bi-trophy-fill me-1"></i>{{ $index + 1 }}
                                                 </span>
                                             @else
-                                                <span class="badge rank-bronze p-2" style="color: #CD7F32;">
-                                                    <i class="bi bi-trophy-fill me-1" style="color: #B87333;"></i>{{ $index + 1 }}
+                                                <span class="badge rank-bronze p-2">
+                                                    <i class="bi bi-trophy-fill me-1"></i>{{ $index + 1 }}
                                                 </span>
                                             @endif
                                         @else
@@ -244,6 +244,23 @@
         </div>
     </div>
 
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-12">
+            <div class="eco-card card border-0 shadow-lg mb-4 rounded-3 overflow-hidden">
+                <div class="card-header eco-gradient text-white py-3">
+                    <h6 class="m-0 fw-bold text-success">
+                        <i class="bi bi-bar-chart-fill me-2"></i>Grafik Perbandingan Emisi Karbon Perusahaan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar" style="height: 400px;">
+                        <canvas id="leaderboardChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Content Row -->
     <div class="row">

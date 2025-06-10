@@ -154,10 +154,7 @@
                         <i class="bi bi-graph-up me-2"></i>Emisi Karbon Saya (Line Chart)
                     </h5>
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn period-btn active" data-period="1M">1M</button>
-                        <button type="button" class="btn period-btn" data-period="3M">3M</button>
-                        <button type="button" class="btn period-btn" data-period="6M">6M</button>
-                        <button type="button" class="btn period-btn" data-period="1Y">1Y</button>
+                        <button type="button" class="btn period-btn active" data-period="1M">ALL</button>
                     </div>
                 </div>
                 <div class="card-body p-4">

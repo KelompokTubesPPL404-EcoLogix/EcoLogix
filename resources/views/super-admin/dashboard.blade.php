@@ -99,11 +99,7 @@
             <div class="card-header bg-white border-0 pt-4 d-flex justify-content-between align-items-center">
                 <h5 class="card-title fw-bold"><i class="bi bi-cloud-fill text-success me-2"></i>Total Emisi Karbon</h5>
                 <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-success active period-btn" data-period="1M">1M</button>
-                    <button type="button" class="btn btn-outline-success period-btn" data-period="3M">3M</button>
-                    <button type="button" class="btn btn-outline-success period-btn" data-period="6M">6M</button>
-                    <button type="button" class="btn btn-outline-success period-btn" data-period="1Y">1Y</button>
-                    <button type="button" class="btn btn-outline-success period-btn" data-period="ALL">ALL</button>
+                    <button type="button" class="btn btn-success active period-btn" data-period="1M">ALL</button>
                 </div>
             </div>
             <div class="card-body">

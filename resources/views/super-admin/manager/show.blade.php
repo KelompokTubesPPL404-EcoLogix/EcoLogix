@@ -84,9 +84,6 @@
                     <i class="bi bi-leaf me-1"></i>Informasi lengkap manager sistem monitoring emisi karbon Ecologix
                 </p>
             </div>
-            <div class="carbon-icon">
-                <i class="bi bi-person-circle"></i>
-            </div>
         </div>
     </div>
 
@@ -128,8 +125,8 @@
         <div class="col-lg-8">
             <div class="eco-card card border-0 shadow-lg mb-4">
                 <div class="card-header eco-gradient text-white py-3">
-                    <h6 class="m-0 fw-bold">
-                        <i class="bi bi-info-circle me-2"></i>Informasi Detail Manager
+                    <h6 class="m-0 fw-bold" style="color: #198754;">
+                        <i class="bi bi-info-circle me-2" style="color: #198754;"></i>Informasi Detail Manager
                     </h6>
                 </div>
                 <div class="card-body p-4">
@@ -196,7 +193,7 @@
                                     @if($manager->perusahaan)
                                         <div class="eco-badge d-inline-block">
                                             <i class="bi bi-building-fill me-1"></i>
-                                            <a href="{{ route('superadmin.perusahaan.show', $manager->perusahaan->kode_perusahaan) }}" class="text-white text-decoration-none">
+                                            <a href="{{ route('superadmin.perusahaan.show', $manager->perusahaan->kode_perusahaan) }}" class="text-decoration-none" style="color: #198754;">
                                                 {{ $manager->perusahaan->nama_perusahaan }}
                                             </a>
                                         </div>

@@ -91,7 +91,7 @@ class PerusahaanController extends Controller
         }
         
         $perusahaan = Perusahaan::findOrFail($kode_perusahaan);
-        $superAdmins = User::where('role', 'super_admin')->get();
+        $superAdmins = User::superAdmin()->get();
         return view('super-admin.perusahaan.edit', compact('perusahaan', 'superAdmins'));
     }
     public function update(Request $request, $kode_perusahaan)

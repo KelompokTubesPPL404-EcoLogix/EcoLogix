@@ -72,7 +72,7 @@
                                 <th class="px-3 py-3">Sub Kategori</th>
                                 <th class="px-3 py-3 text-end">Nilai Aktivitas</th>
                                 <th class="px-3 py-3 text-end">Faktor Emisi</th>
-                                <th class="px-3 py-3 text-end">Kadar Emisi (kg)</th>
+                                <th class="px-3 py-3 text-end">Kadar Emisi (ton)</th>
                                 <th class="px-3 py-3 text-end">Emisi (ton)</th>
                                 <th class="px-3 py-3 text-end">Kompensasi (ton)</th>
                                 <th class="px-3 py-3 text-end">Sisa Emisi (ton)</th>
@@ -181,14 +181,14 @@
                         </div>
                         <div class="col-md-3">
                             <label for="jumlah_kompensasi" class="form-label fw-medium">
-                                <i class="bi bi-calculator me-1 text-primary"></i> Jumlah Kompensasi (kg)
+                                <i class="bi bi-calculator me-1 text-primary"></i> Jumlah Kompensasi (ton)
                             </label>
                             <div class="input-group">
                                 <input type="number" name="jumlah_kompensasi" id="jumlah_kompensasi" step="0.01" 
                                     class="form-control shadow-none border-0" 
                                     value="{{ old('jumlah_kompensasi') }}" 
                                     placeholder="0.00" required>
-                                <span class="input-group-text bg-white border-0">kg</span>
+                                <span class="input-group-text bg-white border-0">ton</span>
                             </div>
                         </div>
                         <div class="col-md-3">

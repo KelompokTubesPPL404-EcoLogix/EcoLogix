@@ -34,14 +34,18 @@
           <span>Manajemen Staff</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a href="{{ route('admin.emisicarbon.index') }}" class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.emisicarbon*') ? 'active' : '' }}">
-          <div class="icon-container me-3">
-            <i class="bi bi-cloud-fill"></i>
-          </div>
-          <span>Kelola Emisi Karbon</span>
-        </a>
-      </li>
+
+      <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Karbon & Emisi</div>
+      <ul class="nav flex-column gap-1">
+          <li class="nav-item">
+            <a href="{{ route('admin.emisicarbon.index') }}" class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.emisicarbon*') ? 'active' : '' }}">
+              <div class="icon-container me-3">
+                <i class="bi bi-cloud-fill"></i>
+              </div>
+              <span>Kelola Emisi Karbon</span>
+            </a>
+          </li>
+      </ul>
       
       <li class="nav-item">
         <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.carbon-credit-purchase*') ? 'active' : '' }}" href="{{ route('admin.carbon-credit-purchase.index') }}">
@@ -51,23 +55,7 @@
           <span>Pembelian Carbon Credit</span>
         </a>
       </li>
-    </ul>
-    
-    <div class="sidebar-heading small text-uppercase text-white-50 px-3 py-2 mt-4">Laporan & Data</div>
-    
-    <ul class="nav flex-column gap-1">
-      <li class="nav-item">
-        <a class="eco-nav-link rounded-3 py-2 px-3 d-flex align-items-center {{ request()->routeIs('admin.reports*') ? 'active' : '' }}" href="#">
-          <div class="icon-container me-3">
-            <i class="bi bi-file-earmark-text"></i>
-          </div>
-          <span>Laporan Emisi</span>
-        </a>
-      </li>
-     
-    </ul>
-    
-    
+    </ul>  
     
   </div>
 </div>
